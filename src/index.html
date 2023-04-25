@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE >
+<html >
 	<head>
 		<!-- Primary Meta Tags -->
+		<meta charset="utf-8">
 		<title>Midi</title>
 		<link rel="stylesheet" href="styles.css">
 	</head>
@@ -10,11 +11,51 @@
 		<!--
 		<script src="./extras/jquery.js"></script>
 		-->
+		<div id="init-overlay">
+			<div>
+				<button class="my-button" id="init-btn">
+					Start
+				</button>
+			</div>
+		</div>
+		<div id="controls">
+			
+			<div class="controls-holder">
+				<button class="my-button my-button-icon" id="play-btn">▶</button>
+				<button class="my-button my-button-icon" id="stop-btn" style="display:none;">◼</button>
+			</div>
 
-		<input id="volume" type="range" min="0" max="1" step="0.1" value="1"/>
-		<button id="init-btn">Listen to mic</button>
+			<div class="controls-holder">
+				<button class="my-button my-button-icon record-btn" id="rec-btn">●</button>
+			</div>
 
+			<div class="controls-holder">
+				<div class="label" >
+					Volume
+				</div>
+				<div>
+					<input id="volume" type="range" min="0" max="1" step="0.02" value="1"/>
+				</div>
+			</div>
+
+			<div class="controls-holder" id="recorded-audio">
+				<div class="label">
+					Recorded Audio
+				</div>
+				<div>
+					<button class="my-button my-button-small" id="recorded-play-btn">▶</button>
+					<button class="my-button my-button-small" id="recorded-stop-btn" style="display:none;">◼</button>
+					<button class="my-button my-button-small" id="recorded-download-btn">↷</button>
+				</div>
+
+			</div>
+
+			<div style="clear:both"></div>
+
+		</div>
+		
 		<script src="./extras/perlin2.js"></script>
+		<script src="./extras/jquery.js"></script>
 		
 		<script src="./main.js" type="module"></script>	
 	

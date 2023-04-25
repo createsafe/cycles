@@ -5,8 +5,7 @@ import { MeshoptDecoder } from './scripts/jsm/libs/meshopt_decoder.module.js';
 // import { GLTFExporter } from './scripts/jsm/exporters/GLTFExporter.js';
 import { RoomEnvironment } from './scripts/jsm/environments/RoomEnvironment.js';
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
-
-// import { RoomEnvironment } from './scripts/jsm/environments/RoomEnvironment.js';
+import { Recorder } from './Recorder.js';
 // import { TransformControls } from './scripts/jsm/controls/TransformControls.js';
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
 
@@ -14,55 +13,183 @@ let camera, scene, renderer, clock, ktx2Loader, controls, loader, mainModel, aud
 
 const BUFF_SIZE = 16384;
 
-let audioInput = null,
-    microphone_stream = null,
-    gain_node = null,
-    script_processor_node = null,
-    script_processor_fft_node = null,
+let audioInput = null, 
+    outputMix = null,
+    dryGain = null,
+    wetGain = null,
+    effectInput = null,
+    lpInputFilter = null,
+    analyser1 = null,
+    midiOuts = null,
+    analyser2 = null,
+    inputStream = null,
+    gainNode = null,
+    scriptProcessorNode = null,
+    scriptProcessorFftNode = null,
     analyserNode = null;
 
+let isPlaying = false;
+let isRecording = false;
+let isPlayingRecordedAudio = false;
+let audioStream;
+let recordedAudioElement;
+const audioRecorder = new Recorder(); 
+const constraints = 
+{
+    audio: {
+        optional: [{ echoCancellation: false }]
+    }
+};
+
 //midi();
+//initInput();
+$("#init-btn, #init-overlay").click(function(){
+    initInput();
+})
+$("#play-btn, #stop-btn").click(function(){
+    togglePlayMidi();
+});
+$("#rec-btn").click(function(){
+    if(audioStream != null)
+        toggleRecord();
+});
+
+$( "#volume" ).bind( "change", function(event, ui) {
+    const vol = $("#volume").val();
+    outputMix.gain.value = vol;
+});
+
+$("#recorded-stop-btn, #recorded-play-btn").bind( "click", function() {
+    if(recordedAudioElement!=null){
+        if(!isPlayingRecordedAudio){
+            isPlayingRecordedAudio = true;
+            $("#recorded-play-btn").hide();
+            $("#recorded-stop-btn").show();
+            recordedAudioElement.play();
+        }else{
+            isPlayingRecordedAudio = false;
+            $("#recorded-play-btn").show();
+            $("#recorded-stop-btn").hide();
+            recordedAudioElement.pause();
+        }
+    }
+});
+
+$("#recorded-download-btn").bind( "click", function() {
+    audioRecorder.download();
+});
+
+  
+navigator.requestMIDIAccess().then(requestMIDIAccessSuccess);
+
 init();
 animate();
 
 
 
-
-
-document.getElementById("init-btn").addEventListener('click', initInput);
-
 function initInput(){
     
+    $("#init-overlay").fadeOut();
+
     audioContext = new AudioContext();
 
     console.log("audio is starting up ...");
 
-    if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-                            navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    if (!navigator.getUserMedia)navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-    
     navigator.mediaDevices.enumerateDevices().then((devices) => {
         devices.forEach((device) => {
-            console.log(device); // an InputDeviceInfo object if the device is an input device, otherwise a MediaDeviceInfo object.
+            //console.log(device); // an InputDeviceInfo object if the device is an input device, otherwise a MediaDeviceInfo object.
         });
     });
 
     if (navigator.getUserMedia){
 
-        navigator.getUserMedia({audio:true}, 
+        navigator.getUserMedia(constraints, 
             function(stream) {
-                console.log(stream)
-                start_microphone(stream);
+                //console.log(stream)
+                audioStream = stream;
+                startInput(stream);
             },
             function(e) {
             //alert('Error capturing audio.');
             }
         );
 
-    } else { alert('getUserMedia not supported in this browser.'); }
+    } else { 
+        alert('getUserMedia not supported in this browser.'); 
+    }
 
 }
+
+function toggleRecord(){
+    if(!isRecording){
+        
+        isRecording = true;
+        initPlaying();
+
+        $("#rec-btn").css("background-color","#e9e9e9");
+        audioRecorder.startAudioRecording(audioStream);
+
+    }else{
+        
+        midiOuts.send([0xFC]);
+        isPlaying = false;
+        $("#play-btn").show();
+        $("#stop-btn").hide();
+
+        killRecording();
+        
+    }
+}
+
+
+
+
+
+function togglePlayMidi(){
+    if(!isPlaying){
+       initPlaying();
+    }else{
+        if(midiOuts!=null){
+
+         
+            killPlaying();
+            if(isRecording){
+                killRecording();   
+            }
+            
+        }
+    }
+    
+}
+
+function initPlaying(){
+    if(midiOuts!=null){
+        midiOuts.send([0xFA]);
+        midiOuts.send([0xF8]);
+        isPlaying = true;
+        $("#play-btn").hide();
+        $("#stop-btn").show();
+    }
+}
+
+
+function killPlaying(){
+    midiOuts.send([0xFC]);
+    isPlaying = false;
+    $("#play-btn").show();
+    $("#stop-btn").hide();
+}
+
+function killRecording(){
+    $("#recorded-audio").fadeIn();
+    isRecording = false;
+    $("#rec-btn").css("background-color","#f00");
+    recordedAudioElement = audioRecorder.stopAudioRecording();
+        
+}
+
 
 // ---
 
@@ -80,7 +207,7 @@ function show_some_data(given_typed_array, num_row_to_display, label) {
     }
 }
 
-function process_microphone_buffer(event) { // invoked by event loop
+function processMicrophoneBuffer(event) { // invoked by event loop
 
     var i, N, inp, microphone_output_buffer;
 
@@ -88,58 +215,59 @@ function process_microphone_buffer(event) { // invoked by event loop
 
     // microphone_output_buffer  <-- this buffer contains current gulp of data size BUFF_SIZE
 
-    show_some_data(microphone_output_buffer, 5, "from getChannelData");
+    //show_some_data(microphone_output_buffer, 5, "from getChannelData");
 }
 
-function start_microphone(stream){
+function startInput(stream){
+    
+    analyser1 = audioContext.createAnalyser();
+    analyser1.fftSize = 1024;
+    
+    var input = audioContext.createMediaStreamSource(stream);
 
-    gain_node = audioContext.createGain();
-    gain_node.connect( audioContext.destination );
+    audioInput = convertToMono( input );
 
-    microphone_stream = audioContext.createMediaStreamSource(stream);
-    microphone_stream.connect(gain_node); 
-
-    script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
-    script_processor_node.onaudioprocess = process_microphone_buffer;
-
-    microphone_stream.connect(script_processor_node);
-
-    // --- enable volume control for output speakers
+    //if (useFeedbackReduction) {
+        // audioInput.connect( createLPInputFilter() );
+        // audioInput = lpInputFilter;
         
-    document.getElementById('volume').addEventListener('change', function() {
-
-        var curr_volume = this.value;
-        gain_node.gain.value = curr_volume;
-
-        console.log("curr_volume ", curr_volume);
-    });
-
-    // --- setup FFT
-
-    script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
-    script_processor_fft_node.connect(gain_node);
-
-    analyserNode = audioContext.createAnalyser();
-    analyserNode.smoothingTimeConstant = 0;
-    analyserNode.fftSize = 2048;
-
-    microphone_stream.connect(analyserNode);
-
-    analyserNode.connect(script_processor_fft_node);
-
-    script_processor_fft_node.onaudioprocess = function() {
-
-        // get the average for the first channel
-        var array = new Uint8Array(analyserNode.frequencyBinCount);
-        analyserNode.getByteFrequencyData(array);
-
-        // draw the spectrogram
-        if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
-
-            //show_some_data(array, 5, "from fft");
-        }
-    };
+    //}
+    // create mix gain nodes
+    outputMix = audioContext.createGain();
+    dryGain = audioContext.createGain();
+    effectInput = audioContext.createGain();
+    audioInput.connect(dryGain);
+    audioInput.connect(analyser1);
+    audioInput.connect(effectInput);
+    dryGain.connect(outputMix);
+    outputMix.connect( audioContext.destination );
+    //dryGain.gain.value = 1;
+    //wetGain.gain.value = 1;
+    //outputMix.connect(analyser2);
+    //crossfade(1.0);
+    //changeEffect();
+    //cancelAnalyserUpdates();
+    //updateAnalysers();
 }
+
+function createLPInputFilter() {
+    lpInputFilter = audioContext.createBiquadFilter();
+    lpInputFilter.frequency.value = 2048;
+    return lpInputFilter;
+}
+
+
+function convertToMono( input ) {
+    var splitter = audioContext.createChannelSplitter(2);
+    var merger = audioContext.createChannelMerger(2);
+
+    input.connect( splitter );
+    splitter.connect( merger, 0, 0 );
+    splitter.connect( merger, 0, 1 );
+    return merger;
+}
+
+
 
 
 
@@ -149,54 +277,68 @@ function midiOnStateChange(event) {
 
 function midiOnMIDImessage(event) {
     //console.log('midiOnMIDImessage', event);
-    if(event.data[1]!=null){
-        
+    if(event.data[0]!=null){
         const command = event.data[0];
+        //console.log(command)
+        if(command!=248){
+            //console.log(command)
+            switch(command){
+
+                case 144://track 1 on
+                    break;
+                case 145://track 2 on
+                    break;
+                case 146: // track 3 on
+                    break;
+                case 147://track 4 on 
+                    break;
+                case 148://track 5 on
+                    break;
+                case 149://track 6 on
+                    break;
+
+
+                case 128://track 1 off
+                    break;
+                case 129://track 2 off
+                    break;
+                case 130: // track 3 off
+                    break;
+                case 131://track 4 off
+                    break;
+                case 132://track 5 off
+                    break;
+                case 133://track 6 off
+                    break;
+            }
         
-        switch(command){
-            case 144://track 1 on
-                break;
-            case 145://track 2 on
-                break;
-            case 146: // track 3 on
-                break;
-            case 147://track 4 on 
-                break;
-            case 148://track 5 on
-                break;
-            case 149://track 6 on
-                break;
-
-
-            case 128://track 1 on
-                break;
-            case 129://track 2 on
-                break;
-            case 130: // track 3 on
-                break;
-            case 131://track 4 on 
-                break;
-            case 132://track 5 on
-                break;
-            case 133://track 6 on
-                break;
+            // console.log(event);
+            // const note = event.data[1];
+            // const velocity = event.data[2];
+            // console.log(event.data);
+            // console.log("command = "+command);
+            // console.log("note = "+note);
+            // console.log("velocity = "+velocity);
         }
-        // console.log(event);
-        // const note = event.data[1];
-        // const velocity = event.data[2];
-        // console.log(event.data);
-        // console.log("command = "+command);
-        // console.log("note = "+note);
-        // console.log("velocity = "+velocity);
     }
 
 
 }
 
 function requestMIDIAccessSuccess(midi) {
+
+    const outputs = [];
+    var iter = midi.outputs.values();
+    for (var i = iter.next(); i && !i.done; i = iter.next()) {
+      outputs.push(i.value);
+    }
+    midiOuts = outputs[0];
+    midiOuts.send([0xFC]);
+    //console.log(midiOuts)
+
     var inputs = midi.inputs.values();
-    console.log("hi")
-    console.log(inputs)
+    // console.log("hi")
+    //console.log(inputs)
     for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
         //console.log('midi input', input);
         input.value.onmidimessage = midiOnMIDImessage;
@@ -205,36 +347,9 @@ function requestMIDIAccessSuccess(midi) {
 
 }
 
-navigator.requestMIDIAccess().then(requestMIDIAccessSuccess);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function init() {
     
-
-
     camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, .1, 200 );
     camera.position.z = 2;
     camera.position.y = 0;
@@ -251,7 +366,6 @@ function init() {
 
     const ambientLight = new THREE.AmbientLight( 0x222222 );
     scene.add( ambientLight );
-
 
     const geometry = new THREE.BoxGeometry( .5, .5, .5 );
     const material = new THREE.MeshStandardMaterial(  );
@@ -286,6 +400,7 @@ function init() {
     window.addEventListener( 'resize', onWindowResize );
 
 }
+
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -295,7 +410,6 @@ function onWindowResize() {
 
 }
 
-
 function animate() {
 
     requestAnimationFrame( animate );
@@ -304,3 +418,4 @@ function animate() {
     renderer.render( scene, camera );
 
 }
+
