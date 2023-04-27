@@ -15,7 +15,8 @@
     "express": "^4.17.3",
     "gltfpack": "^0.18.0",
     "nodemon": "^2.0.15",
-    "three": "^0.148.0"
+    "three": "^0.148.0",
+    "tone": "^14.7.77"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",

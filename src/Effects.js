@@ -1,331 +1,327 @@
 
-class Recorder{
-    constructor(){
-        
+class Effects{
+    constructor(OBJ){
         const self = this;
+        //this.effectInput = OBJ.effectInput;
+        this.audioContext = OBJ.audioContext;
         
-        this.audioRecordStartTime;
-        this.maximumRecordingTimeInHours = 1;
-        this.elapsedTimeTimer;
-        this.audioElement = document.createElement("audio");//document.getElementsByClassName("audio-element")[0];
-        this.audioElement.loop = true;
-        this.audioElementSource;// = document.getElementsByClassName("audio-element")[0].getElementsByTagName("source")[0];
-
-        this.link = document.createElement( 'a' );
-		this.link.style.display = 'none';
-		document.body.appendChild( this.link ); // Firefox workaround, see #6594
-        this.blob;
-
-        this.audioRecorder = {
-            /** Stores the recorded audio as Blob objects of audio data as the recording continues*/
-            audioBlobs: [], /*of type Blob[]*/
-            /** Stores the reference of the MediaRecorder instance that handles the MediaStream when recording starts*/
-            mediaRecorder: null, /*of type MediaRecorder*/
-            /** Stores the reference to the stream currently capturing the audio*/
-            streamBeingCaptured: null, /*of type MediaStream*/
-            
-            start: function (stream) {
-                // if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
-                //     //Feature is not supported in browser
-                //     //return a custom error
-                //     return Promise.reject(new Error('mediaDevices API or getUserMedia method is not supported in this browser.'));
-                // }
-        
-                // else {
-                    //Feature is supported in browser
-        
-                    //create an audio stream
-                    // return navigator.mediaDevices.getUserMedia({ audio: true }/*of type MediaStreamConstraints*/)
-                    //     //returns a promise that resolves to the audio stream
-                    //     .then(stream /*of type MediaStream*/ => {
-        
-                    //         //save the reference of the stream to be able to stop it when necessary
-                    //         audioRecorder.streamBeingCaptured = stream;
-        
-                    //         //create a media recorder instance by passing that stream into the MediaRecorder constructor
-                    //         audioRecorder.mediaRecorder = new MediaRecorder(stream); /*the MediaRecorder interface of the MediaStream Recording
-                    //         API provides functionality to easily record media*/
-        
-                    //         //clear previously saved audio Blobs, if any
-                    //         audioRecorder.audioBlobs = [];
-        
-                    //         //add a dataavailable event listener in order to store the audio data Blobs when recording
-                    //         audioRecorder.mediaRecorder.addEventListener("dataavailable", event => {
-                    //             //store audio Blob object
-                    //             audioRecorder.audioBlobs.push(event.data);
-                    //         });
-        
-                    //         //start the recording by calling the start method on the media recorder
-                    //         audioRecorder.mediaRecorder.start();
-                    //     });
-        
-                    /* errors are not handled in the API because if its handled and the promise is chained, the .then after the catch will be executed*/
-                //}
-
-                    //console.log(stream)
-                    self.audioRecorder.streamBeingCaptured = stream;
-
-                    //create a media recorder instance by passing that stream into the MediaRecorder constructor
-                    self.audioRecorder.mediaRecorder = new MediaRecorder(stream); /*the MediaRecorder interface of the MediaStream Recording
-                    API provides functionality to easily record media*/
-
-                    //clear previously saved audio Blobs, if any
-                    self.audioRecorder.audioBlobs = [];
-
-                    //add a dataavailable event listener in order to store the audio data Blobs when recording
-                    self.audioRecorder.mediaRecorder.addEventListener("dataavailable", event => {
-                        //store audio Blob object
-                        self.audioRecorder.audioBlobs.push(event.data);
-                    });
-
-                    //start the recording by calling the start method on the media recorder
-                    self.audioRecorder.mediaRecorder.start();
-
-                    
-            },
-            stop: function () {
-                //return a promise that would return the blob or URL of the recording
-                return new Promise(resolve => {
-                    //save audio type to pass to set the Blob type
-                    //let mimeType = self.audioRecorder.mediaRecorder.mimeType;
-        
-                    //listen to the stop event in order to create & return a single Blob object
-                    self.audioRecorder.mediaRecorder.addEventListener("stop", () => {
-                        //create a single blob object, as we might have gathered a few Blob objects that needs to be joined as one
-                        //let audioBlob = new Blob(self.audioRecorder.audioBlobs, { type: mimeType });
-                        let audioBlob = new Blob(self.audioRecorder.audioBlobs, { 'type' : 'audio/wav; codecs=MS_PCM' } );
-
-                        //resolve promise with the single audio blob representing the recorded audio
-                        resolve(audioBlob);
-                    });
-        
-                    //stop the recording feature
-                    self.audioRecorder.mediaRecorder.stop();
-            
-                    
-                    //reset API properties for next recording
-                    self.audioRecorder.resetRecordingProperties();
-
-                });
-            },
-            resetRecordingProperties: function () {
-                self.audioRecorder.mediaRecorder = null;
-                self.audioRecorder.streamBeingCaptured = null;
-        
-                /*No need to remove event listeners attached to mediaRecorder as
-                If a DOM element which is removed is reference-free (no references pointing to it), the element itself is picked
-                up by the garbage collector as well as any event handlers/listeners associated with it.
-                getEventListeners(audioRecorder.mediaRecorder) will return an empty array of events.*/
-            }
-        }
+        this.lastEffect = -1;
+        this.currentEffectNode = null;
+        this.reverbBuffer = null;
+        this.dtime = null;
+        this.dregen = null;
+        this.lfo = null;
+        this.cspeed = null;
+        this.cdelay = null;
+        this.cdepth = null;
+        this.scspeed = null;
+        this.scldelay = null;
+        this.scrdelay = null;
+        this.scldepth = null;
+        this.scrdepth = null;
+        this.fldelay = null;
+        this.flspeed = null;
+        this.fldepth = null;
+        this.flfb = null;
+        this.sflldelay = null;
+        this.sflrdelay = null;
+        this.sflspeed = null;
+        this.sflldepth = null;
+        this.sflrdepth = null;
+        this.sfllfb = null;
+        this.sflrfb = null;
+        this.rmod = null;
+        this.mddelay = null;
+        this.mddepth = null;
+        this.mdspeed = null;
+        this.lplfo = null;
+        this.lplfodepth = null;
+        this.lplfofilter = null;
+        this.awFollower = null;
+        this.awDepth = null;
+        this.awFilter = null;
+        this.ngFollower = null;
+        this.ngGate = null;
+        this.bitCrusher = null;
+        this.btcrBits = 3,   // between 1 and 16
+        this.btcrNormFreq = .2; // between 0.0 and 1.0
+        this.apolloEffect = new ApolloEffect({audioContext:this.audioContext})
 
     }
 
-    startAudioRecording(stream) {
-        
+    
+    
+    changeEffect(effectNumber) {
+        /*
+        if (this.currentEffectNode) 
+            this.currentEffectNode.disconnect();
+        if (this.effectInput)
+            this.effectInput.disconnect();
+
+        var effect = effectNumber;//document.getElementById("effect").selectedIndex;
+        //var effectControls = document.getElementById("controls");
+        //if (this.lastEffect > -1)
+            //effectControls.children[lastEffect].classList.remove("display");
+        //lastEffect = effect;
+        //effectControls.children[effect].classList.add("display");
+        this.lastEffect = effect;
+        */
+        /*
+        switch (effect) {
+            case 0: // Delay
+                currentEffectNode = createDelay();
+                break;
+            case 2: // Distortion
+                currentEffectNode = createDistortion();
+                break;
+            case 13: // LPF LFO
+                currentEffectNode = createFilterLFO();
+                break;
+            case 20: // BitCrusher
+                currentEffectNode = createBitCrusher();
+                break;
+            case 21: // Apollo effect
+                currentEffectNode = createApolloEffect();
+                break;
+            default:
+                break;
+        }
+        audioInput.connect( currentEffectNode );
+        */
+    }
+
+    createFilterLFO(wetGain) {
+        /*
+LFO speed: <input id="lplfo" type="range" min="0.25" max="20" step="0.25" value="3" style="height: 20px; width: 200px;" onInput="if (lplfo) lplfo.frequency.value = event.target.value;"><br>
+		LFO depth: <input id="lplfodepth" type="range" min="0.0" max="1.0" step="0.1" value="1.0" style="height: 20px; width: 200px;" onInput="if (lplfodepth) lplfodepth.gain.value = 2500 * event.target.value;">
+		Filter Q: <input id="lplfoq" type="range" min="0.0" max="20.0" step="0.5" value="3.0" style="height: 20px; width: 200px;" onInput="if (lplfofilter) lplfofilter.Q.value = event.target.value;">
+	</div>
+        */
+        var osc = this.audioContext.createOscillator();
+        var gainMult = this.audioContext.createGain();
+        var gain = this.audioContext.createGain();
+        var filter = this.audioContext.createBiquadFilter();
+    
+        filter.type = "lowpass";
+        filter.Q.value = .14;//parseFloat( document.getElementById("lplfoq").value );
+        this.lplfofilter = filter;
+    
+        osc.type = 'sine';
+        osc.frequency.value = 20.025; //= parseFloat( document.getElementById("lplfo").value );
+        osc.connect( gain );
+    
+        filter.frequency.value = 2500;  // center frequency - this is kinda arbitrary.
+        gain.gain.value = 2500 * .6; //parseFloat( document.getElementById("lplfodepth").value );
+        // this should make the -1 - +1 range of the osc translate to 0 - 5000Hz, if
+        // depth == 1.
+    
+        gain.connect( filter.frequency );
+        filter.connect( wetGain );
+        this.lplfo = osc;
+        this.lplfodepth = gain;
+    
+        osc.start(0);
+        return filter;
+    }
+
+    createBitCrusher(wetGain) {
+        //console.log()
+        /*
+         this.btcrBits = 3,   // between 1 and 16
+        this.btcrNormFreq = .2; // between 0.0 and 1.0
+        */
         const self = this;
-        
-        console.log("Recording Audio...");
-    
-        //If a previous audio recording is playing, pause it
-        //let recorderAudioIsPlaying = !audioElement.paused; // the paused property tells whether the media element is paused or not
-        //console.log("paused?", !recorderAudioIsPlaying);
-        // if (this.recorderAudioIsPlaying) {
-        //     //audioElement.pause();
-        //     //also hide the audio playing indicator displayed on the screen
-        //     hideTextIndicatorOfAudioPlaying();
-        // }
-    
-        //start recording using the audio recording API
-        this.audioRecorder.start(stream);
-        this.audioRecordStartTime = new Date();
-        //then(() => { //on success
-    
-                //store the recording start time to display the elapsed time according to it
-              
-    
-                //display control buttons to offer the functionality of stop and cancel
-                //handleDisplayingRecordingControlButtons();
-            //})
-            /*
-            .catch(error => { //on error
-                //No Browser Support Error
-                if (error.message.includes("mediaDevices API or getUserMedia method is not supported in this browser.")) {
-                    //console.log("To record audio, use browsers like Chrome and Firefox.");
-                    //displayBrowserNotSupportedOverlay();
+        const btcrBufferSize = 4096;
+        var bitCrusher = this.audioContext.createScriptProcessor(btcrBufferSize, 1, 1);
+        var phaser = 0;
+        var last = 0;
+        bitCrusher.onaudioprocess = function(e) {
+            //self.btcrBits = 3,   // between 1 and 16
+            //this.btcrNormFreq = .2; // between 0.0 and 1.0
+            self.btcrBits = 3.;//1+Math.random()*15,   // between 1 and 16
+            self.btcrNormFreq = .1;//.2+Math.random()*.2; 
+            var step = Math.pow(1/2, self.btcrBits);
+            for (var channel=0; channel<e.inputBuffer.numberOfChannels; channel++) {
+                var input = e.inputBuffer.getChannelData(channel);
+                var output = e.outputBuffer.getChannelData(channel);
+                for (var i = 0; i < btcrBufferSize; i++) {
+                    phaser += self.btcrNormFreq;
+                    if (phaser >= 1.0) {
+                        phaser -= 1.0;
+                        last = step * Math.floor(input[i] / step + 0.5);
+                    }
+                    output[i] = last;
                 }
-    
-                //Error handling structure
-                switch (error.name) {
-                    case 'AbortError': //error from navigator.mediaDevices.getUserMedia
-                        console.log("An AbortError has occured.");
-                        break;
-                    case 'NotAllowedError': //error from navigator.mediaDevices.getUserMedia
-                        console.log("A NotAllowedError has occured. User might have denied permission.");
-                        break;
-                    case 'NotFoundError': //error from navigator.mediaDevices.getUserMedia
-                        console.log("A NotFoundError has occured.");
-                        break;
-                    case 'NotReadableError': //error from navigator.mediaDevices.getUserMedia
-                        console.log("A NotReadableError has occured.");
-                        break;
-                    case 'SecurityError': //error from navigator.mediaDevices.getUserMedia or from the MediaRecorder.start
-                        console.log("A SecurityError has occured.");
-                        break;
-                    case 'TypeError': //error from navigator.mediaDevices.getUserMedia
-                        console.log("A TypeError has occured.");
-                        break;
-                    case 'InvalidStateError': //error from the MediaRecorder.start
-                        console.log("An InvalidStateError has occured.");
-                        break;
-                    case 'UnknownError': //error from the MediaRecorder.start
-                        console.log("An UnknownError has occured.");
-                        break;
-                    default:
-                        console.log("An error occured with the error name " + error.name);
-                };
-            });
-            */
-    }
-    
-    stopAudioRecording() {
-    
-        //console.log("Stopping Audio Recording...");
-        const self = this;
-        //stop the recording using the audio recording API
-        this.audioRecorder.stop().then(audioAsBlob => {
-            //Play recorder audio
-            self.blob = audioAsBlob;
-            self.playAudio(audioAsBlob);
-            
-            //hide recording control button & return record icon
-            //this.handleHidingRecordingControlButtons();
-        }).catch(error => {
-            //Error handling structure
-            switch (error.name) {
-                case 'InvalidStateError': //error from the MediaRecorder.stop
-                    console.log("An InvalidStateError has occured.");
-                    break;
-                default:
-                    console.log("An error occured with the error name " + error.name);
-            };
-        });
-        return this.audioElement;
-    }
-    
-    playAudio(recorderAudioAsBlob){
-        
-        const self = this;
-        let reader = new FileReader();
-
-        //once content has been read
-        reader.onload = (e) => {
-            //store the base64 URL that represents the URL of the recording audio
-            let base64URL = e.target.result;
-    
-            //If this is the first audio playing, create a source element
-            //as pre populating the HTML with a source of empty src causes error
-            if (!self.audioElementSource) //if its not defined create it (happens first time only)
-                self.createSourceForAudioElement();
-    
-            //set the audio element's source using the base64 URL
-            self.audioElementSource.src = base64URL;
-    
-            //set the type of the audio element based on the recorded audio's Blob type
-            let BlobType = recorderAudioAsBlob.type.includes(";") ? recorderAudioAsBlob.type.substr(0, recorderAudioAsBlob.type.indexOf(';')) : recorderAudioAsBlob.type;
-            self.audioElementSource.type = BlobType;
-    
-            //call the load method as it is used to update the audio element after changing the source or other settings
-            self.audioElement.load();
-    
-            //play the audio after successfully setting new src and type that corresponds to the recorded audio
-            //console.log("Playing audio...");
-            //self.audioElement.play();
-            
-            //Display text indicator of having the audio play in the background
-            //displayTextIndicatorOfAudioPlaying();
+            }
         };
-    
-        //read content and convert it to a URL (base64)
-        reader.readAsDataURL(recorderAudioAsBlob);
-
-    }
-    createSourceForAudioElement() {
-        let sourceElement = document.createElement("source");
-        this.audioElement.appendChild(sourceElement);
-    
-        this.audioElementSource = sourceElement;
+        bitCrusher.connect( wetGain );
+        return bitCrusher;
     }
 
-    download(){
-        
-        this.link.href = URL.createObjectURL( this.blob );
-	    this.link.download = "song";
-		this.link.click();
+    
+
+
+}
+
+class ApolloEffect {
+    constructor(OBJ){
+        this.audioContext = OBJ.audioContext;
+        this.beepGain = null;
+        this.apolloGate = null;
+        this.wasSilent=true;
+        this.lastNoise = 0;
+        this.waitingForOutro=false;
+        this.OUTRODELAY=0.5;  // trailing edge delay, in seconds
+
     }
-    /*
-    elapsedTimeReachedMaximumNumberOfHours(elapsedTime) {
-        //Split the elapsed time by the symbo :
-        let elapsedTimeSplitted = elapsedTime.split(":");
     
-        //Turn the maximum recording time in hours to a string and pad it with zero if less than 10
-        let maximumRecordingTimeInHoursAsString = maximumRecordingTimeInHours < 10 ? "0" + maximumRecordingTimeInHours : maximumRecordingTimeInHours.toString();
-    
-        //if it the elapsed time reach hours and also reach the maximum recording time in hours return true
-        if (elapsedTimeSplitted.length === 3 && elapsedTimeSplitted[0] === maximumRecordingTimeInHoursAsString)
-            return true;
-        else //otherwise, return false
-            return false;
+
+/*function introQuindar(){ playQuindarTone( true );}
+function outroQuindar(){ playQuindarTone( false );}
+
+window.addEventListener('load', function() {
+	document.getElementById("apollo").addEventListener('mousedown', introQuindar );
+	document.getElementById("apollo").addEventListener('mouseup', outroQuindar );
+} );
+*/
+    createApolloEffect(wetGain) {
+        // Step 1: create band limiter with output delay
+        // I double up the filters to get a 4th-order filter = faster fall-off
+        var lpf1 = this.audioContext.createBiquadFilter();
+        lpf1.type = "lowpass";
+        lpf1.frequency.value = 2000.0;
+        var lpf2 = this.audioContext.createBiquadFilter();
+        lpf2.type = "lowpass";
+        lpf2.frequency.value = 2000.0;
+        var hpf1 = this.audioContext.createBiquadFilter();
+        hpf1.type = "highpass";
+        hpf1.frequency.value = 500.0;
+        var hpf2 = this.audioContext.createBiquadFilter();
+        hpf2.type = "highpass";
+        hpf2.frequency.value = 500.0;
+        lpf1.connect( lpf2 );
+        lpf2.connect( hpf1 );
+        hpf1.connect( hpf2 );
+
+        // create delay to make room for the intro beep
+        var delay = this.audioContext.createDelay();
+        delay.delayTime.setValueAtTime(0.100, 0);
+        delay.connect( wetGain );
+        hpf2.connect( delay );
+
+        //Step 2: create the volume tracker to connect to the beeper
+        var volumeprocessor = this.audioContext.createScriptProcessor(512);
+        const self = this;
+        volumeprocessor.onaudioprocess = function(e){
+            self.volumeAudioProcess(e,self);
+        };
+
+        var zeroGain = this.audioContext.createGain();
+        zeroGain.gain.setValueAtTime(0,0);
+        zeroGain.connect(this.audioContext.destination);
+        volumeprocessor.connect(zeroGain);
+
+        //Step 3: create the noise gate
+        var inputNode = this.audioContext.createGain();
+        var rectifier = this.audioContext.createWaveShaper();
+        this.ngFollower = this.audioContext.createBiquadFilter();
+        this.ngFollower.type = "lowpass";
+        this.ngFollower.frequency.value = 10.0;
+
+        var curve = new Float32Array(65536);
+        for (var i=-32768; i<32768; i++)
+            curve[i+32768] = ((i>0)?i:-i)/32768;
+        rectifier.curve = curve;
+        rectifier.connect(this.ngFollower);
+        this.apolloGate = this.audioContext.createWaveShaper();
+        this.apolloGate.curve = this.generateNoiseFloorCurve( 0.02 );
+        this.ngFollower.connect(this.apolloGate);
+
+        var gateGain = this.audioContext.createGain();
+        gateGain.gain.value = 0.0;
+        this.apolloGate.connect( gateGain.gain );
+        gateGain.connect( lpf1 );
+        gateGain.connect( volumeprocessor );
+        inputNode.connect(rectifier);
+        inputNode.connect(gateGain);
+
+        return( inputNode );
     }
 
-    computeElapsedTime(startTime) {
-        //record end time
-        let endTime = new Date();
+    generateNoiseFloorCurve( floor ) {
+        // "floor" is 0...1
     
-        //time difference in ms
-        let timeDiff = endTime - startTime;
+        var curve = new Float32Array(65536);
+        var mappedFloor = floor * 32768;
     
-        //convert time difference from ms to seconds
-        timeDiff = timeDiff / 1000;
+        for (var i=0; i<32768; i++) {
+            var value = (i<mappedFloor) ? 0 : 1;
     
-        //extract integer seconds that dont form a minute using %
-        let seconds = Math.floor(timeDiff % 60); //ignoring uncomplete seconds (floor)
-    
-        //pad seconds with a zero if neccessary
-        seconds = seconds < 10 ? "0" + seconds : seconds;
-    
-        //convert time difference from seconds to minutes using %
-        timeDiff = Math.floor(timeDiff / 60);
-    
-        //extract integer minutes that don't form an hour using %
-        let minutes = timeDiff % 60; //no need to floor possible incomplete minutes, becase they've been handled as seconds
-        minutes = minutes < 10 ? "0" + minutes : minutes;
-    
-        //convert time difference from minutes to hours
-        timeDiff = Math.floor(timeDiff / 60);
-    
-        //extract integer hours that don't form a day using %
-        let hours = timeDiff % 24; //no need to floor possible incomplete hours, becase they've been handled as seconds
-    
-        //convert time difference from hours to days
-        timeDiff = Math.floor(timeDiff / 24);
-    
-        // the rest of timeDiff is number of days
-        let days = timeDiff; //add days to hours
-    
-        let totalHours = hours + (days * 24);
-        totalHours = totalHours < 10 ? "0" + totalHours : totalHours;
-    
-        if (totalHours === "00") {
-            return minutes + ":" + seconds;
-        } else {
-            return totalHours + ":" + minutes + ":" + seconds;
+            curve[32768-i] = -value;
+            curve[32768+i] = value;
         }
-    }
-    */
+        curve[0] = curve[1]; // fixing up the end.
     
+        return curve;
+    }
+
+
+    playQuindarTone( intro ) {
+        if (!this.beepgain) {
+            this.beepgain=this.audioContext.createGain();
+            this.beepgain.gain.value = 0.25;
+           //this.beepgain.connect(this.audioContext.destination);
+        }
+        var osc=this.audioContext.createOscillator();
+        osc.frequency.setValueAtTime( intro ? 2525 : 2475, 0);
+        osc.connect(this.beepgain);
+        osc.start(0);
+        osc.stop(this.audioContext.currentTime+0.25);
+    }
+
+
+
+    volumeAudioProcess( event, self ) {
+        //console.log(this)
+        var buf = event.inputBuffer.getChannelData(0);
+        var bufLength = buf.length;
+        var sum = 0;
+        var x;
+        var currentlySilent = true;
+
+        // Do a root-mean-square on the samples: sum up the squares...
+        for (var i=0; i<bufLength; i++) {
+            currentlySilent = currentlySilent && (buf[i]==0.0);
+        }
+
+        if (self.wasSilent&&currentlySilent) {
+            if (self.waitingForOutro) {
+                if ((self.lastNoise+self.OUTRODELAY)<event.playbackTime) {
+                    self.playQuindarTone(false);
+                    self.waitingForOutro=false;
+                }
+            }
+            return;
+        }
+
+        if (self.wasSilent) { // but not currently silent - leading edge
+            if (!self.waitingForOutro) {
+                self.playQuindarTone(true);
+                self.waitingForOutro=true;
+            }
+            self.wasSilent=false;
+            return;
+        }
+
+        if (currentlySilent) {  // but wasn't silent - trailing edge
+            this.lastNoise=event.playbackTime;
+            this.wasSilent=true;
+        }
+
+    }
+
 }
 
 
-export { Recorder };
+export { Effects };
 

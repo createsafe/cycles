@@ -39,18 +39,24 @@ body{
   margin-top: -5vh;
   text-align: center;
 }
+.fx-slider{
+  max-width: 60px !important;
+}
+
 #controls{
   position: fixed;
   left: 50%;
   bottom: 0px;
-  width: 500px;
-  height: 50px;
+  width: 1200px;
+  height: 70px;
   z-index: 500;
-  margin-left: -250px;
+  margin-left: -600px;
   padding: 20px;
+  text-align: center;
 }
+
 .controls-holder{
-  float: left;
+  display: inline-block;
   text-align: center;
   margin-right: 20px;
 }
@@ -98,7 +104,4 @@ body{
 .label{
   font-size: 14px;
   padding-bottom:5px;
-}
-#recorded-audio{
-  display: none;
 }

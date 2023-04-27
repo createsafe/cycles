@@ -1,0 +1,176 @@
+<!DOCTYPE >
+<html >
+	<head>
+		<!-- Primary Meta Tags -->
+		<meta charset="utf-8">
+		<title>tone test</title>
+	
+        <style type="text/css">
+            tone-oscilloscope {
+                width: 100%;
+                background-color: black;
+                height: 40px;
+                border-radius: 20px;
+                margin-bottom: 10px;
+            }
+        </style>
+	</head>
+
+	<body>
+		<!--
+		<script src="./extras/jquery.js"></script>
+		-->
+        <!---->
+	
+        <div id="content"></div>
+        <button id="start">start</button>
+        <button id="record">record</button>
+        <button id="download">download</button>
+        
+        <select id="audioinput" style="max-width:100px;">
+            <option>default (selection not supported)</option>
+        </select>
+        <input id="filter" type="range" min="0" max="1" step="0.05" value="1"/>
+        <input id="distortion" type="range" min="0" max="1" step="0.05" value="1"/>
+
+        <script src="build/Tone.js"></script>
+        <script src="extras/tone-ui.js"></script>
+
+		<script type="module">
+            
+            let inited = false;
+            let filter;
+            let distortion;
+            let input;
+            let recording = false;
+            let recordedFile 
+            const recorder = new Tone.Recorder();
+     
+
+            document.getElementById("filter").addEventListener("input", function(e){
+                filter.wet.value = parseFloat(e.target.value);
+            });
+
+            document.getElementById("distortion").addEventListener("input", function(e){
+                distortion.wet.value = parseFloat(e.target.value);
+                console.log(distortion.wet.value)
+            });
+
+            function gotSources(sourceInfos) {
+
+                var audioSelect = document.getElementById("audioinput");
+                while (audioSelect.firstChild)
+                    audioSelect.removeChild(audioSelect.firstChild);
+
+                for (var i = 0; i != sourceInfos.length; ++i) {
+                    var sourceInfo = sourceInfos[i];
+                    if (sourceInfo.kind === 'audioinput') {
+                        console.log(sourceInfo)
+                        var option = document.createElement("option");
+                        option.value = sourceInfo.deviceId;
+                        option.text = sourceInfo.label || 'input ' + (audioSelect.length + 1);
+                        audioSelect.appendChild(option);
+                    }
+                }
+                audioSelect.onchange = changeInput;
+            }
+
+            function changeInput(){
+    
+                // audioStream.getAudioTracks().forEach(function(track) {
+                //     track.stop();
+                // });
+                //input.dispose();
+                input.close();
+                console.log("hii")
+                const audioSelect = document.getElementById("audioinput");
+                const audioSource = audioSelect.value;
+
+              
+                input.open(audioSource);
+             
+            }
+
+            document.getElementById("record").addEventListener("click", toggleRecorder);
+            document.getElementById("download").addEventListener("click", download);
+            document.getElementById("start").addEventListener("click", async function(){
+                await Tone.start();
+                initTone();
+            })
+
+            function toggleRecorder(){
+                if(!recording){
+                    document.getElementById("record").innerHTML = "stop";
+                    recording = true;
+                    recorder.start();
+                }else{
+                    document.getElementById("record").innerHTML = "record";
+                    recording = false;
+                    killRecording();
+
+                }
+                
+                
+            }
+
+            async function killRecording(){
+                recordedFile = await recorder.stop();
+                // download the recording by creating an anchor element and blob url
+                // const url = URL.createObjectURL(recording);
+                // const anchor = document.createElement("a");
+                // anchor.download = "recording.webm";
+                // anchor.href = url;
+                // anchor.click();
+            }
+
+            function download(){
+                if(recordedFile){
+                    const url = URL.createObjectURL(recordedFile);
+                    const anchor = document.createElement("a");
+                    anchor.download = "recording.webm";
+                    anchor.href = url;
+                    anchor.click();
+                }
+            }
+
+
+            function initTone(){
+
+                if(!inited){
+                    inited = true;
+                   
+                    input = new Tone.UserMedia();
+                    Tone.UserMedia.enumerateDevices().then(gotSources);
+
+                    const inputFFT = new Tone.FFT();
+                    input.connect(inputFFT);
+
+                    input.open();
+                   
+                    filter = new Tone.AutoFilter(4).start();
+                    distortion = new Tone.Distortion(0.5);
+                    // connect the player to the filter, distortion and then to the master output
+                    input.chain(filter, distortion, Tone.Destination);
+                    Tone.Destination.connect(recorder)
+
+
+                    //mic.toDestination();
+
+                    
+                }
+
+            }
+          
+
+
+
+            //import * as Tone from './build/Tone.js';
+            
+        </script>
+		
+		
+		
+	
+	
+	</body>
+</html>

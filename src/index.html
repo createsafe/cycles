@@ -21,6 +21,12 @@
 		<div id="controls">
 			
 			<div class="controls-holder">
+				<select id="audioinput" style="max-width:100px;">
+					<option>default (selection not supported)</option>
+				</select>
+			</div>
+
+			<div class="controls-holder">
 				<button class="my-button my-button-icon" id="play-btn">▶</button>
 				<button class="my-button my-button-icon" id="stop-btn" style="display:none;">◼</button>
 			</div>
@@ -29,15 +35,7 @@
 				<button class="my-button my-button-icon record-btn" id="rec-btn">●</button>
 			</div>
 
-			<div class="controls-holder">
-				<div class="label" >
-					Volume
-				</div>
-				<div>
-					<input id="volume" type="range" min="0" max="1" step="0.02" value="1"/>
-				</div>
-			</div>
-
+			
 			<div class="controls-holder" id="recorded-audio">
 				<div class="label">
 					Recorded Audio
@@ -50,12 +48,60 @@
 
 			</div>
 
-			<div style="clear:both"></div>
+			
+			<div class="controls-holder">
+				<div class="label" >
+					Volume
+				</div>
+				<div>
+					<input class="fx-slider" id="volume" type="range" min="0" max="1" step="0.05" value="1"/>
+				</div>
+			</div>
+
+			<div class="controls-holder">
+				<div class="label" >
+					Distortion
+				</div>
+				<div>
+					<input class="fx-slider" id="distortion" type="range" min="0" max="1" step="0.05" value="0"/>
+				</div>
+			</div>
+
+			<div class="controls-holder">
+				<div class="label" >
+					Crush
+				</div>
+				<div>
+					<input class="fx-slider" id="crush" type="range" min="0" max="1" step="0.05" value="0"/>
+				</div>
+			</div>
+
+			<div class="controls-holder">
+				<div class="label" >
+					Chill
+				</div>
+				<div>
+					<input class="fx-slider" id="chill" type="range" min="0" max="1" step="0.05" value="0"/>
+				</div>
+			</div>
+
+			<div class="controls-holder">
+				<div class="label" >
+					Filter
+				</div>
+				<div>
+					<input class="fx-slider" id="filter" type="range" min="0" max="1" step="0.05" value="0"/>
+				</div>
+			</div>
+
+			<!--<div style="clear:both"></div>-->
 
 		</div>
+
 		
 		<script src="./extras/perlin2.js"></script>
 		<script src="./extras/jquery.js"></script>
+		<script src="./extras/Tone.js"></script>
 		
 		<script src="./main.js" type="module"></script>	
 	
