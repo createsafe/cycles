@@ -43,7 +43,7 @@
             let distortion;
             let input;
             let recording = false;
-            let recordedFile 
+            let recordedFile;
             const recorder = new Tone.Recorder();
      
 
@@ -113,15 +113,7 @@
                 
             }
 
-            async function killRecording(){
-                recordedFile = await recorder.stop();
-                // download the recording by creating an anchor element and blob url
-                // const url = URL.createObjectURL(recording);
-                // const anchor = document.createElement("a");
-                // anchor.download = "recording.webm";
-                // anchor.href = url;
-                // anchor.click();
-            }
+            
 
             function download(){
                 if(recordedFile){

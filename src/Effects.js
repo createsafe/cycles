@@ -164,6 +164,7 @@ LFO speed: <input id="lplfo" type="range" min="0.25" max="20" step="0.25" value=
 }
 
 class ApolloEffect {
+    
     constructor(OBJ){
         this.audioContext = OBJ.audioContext;
         this.beepGain = null;
@@ -172,7 +173,6 @@ class ApolloEffect {
         this.lastNoise = 0;
         this.waitingForOutro=false;
         this.OUTRODELAY=0.5;  // trailing edge delay, in seconds
-
     }
     
 
@@ -245,6 +245,11 @@ window.addEventListener('load', function() {
         inputNode.connect(rectifier);
         inputNode.connect(gateGain);
 
+
+        // const customEffect = Tone.context.rawContext.createScriptProcessor(...args)
+        // customEffect. onaudioprocess = yourProcessingFunction
+        // Tone.connect(anyToneAudioNode, customEffect, Tone.context.destination)
+        
         return( inputNode );
     }
 

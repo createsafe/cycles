@@ -45,32 +45,54 @@ class GlitchPass extends Pass {
 		this.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 		this.uniforms[ 'seed' ].value = Math.random();//default seeding
 		this.uniforms[ 'byp' ].value = 0;
+		// if ( this.curF % this.randX == 0 || this.goWild == true ) {
 
-		if ( this.curF % this.randX == 0 || this.goWild == true ) {
+		// 	this.uniforms[ 'amount' ].value = Math.random() / 30;
+		// 	this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
+		// 	this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 1, 1 );
+		// 	this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 1, 1 );
+		// 	this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
+		// 	this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
+		// 	this.curF = 0;
+		// 	this.generateTrigger();
 
-			this.uniforms[ 'amount' ].value = Math.random() / 30;
+		// } else if ( this.curF % this.randX < this.randX / 5 ) {
+
+		// 	this.uniforms[ 'amount' ].value = Math.random() / 90;
+		// 	this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
+		// 	this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
+		// 	this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
+		// 	this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 0.3, 0.3 );
+		// 	this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 0.3, 0.3 );
+
+		// } else if ( this.goWild == false ) {
+
+		// 	this.uniforms[ 'byp' ].value = 1;
+
+		// }
+
+
+
+		if ( this.goWild == true ) {
+
+			this.uniforms[ 'amount' ].value = Math.random() / 110;
 			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
-			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 1, 1 );
-			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 1, 1 );
-			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
-			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
+			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - .3, .3 );
+			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - .3, .3 );
+			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, .3 );
+			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, .3 );
 			this.curF = 0;
 			this.generateTrigger();
 
-		} else if ( this.curF % this.randX < this.randX / 5 ) {
-
-			this.uniforms[ 'amount' ].value = Math.random() / 90;
-			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
-			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
-			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
-			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - 0.3, 0.3 );
-			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 0.3, 0.3 );
-
-		} else if ( this.goWild == false ) {
+		} else {
 
 			this.uniforms[ 'byp' ].value = 1;
 
 		}
+
+
+
+
 
 		this.curF ++;
 
