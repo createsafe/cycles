@@ -10,13 +10,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@neurosity/notion": "^5.17.0",
+    "@neurosity/sdk": "^6.5.7",
     "compression": "^1.7.4",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "gltfpack": "^0.18.0",
     "nodemon": "^2.0.15",
     "three": "^0.148.0",
-    "tone": "^14.7.77"
+    "tone": "^14.7.77",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
@@ -24,8 +27,8 @@
     "javascript-obfuscator": "^4.0.0",
     "mini-css-extract-plugin": "^2.6.1",
     "terser-webpack-plugin": "^5.3.1",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^4.9.2",
+    "webpack": "^5.82.0",
+    "webpack-cli": "^4.10.0",
     "webpack-obfuscator": "^3.5.1"
   }
 }

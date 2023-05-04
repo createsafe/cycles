@@ -110,6 +110,35 @@ window.loadObjs = [
 init();
 
 
+
+
+const crown_1_socket = new WebSocket('ws://localhost:8080');
+crown_1_socket.addEventListener('open', function (event) {
+  console.log('WebSocket connected');
+
+  // Send a message to the server
+  crown_1_socket.send('Hello from client!');
+});
+
+crown_1_socket.addEventListener('message', function (event) {
+  console.log('Crown 1 websocket received message:', event.data);
+});
+
+
+
+const crown_2_socket = new WebSocket('ws://localhost:8081');
+crown_2_socket.addEventListener('open', function (event) {
+  console.log('WebSocket connected');
+
+  // Send a message to the server
+  crown_2_socket.send('Hello from client!');
+});
+
+crown_2_socket.addEventListener('message', function (event) {
+console.log('Crown 2 websocket received message:', event.data);
+});
+
+
 document.addEventListener("keydown",onKeyDown)
 function onKeyDown(e){
     console.log(e.keyCode)
