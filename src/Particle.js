@@ -36,7 +36,6 @@ const metalMesh = new Mesh(metalGeo, metalMat);
 
 
 
-
 class FireParticle{
 
 	constructor(OBJ, SPECIAL){
@@ -59,7 +58,10 @@ class FireParticle{
 		this.killed = false;
 	    
         this.inc = 0;
+		this.fftIndex = Math.floor(Math.random()*1000);
 		
+		this.rndHue = Math.random()*.05;
+		this.sclMult = 2;
 		self.init(OBJ, SPECIAL);
         
 		
@@ -77,8 +79,8 @@ class FireParticle{
 		// this.mesh.rotation.y = Math.random()*Math.PI*2
 		// this.mesh.rotation.x = Math.random()*Math.PI*2
 		const rndOffset = Math.random();
-		this.mesh.material.color = col;
-        this.mesh.material.emissive = col;
+	//	this.mesh.material.color = col;
+       // this.mesh.material.emissive = col;
         
 		this.mesh.scale.set(0,0,0);
 
@@ -110,7 +112,7 @@ class FireParticle{
 			const offset = new Vector3().copy(rndPos).multiplyScalar(trans.scl * 1); 
 			self.mesh.position.add( offset );
 			
-			const s = (trans.scl * self.vel * (self.sclOff))*1.2;
+			const s = (trans.scl * self.vel * (self.sclOff))*self.sclMult;
 			self.mesh.scale.set(s,s,s);
 		})
 		.start()
@@ -122,6 +124,11 @@ class FireParticle{
 
 	update(OBJ){
 		
+		const fft = ((100 + OBJ.fft[this.fftIndex]) / 100)*window.fftMult;
+		//console.log((100 + OBJ.fft[this.fftIndex]) / 100 );
+		this.sclMult = .5 + (fft )*4.8;
+		const col = new Color().setHSL(this.rndHue, 1.5, (fft )*1.8 );
+		this.mesh.material.color = this.mesh.material.emissive = col;
 		
 	}
 
@@ -142,6 +149,160 @@ class FireParticle{
 
 
 export { FireParticle };
+
+
+
+class ButterflyParticle{
+
+	constructor(OBJ, SPECIAL){
+		const self = this;
+		this.hue = OBJ.hue
+        this.scene = OBJ.scene;
+		this.spline = OBJ.spline;
+		//this.spline.addToScene(this.scene);
+       
+		const modelToClone = window.getLoadedObjectByName("butterfly");
+		this.mesh = clone( modelToClone.model );
+		this.mixer = new AnimationMixer(this.mesh);
+		const ani = modelToClone.group.animations[0];
+		const clip = this.mixer.clipAction(ani);  
+		clip.play();
+		
+		
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				const mat = obj.material.clone();
+				obj.material = mat;
+			}
+		})
+		
+		// this.mesh = window.flowers[Math.floor(Math.random()*window.flowers.length)].clone();
+		// this.mesh.traverse(function(obj){
+		// 	if(obj.isMesh){
+		// 		const mat = obj.material.clone();
+		// 		obj.material = mat;//obj.material.emissive = col;
+		// 	}
+		// })
+        // const clone = this.mesh.material.clone();   
+        // this.mesh.material = clone;
+		this.rndSpeed = 
+        this.vel = 0;
+		this.sclOff = 0;
+		this.note = 0;
+		
+	    this.scene.add(this.mesh);
+        
+		this.killed = false;
+	    
+        this.inc = 0;
+		this.fftIndex = Math.floor(Math.random()*1000);
+		
+		this.rndHue = .4+(Math.random()*.6);
+		this.sclMult = .4+Math.random()*.5;
+		this.rndRot = new Vector3(-.5+Math.random(),-.5+Math.random(),-.5+Math.random());
+		this.yOff = Math.random()*.7;
+		
+		this.rndAniSpeed = 1.6+Math.random()*.8;
+		self.init(OBJ, SPECIAL);
+        
+		
+	}	
+
+	init(OBJ, SPECIAL){
+		
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+        const sat = .5 + ( ( ( i / len) * .5) );
+		const hue = SPECIAL.instanceRandom+( i / ( len * .2 ) )%1.0; 
+		//const col = new Color().setHSL(this.hue + Math.random()*.1, sat*2, .4+Math.random()*.3);
+		//const col = new Color().setHSL(Math.random()*.051, sat*20, (.4+Math.random()*.3)*1.2 );
+		//
+		// this.mesh.rotation.y = Math.random()*Math.PI*2
+		// this.mesh.rotation.x = Math.random()*Math.PI*2
+		//const rndOffset = Math.random();
+	//	this.mesh.material.color = col;
+       // this.mesh.material.emissive = col;
+	  
+
+		this.mesh.scale.set(0,0,0);
+
+		const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
+
+		this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((index / amount) * ((SPECIAL.vel/127)*.7));
+        this.note = SPECIAL.note;
+		
+		const rndPos = new Vector3(-.5+Math.random(), -.5+Math.random(),-.5+Math.random());
+		
+		const self = this;
+		const p = {inc:0};
+		const nseRnd = .7+(Math.random()*4);
+		this.yOff = Math.random()*.7;
+		this.mesh.visible = true;
+		this.rndRot = new Vector3(-.5+Math.random(),-.5+Math.random(),-.5+Math.random());
+		
+		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*(5000+Math.random()*2000)) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc = p.inc;
+			const trans = self.spline.getTransforms({inc:self.inc, noiseAmt:nseRnd});
+			self.mesh.position.copy(trans.pos);
+			this.mesh.position.y+=self.yOff*3.5;
+			self.mesh.quaternion.copy(trans.quat);
+			//this.mesh.rotation.x += Math.PI;
+			//this.mesh.rotation.z += self.rndRot.z*(Math.PI*2);
+			//console.log(tran)
+			const offset = new Vector3().copy(rndPos).multiplyScalar(trans.scl * 1); 
+			self.mesh.position.add( offset );
+			
+			const s = (trans.scl * self.vel * (self.sclOff))*self.sclMult;
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			//self.kill();
+			self.hide();
+		});
+	}
+
+	update(OBJ){
+		this.mixer.update(OBJ.delta*this.rndAniSpeed)
+		const self = this;
+		const fft = ((100 + OBJ.fft[this.fftIndex]) / 100)*window.fftMult;
+		//console.log((100 + OBJ.fft[this.fftIndex]) / 100 );
+		//this.sclMult = .2 + ( fft )*3.8;
+		const col = new Color().setHSL(this.rndHue, .4, .2 + ( fft )*1.2 );
+		const col2 = new Color().setHSL(this.rndHue+Math.random()*.1, 2, .4 + ( fft )*3.2 );
+				
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				obj.material.color = col;
+				obj.material.emissive = col2;
+			}
+		})
+	
+		
+	}
+
+	kill(){
+
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+	}
+
+	hide(){
+		this.mesh.visible = false;
+		if(this.tween)this.tween.stop();
+		
+	}
+}
+
+
+export { ButterflyParticle };
 
 
 

@@ -81,6 +81,12 @@ window.loadObjs = [
     {loaded:false, group:null, url:"butterfly.glb", isMainModel:false, name:"butterfly", animated:true, model:null},
     {loaded:false, group:null, url:"firelink.glb", isMainModel:false, name:"firelink", animated:false, model:null},
     {loaded:false, group:null, url:"white-fairy.glb", isMainModel:false, name:"white fairy", animated:false, model:null},
+    {loaded:false, group:null, url:"oracle-2.glb", isMainModel:false, name:"oracle", animated:false, model:null},
+    {loaded:false, group:null, url:"normal-fairy.glb", isMainModel:false, name:"normal fairy", animated:false, model:null},
+    {loaded:false, group:null, url:"hibiscus.glb", isMainModel:false, name:"hibiscus", animated:false, model:null},
+    {loaded:false, group:null, url:"moth-orchid.glb", isMainModel:false, name:"moth orchid", animated:false, model:null},
+    {loaded:false, group:null, url:"orchid.glb", isMainModel:false, name:"orchid", animated:false, model:null},
+    {loaded:false, group:null, url:"siam.glb", isMainModel:false, name:"siam", animated:false, model:null},
 ]
 
 

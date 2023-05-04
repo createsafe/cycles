@@ -15,7 +15,6 @@ class CustomMaterials{
     }
 
     twist(OBJ){
-        console.log("jhii")
         const self = this;
 
         const material = OBJ.mesh.material.clone();//new THREE.MeshNormalMaterial();
@@ -83,12 +82,10 @@ class MaterialMeshHelper{
         this.mesh = OBJ.mesh;
         this.inc = 0;//Math.random()*1000;
         this.speed = OBJ.speed;
-        console.log(this.speed)
     }
     update(OBJ){
         const self = this;
         this.inc+=OBJ.delta*(this.speed*.1);
-        //console.log(this.inc)
         this.mesh.traverse( function ( child ) {
 
             if ( child.isMesh ) {

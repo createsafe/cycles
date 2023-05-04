@@ -42,11 +42,24 @@ class TrackAni{
         this.inc = 0;
         this.emitInc = 0;
         this.rotSpeed = new Vector3(-.5+Math.random(), -.5+Math.random(),-.5+Math.random())
+        if(OBJ.name=="butterfly")this.rotSpeed = new Vector3();
+        this.limitInc=0;
+        this.limit = 4;
+        this.canLimitEmit = false;
+        this.showingParticles = true;
         //this.anis=[];
         //this.anis.push( new SplineAnimation( {scene:OBJ.scene, spline:this.spline, mesh:mesh} ) );
     }
 
-
+    toggleParticles(){
+        if(this.showingParticles){
+            this.showingParticles = false;
+            this.emitter.hideParticles();
+        }else{
+            this.showingParticles = true;
+            //this.emitter.showParticles();
+        }
+    }
 
     burst(OBJ){
         //this.ani.burst(OBJ);
@@ -60,12 +73,23 @@ class TrackAni{
                 // const hue = rndStart + ( i / ( len * 1 ) ); 
                 // OBJ.col = new Color().setHSL(hue, sat, .5);
                 OBJ.index = i+1;
-
                 self.emitter.emit(OBJ);
             }, i*OBJ.burstSpeed);
             
         }
     }
+
+    limitedBurst(OBJ, limit){
+        
+        this.limit = limit;
+        
+        if(this.canLimitEmit){
+            this.emitter.emit(OBJ);
+            this.canLimitEmit = false;
+        }
+    }
+
+    
 
     emit(OBJ){
           //OBJ.col = new Color().setHSL(this.inc, 1, .5);
@@ -95,6 +119,13 @@ class TrackAni{
         this.parent.rotation.y+=OBJ.delta*(this.rotSpeed.y)*2;
         this.inc += OBJ.delta;
         this.emitInc += OBJ.delta;
+        this.limitInc += OBJ.delta;
+        
+        if( this.limitInc > this.limit){
+            this.canLimitEmit = true;
+            this.limitInc=0;
+        }
+        
         this.emitter.update(OBJ);
         //this.ani.update({delta:OBJ.delta});
         if(this.shouldEmit){

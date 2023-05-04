@@ -50,6 +50,18 @@ class ParticleEmitter {
 		}
 	}
 
+	hideParticles(){
+		for(let i = 0; i < this.arr.length; i++){
+			this.arr[i].mesh.visible = false;	
+		}
+	}
+
+	showParticles(){
+		for(let i = 0; i < this.arr.length; i++){
+			this.arr[i].mesh.visible = true;	
+		}
+	}
+
 
 	kill(){
 		for(let i = 0; i < this.arr.length; i++){

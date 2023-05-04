@@ -57,25 +57,25 @@ class GenerativeSplines{
         const self = this;
         const len = 20;
         const arr = [];
-        let radX = OBJ.rad.x;//.2+Math.random()*;
-        let radY = OBJ.rad.y;//.2+Math.random()*.2;
+        let radX = OBJ.rad;//.2+Math.random()*;
+        let radY = OBJ.rad;//.2+Math.random()*.2;
         let verticalSize = OBJ.verticalSize;
-        const n = .4 + Math.random() * OBJ.circleAmt;
-        const curvAmt = 1.8 + Math.random()*3.3;
+        const n = 2;//+ Math.random() * OBJ.circleAmt;
+        const curvAmt = 2.8;
         const incRnd0 = Math.random();
         const incRnd1 = Math.random();
-        const incRnd2 = Math.random();
+        const rndStart = OBJ.rndStart;
     
         for(let i = 0; i<len; i++){
     
             const angle = (i/len)*(Math.PI*curvAmt);
             const na = 2/n;
-            radX += (i*(incRnd0*.01))
-            radY += (i*(incRnd1*.01))
+            // radX += (i*(incRnd0*.01))
+            // radY += (i*(incRnd1*.01))
             const x = Math.pow( Math.abs( Math.cos(angle) ), na ) * radX * self.sgn( Math.cos(angle) );
             const y = Math.pow( Math.abs( Math.sin(angle) ), na ) * radY * self.sgn( Math.sin(angle) );
             
-            arr.push(new Vector3(x, -.5 + (i*verticalSize), y ));
+            arr.push(new Vector3(x, rndStart + (i*verticalSize), y ));
         }
         return arr;
     }
