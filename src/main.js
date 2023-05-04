@@ -73,6 +73,9 @@ let clockAdd16 = 0;
 let shouldEmit = true;
 window.clock16Time = 5;
 window.clock4Time = 0;
+let splode;
+let setFFTIndexes = false;
+const fftIndex = [];
 
 let composer, dot, rbgShift, glitchPass, bloom, brtCont, hue, filmShader;
 
@@ -106,7 +109,7 @@ let emo2 = 0;
 const noiseArray =[
     new NoiseHelper({scale:.15 + Math.random() * .5, speed:.1 + Math.random() * .8 }),
     new NoiseHelper({scale:.2, speed:.1 }),
-    new NoiseHelper({scale:.15 + Math.random() * .5, speed:.1 }),
+    new NoiseHelper({scale:.1 , speed:.1 }),
     new NoiseHelper({scale:.15 + Math.random() * .5, speed:.1 }),
     new NoiseHelper({scale:.15 + Math.random() * .5, speed:.1 }),
 ]
@@ -120,10 +123,13 @@ window.loadObjs = [
     {loaded:false, group:null, url:"oracle-2.glb", name:"oracle", animated:false, model:null},
     {loaded:false, group:null, url:"fire-2.glb", name:"fire", animated:false, model:null},
     {loaded:false, group:null, url:"normal-fairy.glb", name:"normal fairy", animated:false, model:null},
+    {loaded:false, group:null, url:"splode2.glb", name:"splode", animated:false, model:null},
+    /*
     {loaded:false, group:null, url:"hibiscus.glb", name:"hibiscus", animated:false, model:null},
     {loaded:false, group:null, url:"moth-orchid.glb", name:"moth orchid", animated:false, model:null},
     {loaded:false, group:null, url:"orchid.glb", name:"orchid", animated:false, model:null},
     {loaded:false, group:null, url:"siam.glb", name:"siam", animated:false, model:null},
+    */
 ]
 
 init();
@@ -246,6 +252,8 @@ function onKeyDown(e){
             }
             break;
         case 90://~
+            if(splode)
+                splode.visible = !splode.visible;
             // shouldEmit = !shouldEmit;
             // for(let i = 0; i<anis.length; i++){
             //     anis[i].toggleParticles();
@@ -529,35 +537,35 @@ function midiOnStateChange(event) {
 function midiOnMIDImessage(event) {
     
     //if(event.data[]!=null && anis.length>0){
-    if(event.data[0] != null){
+    if(event.data[0] != null && anis.length>0){
 
         const command = event.data[0];
         const note = event.data[1];
         const velocity = event.data[2];
         
         //console.log(command)
-        /*
-        if(command != 248){
-            console.log(note); 
+       
+        if(command != 248 && note!=null){
+        
             switch( note % anis.length ){
                 case 0:
                 case 1:
                 case 2:
                 case 3:
                 case 4:
-                    anis[note % anis.length].burst({vel:velocity, note:note, amt:1+Math.floor(Math.random()*3), burstSpeed:100});
+                    anis[note % anis.length].burst({vel:velocity, note:note, amt:20+Math.floor(Math.random()*3), burstSpeed:Math.random()*40});
                     break;
                 case 5:
-                    anis[5].limitedBurst({vel:velocity, note:note}, 0.8);
+                    anis[5].limitedBurst({vel:velocity, note:note}, .4);
                     break;
                 
             }
 
         }
-        */
-        if(command != 248 && note!=null){
-            anis[note % anis.length].burst({vel:velocity, note:note, amt:1+Math.floor(Math.random()*3), burstSpeed:100});
-        }
+       
+        
+            //anis[note % anis.length].burst({vel:velocity, note:note, amt:1+Math.floor(Math.random()*3), burstSpeed:100});
+        //}
                     
 
     }
@@ -860,36 +868,16 @@ function loadHelper(OBJ){
                 })
 
                 break;
-            case "orchid":
+            case "splode":
                 gltf.scene.traverse(function(obj){
                     if(obj.isMesh){
-                        obj.material.map = null;// = new THREE.Color().setHSL(0,0,.4);   
-                        obj.material.needsUpdate = true;
+                        obj.material.color = new THREE.Color().setHSL(0,0,.4);   
+                        obj.material.side=THREE.DoubleSide;
+                        //obj.material.needsUpdate = true;
                     }
                 })
                 break;
-            case "moth orchid":
-                gltf.scene.traverse(function(obj){
-                    if(obj.isMesh){
-                        obj.material.map = null;// = new THREE.Color().setHSL(0,0,.4);   
-                        obj.material.needsUpdate = true;
-                    }
-                })
-                break;
-            case "siam":
-                gltf.scene.traverse(function(obj){
-                    if(obj.isMesh){
-                        obj.material.vertexColors = false;// = new THREE.Color().setHSL(0,0,.4);   
-                    }
-                })
-                break;
-            case "hibiscus":
-                gltf.scene.traverse(function(obj){
-                    if(obj.isMesh){
-                        obj.material.vertexColors = false;// = new THREE.Color().setHSL(0,0,.4);   
-                    }
-                })
-            break;
+        
         }
            
         OBJ.loaded = true;
@@ -908,10 +896,12 @@ function loadHelper(OBJ){
             fairies.push( getLoadedObjectByName("normal fairy").model );
             scene.add(fairies[0]);
 
-            window.flowers.push(getLoadedObjectByName("hibiscus").model)
-            window.flowers.push(getLoadedObjectByName("moth orchid").model)
-            window.flowers.push(getLoadedObjectByName("orchid").model)
-            window.flowers.push(getLoadedObjectByName("siam").model)
+            splode = getLoadedObjectByName("splode").model;
+            scene.add(splode)
+            // window.flowers.push(getLoadedObjectByName("hibiscus").model)
+            // window.flowers.push(getLoadedObjectByName("moth orchid").model)
+            // window.flowers.push(getLoadedObjectByName("orchid").model)
+            // window.flowers.push(getLoadedObjectByName("siam").model)
 
             const fire = getLoadedObjectByName("fire").model;
             scene.add(fire)
@@ -999,6 +989,13 @@ function animate() {
     camera.focusAt( dist ); 
     //console.log(noiseArray[1].perlin*.45)
     if(inputFFT){
+       // const fftIndex = [];//[20,300,800, 80, 120, 150, 170, 200, 250, 220, 260, 290, ]; 
+        if(!setFFTIndexes){
+            for(let i = 0; i<300; i++){
+                fftIndex.push( Math.floor( Math.random()*inputFFT.getValue().length ) );
+            }
+            setFFTIndexes = true;
+        }
         for(let i = 0; i<anis.length; i++){
             anis[i].update({delta:d, fft:inputFFT.getValue()});
         }
@@ -1008,15 +1005,37 @@ function animate() {
         fireLight.intensity = (.8+Math.sin(inc+Math.random()*.21)*.5)*10
         const moodLights = getLightsByName("point");
     
-        const fftIndex = [20,300,800]; 
+       
         
         for(let i = 0; i < moodLights.length; i++){
             const fft = inputFFT.getValue()[ fftIndex[i] ];
             const fftFnl = ( ( (100 + fft ) / 100 ) * window.fftMult );
-            moodLights[i].intensity = (2 + fftFnl * 20)*musicLightsMod;
+            let fnl = (2 + fftFnl * 20)*musicLightsMod;
+            if(fnl<0)fnl=0;
+            moodLights[i].intensity = fnl;
             moodLights[i].color = new THREE.Color().lerpColors( new THREE.Color(0xff0000), new THREE.Color(0x0000ff), window.mood);
         }
-    
+
+        let t = 0;
+        if(splode!=null){
+            splode.rotation.y += noiseArray[2].perlin*.005;
+            splode.traverse(function(obj){
+                
+                const fft = inputFFT.getValue()[ fftIndex[ t % fftIndex.length] ];
+                const fftFnl = ( ( (100 + fft ) / 100 ) * window.fftMult );
+                const s = .5+fftFnl*.3;
+
+                if(obj.isMesh){ 
+                    obj.scale.set(s, s, s);
+                    obj.rotation.x+=d*fftIndex[ t % fftIndex.length]*.001;
+                    obj.rotation.z+=d*fftIndex[ t % fftIndex.length]*.001;
+                }
+
+                t++;
+
+            })
+        }
+        
     }
 
     //console.log(noiseArray[0].perlin);
@@ -1026,6 +1045,8 @@ function animate() {
     //controls.target.y = .5 + ((1+noiseArray[1].perlin) * .3);
     customMats.update({delta:d})
     
+    console.log(performance.now()*20.2);
+
     if(filmShader)
         filmShader.uniforms[ 'time' ].value = performance.now()*20.2;
     
