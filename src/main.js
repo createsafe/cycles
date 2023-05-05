@@ -553,7 +553,7 @@ function midiOnMIDImessage(event) {
                 case 2:
                 case 3:
                 case 4:
-                    anis[note % anis.length].burst({vel:velocity, note:note, amt:20+Math.floor(Math.random()*3), burstSpeed:Math.random()*40});
+                    anis[note % anis.length].burst({vel:velocity, note:note, amt:4+Math.floor(Math.random()*3), burstSpeed:Math.random()*40});
                     break;
                 case 5:
                     anis[5].limitedBurst({vel:velocity, note:note}, .4);
@@ -930,12 +930,11 @@ function initArt(){
     
     const splineGenerator = new GenerativeSplines();
 
-    const bassEmitter = new ParticleEmitter({max: 100, particleClass:FireParticle});
-    const snairEmitter = new ParticleEmitter({max:100, particleClass:FireParticle});
-    const metalEmitter = new ParticleEmitter({max:100, particleClass:FireParticle});
-
-    const percEmitter = new ParticleEmitter({max: 100, particleClass:FireParticle});
-    const toneEmitter = new ParticleEmitter({max: 100, particleClass:FireParticle});
+    const bassEmitter = new ParticleEmitter({max: 200, particleClass:FireParticle});
+    const snairEmitter = new ParticleEmitter({max:200, particleClass:FireParticle});
+    const metalEmitter = new ParticleEmitter({max:200, particleClass:FireParticle});
+    const percEmitter = new ParticleEmitter({max: 200, particleClass:FireParticle});
+    const toneEmitter = new ParticleEmitter({max: 200, particleClass:FireParticle});
     const chordEmitter = new ParticleEmitter({max:50, particleClass:ButterflyParticle});
     
     /*
@@ -1016,6 +1015,22 @@ function animate() {
             moodLights[i].color = new THREE.Color().lerpColors( new THREE.Color(0xff0000), new THREE.Color(0x0000ff), window.mood);
         }
 
+        for(let i = 0; i<10; i++){
+            const index = Math.floor(Math.random()*inputFFT.getValue().length);
+            const fft = inputFFT.getValue()[ index  ];
+            const fftFnl = ( ( (100 + fft ) / 100 ) * window.fftMult );
+            let fnl = (2 + fftFnl * 20) * musicLightsMod;
+            if(fnl<0)fnl=0;
+       
+            if(fnl>5){
+                if(Math.random>.8){
+                    const command = index;
+                    const data = {data:[command, Math.floor(Math.random()*100), Math.floor(Math.random()*127) ]};
+                    midiOnMIDImessage(data);
+                }
+            }
+        }
+
         let t = 0;
         if(splode!=null){
             splode.rotation.y += noiseArray[2].perlin*.005;
@@ -1045,7 +1060,7 @@ function animate() {
     //controls.target.y = .5 + ((1+noiseArray[1].perlin) * .3);
     customMats.update({delta:d})
     
-    console.log(performance.now()*20.2);
+    //console.log(performance.now()*20.2);
 
     if(filmShader)
         filmShader.uniforms[ 'time' ].value = performance.now()*20.2;
