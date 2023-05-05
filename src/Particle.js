@@ -121,6 +121,7 @@ class FireParticle{
 			self.hide();
 		});
 	}
+	
 
 	update(OBJ){
 		
@@ -191,9 +192,8 @@ class ButterflyParticle{
 		this.note = 0;
 		
 	    this.scene.add(this.mesh);
-        
+
 		this.killed = false;
-	    
         this.inc = 0;
 		this.fftIndex = Math.floor(Math.random()*1000);
 		
@@ -307,456 +307,539 @@ export { ButterflyParticle };
 
 
 
-// class ParticleSnair{
 
-// 	constructor(OBJ, SPECIAL){
-// 		const self = this;
+class ParticleBass{
 
-// 		const i = SPECIAL.index-1 || 1;
-// 		const len = SPECIAL.amt || 1;
-//         const sat = .5 + ( ( ( i / len) * .5) );
-// 		const hue = SPECIAL.instanceRandom + ( i / ( len * 1 ) )%1.0; 
-// 		const col = new Color().setHSL(hue, sat, .5);
+	constructor(OBJ, SPECIAL){
+		const self = this;
 
-//         this.scene = OBJ.scene;
-//         this.spline = snairSplineAni;
-// 		this.spline.addToScene(this.scene);
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+        const sat = .5 + ( ( ( i / len) * .5) );
+		const hue = SPECIAL.instanceRandom + ( i / ( len * 1 ) )%1.0; 
+		const col = new Color().setHSL(hue, sat, .5);
 
-// 		this.mesh = snairMesh.clone();
-//         const clone = this.mesh.material.clone();   
-//         this.mesh.material = clone;
+        this.scene = OBJ.scene;
+        this.spline = bassSplineAni;
+		this.spline.addToScene(this.scene);
+
+		this.mesh = bassMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
         
-//         this.mesh.material.color = col;
-//         this.mesh.scale.set(0,0,0);
+        this.mesh.material.color = col;
+        this.mesh.scale.set(0,0,0);
         
-//         const index = SPECIAL.index || 1;
-//         const amount = SPECIAL.amt || 1;
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
 
-//         this.vel = .8+((SPECIAL.vel/127)*2);
-//         this.sclOff = SPECIAL.index == null ? 1 : 1 - ((index / amount) * ((SPECIAL.vel/127)*.7));
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((index / amount) * ((SPECIAL.vel/127)*.7));
         
-//         this.note = SPECIAL.note;
+        this.note = SPECIAL.note;
         
-// 	    this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
-// 		this.killed = false;
-// 		this.inc = 0;
-// 	    self.init();
+		this.killed = false;
+		this.inc = 0;
+	    self.init();
         
-// 	}
+	}
 
-// 	init(){
-// 		this.mesh.visible = true;
-// 		const self = this;
-// 		const p = {inc:0};
-// 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-// 		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
-// 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
-// 		.onUpdate(() => {
-// 			self.inc = p.inc;
-// 			const trans = self.spline.getTransforms({inc:self.inc});
-// 			self.mesh.position.copy(trans.pos);
-// 			self.mesh.quaternion.copy(trans.quat);
-// 			const s = trans.scl * this.vel * (self.sclOff);
-// 			self.mesh.scale.set(s,s,s);
-// 		})
-// 		.start()
-// 		.onComplete(()=>{
-// 			//self.kill();
-// 			self.hide();
-// 		});
-// 	}
+	init(){
+		this.mesh.visible = true;
+		const self = this;
+		const p = {inc:0};
+		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc = p.inc;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos);
+			self.mesh.quaternion.copy(trans.quat);
+			const s = trans.scl * this.vel * (self.sclOff);
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			//self.kill();
+			self.hide();
+		});
+	}
 
-// 	update(OBJ){
+	update(OBJ){
 		
 	
-// 	}
+	}
 
-// 	kill(){
-// 		this.killed = true;
-// 		this.mesh.geometry.dispose();
-// 		this.mesh.material.dispose();
-// 		this.scene.remove(this.mesh);
-// 	}
-// 	hide(){
-// 		this.mesh.visible = false;
-// 		if(this.tween)this.tween.stop();
+	kill(){
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+	}
+	hide(){
+		this.mesh.visible = false;
+		if(this.tween)this.tween.stop();
 		
-// 	}
-// }
+	}
+}
 
 
-// export { ParticleSnair };
+export { ParticleBass };
 
 
-// class ParticleTone{
+class ParticleSnair{
 
-// 	constructor(OBJ, SPECIAL){
-// 		const self = this;
-// 		const i = SPECIAL.index-1 || 1;
-// 		const len = SPECIAL.amt || 1;
-//         // const sat = .5 + ( ( ( i / len) * .5) );
-// 		// const hue = SPECIAL.instanceRandom + ( i / ( len * 1 ) )%1.0; 
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, .3, .7);
+	constructor(OBJ, SPECIAL){
+		const self = this;
 
-//         this.scene = OBJ.scene;
-//         this.spline = toneSplineAni;
-// 		this.spline.addToScene(this.scene);
-		
-// 		this.mesh = toneMesh.clone();
-//         const clone = this.mesh.material.clone();   
-//         this.mesh.material = clone;
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+        const sat = .5 + ( ( ( i / len) * .5) );
+		const hue = SPECIAL.instanceRandom + ( i / ( len * 1 ) )%1.0; 
+		const col = new Color().setHSL(hue, sat, .5);
+
+        this.scene = OBJ.scene;
+        this.spline = snairSplineAni;
+		this.spline.addToScene(this.scene);
+
+		this.mesh = snairMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
         
-//         this.mesh.material.color = col;
-//         this.mesh.scale.set(0,0,0);
+        this.mesh.material.color = col;
+        this.mesh.scale.set(0,0,0);
         
-//         const index = SPECIAL.index || 1;
-//         const amount = SPECIAL.amt || 1;
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
 
-//         this.vel = .8+((SPECIAL.vel/127)*2);
-//         this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*2.7);
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((index / amount) * ((SPECIAL.vel/127)*.7));
         
-//         this.note = SPECIAL.note;
+        this.note = SPECIAL.note;
         
-// 	    this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
-// 		this.killed = false;
-	    
-//         this.inc = 0;
-// 		self.init();
-		
-// 	}
+		this.killed = false;
+		this.inc = 0;
+	    self.init();
+        
+	}
 
-// 	init(){
-// 		self.visible = true;
-// 		const self = this;
-// 		const p = {inc:0};
-// 		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-// 		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
-// 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
-// 		.onUpdate(() => {
-// 			self.inc =  p.inc;//+= OBJ.delta * this.speed;
-// 			const trans = self.spline.getTransforms({inc:self.inc});
-// 			self.mesh.position.copy(trans.pos);
-// 			self.mesh.position.y+=((-127/2)+self.note)*.04;
-// 			self.mesh.quaternion.copy(trans.quat);
+	init(){
+		this.mesh.visible = true;
+		const self = this;
+		const p = {inc:0};
+		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc = p.inc;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos);
+			self.mesh.quaternion.copy(trans.quat);
+			const s = trans.scl * this.vel * (self.sclOff);
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			//self.kill();
+			self.hide();
+		});
+	}
 
-// 			const s = trans.scl * self.vel * (self.sclOff);
-			
-// 			self.mesh.scale.set(s,s,s);
-// 		})
-// 		.start()
-// 		.onComplete(()=>{
-// 			self.hide();
-// 		});
-// 	}
-
-// 	update(OBJ){
+	update(OBJ){
 		
 	
-// 	}
+	}
 
-// 	kill(){
-// 		this.killed = true;
-// 		this.mesh.geometry.dispose();
-// 		this.mesh.material.dispose();
-// 		this.scene.remove(this.mesh);
-// 	}
-// 	hide(){
-// 		this.mesh.visible = false;
-// 	}
-// }
-
-// export { ParticleTone };
-
-// class ParticleChord{
-
-// 	constructor(OBJ, SPECIAL){
-// 		const self = this;
-// 		const i = SPECIAL.index-1 || 1;
-// 		const len = SPECIAL.amt || 1;
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
-
-// 		/*
-// 		const modelToClone = window.getLoadedObjectByName("butterfly");
-// 		this.mesh = clone( modelToClone.model );
-// 		this.mixer = new AnimationMixer(this.mesh);
-// 		const ani = modelToClone.group.animations[0];
-// 		const clip = this.mixer.clipAction(ani);  
-// 		clip.play();
+	kill(){
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+	}
+	hide(){
+		this.mesh.visible = false;
+		if(this.tween)this.tween.stop();
 		
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+	}
+}
 
-//         this.scene = OBJ.scene;
-//         this.spline = butterflySplineAni;
-// 		this.spline.addToScene(this.scene);
+
+export { ParticleSnair };
+
+
+class ParticleTone{
+
+	constructor(OBJ, SPECIAL){
+		const self = this;
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+        // const sat = .5 + ( ( ( i / len) * .5) );
+		// const hue = SPECIAL.instanceRandom + ( i / ( len * 1 ) )%1.0; 
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, .3, .7);
+
+        this.scene = OBJ.scene;
+        this.spline = toneSplineAni;
+		this.spline.addToScene(this.scene);
 		
-// 		this.mesh.traverse(function(obj){
-// 			if(obj.isMesh){
-// 				obj.material.color = col;
-// 			}
-// 		})
-// 		*/
-// 		this.spline = chordSplineAni;
-// 		this.scene = OBJ.scene;
-// 		this.mesh = toneMesh.clone();
-//         const clone = this.mesh.material.clone();   
-//         this.mesh.material = clone;
+		this.mesh = toneMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
         
-//         this.mesh.material.color = col;
+        this.mesh.material.color = col;
+        this.mesh.scale.set(0,0,0);
+        
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
 
-//         this.mesh.scale.set(0,0,0);
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*2.7);
         
-//         const index = SPECIAL.index || 1;
-//         const amount = SPECIAL.amt || 1;
-
-//         this.vel = .8+((SPECIAL.vel/127)*2);
-//         this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
+        this.note = SPECIAL.note;
         
-//         this.note = SPECIAL.note;
+	    this.scene.add(this.mesh);
         
-// 	    this.scene.add(this.mesh);
-        
-// 		this.killed = false;
+		this.killed = false;
 	    
-//         this.inc = 0;
+        this.inc = 0;
+		self.init();
 		
-// 		const p = {inc:0};
-// 		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-// 		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
-// 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
-// 		.onUpdate(() => {
-// 			self.inc =  p.inc;//+= OBJ.delta * this.speed;
-// 			const trans = self.spline.getTransforms({inc:self.inc});
-// 			self.mesh.position.copy(trans.pos);
-// 			self.mesh.position.y+=((-127/2)+self.note)*.04;
-// 			self.mesh.quaternion.copy(trans.quat);
+	}
 
-// 			const s = (trans.scl * self.vel * (self.sclOff))*.2;
+	init(){
+		self.visible = true;
+		const self = this;
+		const p = {inc:0};
+		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc =  p.inc;//+= OBJ.delta * this.speed;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos);
+			self.mesh.position.y+=((-127/2)+self.note)*.04;
+			self.mesh.quaternion.copy(trans.quat);
+
+			const s = trans.scl * self.vel * (self.sclOff);
 			
-// 			self.mesh.scale.set(s,s,s);
-// 		})
-// 		.start()
-// 		.onComplete(()=>{
-// 			self.kill();
-// 		});
-// 	}
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			self.hide();
+		});
+	}
 
-// 	update(OBJ){
-// 		this.mesh.rotation.x+=3.2;
-// 		//this.mixer.update(OBJ.delta*2);
-// 	}
-
-// 	kill(){
-// 		this.killed = true;
-// 		this.mesh.geometry.dispose();
-// 		this.mesh.material.dispose();
-// 		this.scene.remove(this.mesh);
-// 		// this.mesh.traverse(function(obj){
-// 		// 	if(obj.isMesh){
-// 		// 		//obj.geometry.dispose();
-// 		// 		obj.material.dispose();
-// 		// 	}
-// 		// })
-// 		//this.scene.remove(this.mesh);
-// 	}
-// 	hide(){
-// 		this.mesh.visible = false;
-// 	}
-// }
-
-// export { ParticleChord };
-
-
-
-// class ParticlePerc{
-
-// 	constructor(OBJ, SPECIAL){
-// 		const self = this;
-// 		const i = SPECIAL.index-1 || 1;
-// 		const len = SPECIAL.amt || 1;
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
-
-// 		/*
-// 		const modelToClone = window.getLoadedObjectByName("butterfly");
-// 		this.mesh = clone( modelToClone.model );
-// 		this.mixer = new AnimationMixer(this.mesh);
-// 		const ani = modelToClone.group.animations[0];
-// 		const clip = this.mixer.clipAction(ani);  
-// 		clip.play();
+	update(OBJ){
 		
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+	
+	}
 
-//         this.scene = OBJ.scene;
-//         this.spline = butterflySplineAni;
-// 		this.spline.addToScene(this.scene);
+	kill(){
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+	}
+	hide(){
+		this.mesh.visible = false;
+	}
+}
+
+export { ParticleTone };
+
+class ParticleChord{
+
+	constructor(OBJ, SPECIAL){
+		const self = this;
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+
+		/*
+		const modelToClone = window.getLoadedObjectByName("butterfly");
+		this.mesh = clone( modelToClone.model );
+		this.mixer = new AnimationMixer(this.mesh);
+		const ani = modelToClone.group.animations[0];
+		const clip = this.mixer.clipAction(ani);  
+		clip.play();
 		
-// 		this.mesh.traverse(function(obj){
-// 			if(obj.isMesh){
-// 				obj.material.color = col;
-// 			}
-// 		})
-// 		*/
-// 		this.scene = OBJ.scene;
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+
+        this.scene = OBJ.scene;
+        this.spline = butterflySplineAni;
+		this.spline.addToScene(this.scene);
 		
-// 		this.spline = percSplineAni;
-// 		this.spline.addToScene(this.scene);
-// 		this.mesh = percMesh.clone();
-//         const clone = this.mesh.material.clone();   
-//         this.mesh.material = clone;
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				obj.material.color = col;
+			}
+		})
+		*/
+		this.spline = chordSplineAni;
+		this.scene = OBJ.scene;
+		this.mesh = toneMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
         
-//         this.mesh.material.color = col;
+        this.mesh.material.color = col;
 
-//         this.mesh.scale.set(0,0,0);
+        this.mesh.scale.set(0,0,0);
         
-//         const index = SPECIAL.index || 1;
-//         const amount = SPECIAL.amt || 1;
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
 
-//         this.vel = .8+((SPECIAL.vel/127)*2);
-//         this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
         
-//         this.note = SPECIAL.note;
+        this.note = SPECIAL.note;
         
-// 	    this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
-// 		this.killed = false;
+		this.killed = false;
 	    
-//         this.inc = 0;
-// 		const s = .3;
-// 		this.rnd = new Vector3((-1+Math.random()*2)*s, (-1+Math.random()*2)*s, (-1+Math.random()*2)*s);
-// 		const p = {inc:0};
-// 		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-// 		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
-// 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
-// 		.onUpdate(() => {
-// 			self.inc =  p.inc;//+= OBJ.delta * this.speed;
-// 			const trans = self.spline.getTransforms({inc:self.inc});
-// 			self.mesh.position.copy(trans.pos);
-// 			self.mesh.position.add(self.rnd);
-// 			//self.mesh.position.y+=((-127/2)+self.note)*.04;
-// 			self.mesh.quaternion.copy(trans.quat);
+        this.inc = 0;
+		
+		const p = {inc:0};
+		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc =  p.inc;//+= OBJ.delta * this.speed;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos);
+			self.mesh.position.y+=((-127/2)+self.note)*.04;
+			self.mesh.quaternion.copy(trans.quat);
 
-// 			const s = (trans.scl * self.vel * (self.sclOff))*.2;
+			const s = (trans.scl * self.vel * (self.sclOff))*.2;
 			
-// 			self.mesh.scale.set(s,s,s);
-// 		})
-// 		.start()
-// 		.onComplete(()=>{
-// 			self.kill();
-// 		});
-// 	}
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			self.kill();
+		});
+	}
 
-// 	update(OBJ){
-// 		//this.mixer.update(OBJ.delta*2);
-// 	}
+	update(OBJ){
+		this.mesh.rotation.x+=3.2;
+		//this.mixer.update(OBJ.delta*2);
+	}
 
-// 	kill(){
-// 		this.killed = true;
-// 		// this.mesh.traverse(function(obj){
-// 		// 	if(obj.isMesh){
-// 		// 		//obj.geometry.dispose();
-// 		// 		obj.material.dispose();
-// 		// 	}
-// 		// })
-// 		//this.scene.remove(this.mesh);
-// 	}
-// }
+	kill(){
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+		// this.mesh.traverse(function(obj){
+		// 	if(obj.isMesh){
+		// 		//obj.geometry.dispose();
+		// 		obj.material.dispose();
+		// 	}
+		// })
+		//this.scene.remove(this.mesh);
+	}
+	hide(){
+		this.mesh.visible = false;
+	}
+}
 
-// export { ParticlePerc };
+export { ParticleChord };
 
 
-// class ParticleMetal{
 
-// 	constructor(OBJ, SPECIAL){
-// 		const self = this;
-// 		const i = SPECIAL.index-1 || 1;
-// 		const len = SPECIAL.amt || 1;
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+class ParticlePerc{
 
-// 		/*
-// 		const modelToClone = window.getLoadedObjectByName("butterfly");
-// 		this.mesh = clone( modelToClone.model );
-// 		this.mixer = new AnimationMixer(this.mesh);
-// 		const ani = modelToClone.group.animations[0];
-// 		const clip = this.mixer.clipAction(ani);  
-// 		clip.play();
+	constructor(OBJ, SPECIAL){
+		const self = this;
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+
+		/*
+		const modelToClone = window.getLoadedObjectByName("butterfly");
+		this.mesh = clone( modelToClone.model );
+		this.mixer = new AnimationMixer(this.mesh);
+		const ani = modelToClone.group.animations[0];
+		const clip = this.mixer.clipAction(ani);  
+		clip.play();
 		
-// 		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
 
-//         this.scene = OBJ.scene;
-//         this.spline = butterflySplineAni;
-// 		this.spline.addToScene(this.scene);
+        this.scene = OBJ.scene;
+        this.spline = butterflySplineAni;
+		this.spline.addToScene(this.scene);
 		
-// 		this.mesh.traverse(function(obj){
-// 			if(obj.isMesh){
-// 				obj.material.color = col;
-// 			}
-// 		})
-// 		*/
-// 		this.scene = OBJ.scene;
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				obj.material.color = col;
+			}
+		})
+		*/
+		this.scene = OBJ.scene;
 		
-// 		this.spline = metalSplineAni;
-// 		this.spline.addToScene(this.scene);
-// 		this.mesh = metalMesh.clone();
-//         const clone = this.mesh.material.clone();   
-//         this.mesh.material = clone;
+		this.spline = percSplineAni;
+		this.spline.addToScene(this.scene);
+		this.mesh = percMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
         
-//         this.mesh.material.color = col;
+        this.mesh.material.color = col;
 
-//         this.mesh.scale.set(0,0,0);
+        this.mesh.scale.set(0,0,0);
         
-//         const index = SPECIAL.index || 1;
-//         const amount = SPECIAL.amt || 1;
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
 
-//         this.vel = .8+((SPECIAL.vel/127)*2);
-//         this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
         
-//         this.note = SPECIAL.note;
+        this.note = SPECIAL.note;
         
-// 	    this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
-// 		this.killed = false;
+		this.killed = false;
 	    
-//         this.inc = 0;
-// 		const s = 30.3;
-// 		this.rnd = new Vector3((-1+Math.random()*2)*s, (-1+Math.random()*2)*s, (-1+Math.random()*2)*s);
-		
-// 		this.mesh.rotation.set(this.rnd.x,this.rnd.y,this.rnd.z);
-// 		const p = {inc:0};
-// 		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-// 		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
-// 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
-// 		.onUpdate(() => {
-// 			self.inc =  p.inc;//+= OBJ.delta * this.speed;
-// 			const trans = self.spline.getTransforms({inc:self.inc});
-// 			self.mesh.position.copy(trans.pos)
-// 			//self.mesh.position.y+=((-127/2)+self.note)*.04;
-// 			//self.mesh.quaternion.copy(trans.quat);
+        this.inc = 0;
+		const s = .3;
+		this.rnd = new Vector3((-1+Math.random()*2)*s, (-1+Math.random()*2)*s, (-1+Math.random()*2)*s);
+		const p = {inc:0};
+		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc =  p.inc;//+= OBJ.delta * this.speed;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos);
+			self.mesh.position.add(self.rnd);
+			//self.mesh.position.y+=((-127/2)+self.note)*.04;
+			self.mesh.quaternion.copy(trans.quat);
 
-// 			const s = (trans.scl * self.vel * (self.sclOff))*.2;
+			const s = (trans.scl * self.vel * (self.sclOff))*.2;
 			
-// 			self.mesh.scale.set(s,s,s);
-// 		})
-// 		.start()
-// 		.onComplete(()=>{
-// 			self.kill();
-// 		});
-// 	}
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			self.kill();
+		});
+	}
 
-// 	update(OBJ){
-// 		//this.mixer.update(OBJ.delta*2);
-// 	}
+	update(OBJ){
+		//this.mixer.update(OBJ.delta*2);
+	}
 
-// 	kill(){
-// 		this.killed = true;
-// 		// this.mesh.traverse(function(obj){
-// 		// 	if(obj.isMesh){
-// 		// 		//obj.geometry.dispose();
-// 		// 		obj.material.dispose();
-// 		// 	}
-// 		// })
-// 		//this.scene.remove(this.mesh);
-// 	}
-// }
+	kill(){
+		this.killed = true;
+		// this.mesh.traverse(function(obj){
+		// 	if(obj.isMesh){
+		// 		//obj.geometry.dispose();
+		// 		obj.material.dispose();
+		// 	}
+		// })
+		//this.scene.remove(this.mesh);
+	}
+}
 
-// export { ParticleMetal };
+export { ParticlePerc };
+
+
+class ParticleMetal{
+
+	constructor(OBJ, SPECIAL){
+		const self = this;
+		const i = SPECIAL.index-1 || 1;
+		const len = SPECIAL.amt || 1;
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+
+		/*
+		const modelToClone = window.getLoadedObjectByName("butterfly");
+		this.mesh = clone( modelToClone.model );
+		this.mixer = new AnimationMixer(this.mesh);
+		const ani = modelToClone.group.animations[0];
+		const clip = this.mixer.clipAction(ani);  
+		clip.play();
+		
+		const col = new Color().setHSL((SPECIAL.globalInc*.3)%1.0, 1, .5);
+
+        this.scene = OBJ.scene;
+        this.spline = butterflySplineAni;
+		this.spline.addToScene(this.scene);
+		
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				obj.material.color = col;
+			}
+		})
+		*/
+		this.scene = OBJ.scene;
+		
+		this.spline = metalSplineAni;
+		this.spline.addToScene(this.scene);
+		this.mesh = metalMesh.clone();
+        const clone = this.mesh.material.clone();   
+        this.mesh.material = clone;
+        
+        this.mesh.material.color = col;
+
+        this.mesh.scale.set(0,0,0);
+        
+        const index = SPECIAL.index || 1;
+        const amount = SPECIAL.amt || 1;
+
+        this.vel = .8+((SPECIAL.vel/127)*2);
+        this.sclOff = SPECIAL.index == null ? 1 : 1 - ((SPECIAL.vel/127)*.3);
+        
+        this.note = SPECIAL.note;
+        
+	    this.scene.add(this.mesh);
+        
+		this.killed = false;
+	    
+        this.inc = 0;
+		const s = 30.3;
+		this.rnd = new Vector3((-1+Math.random()*2)*s, (-1+Math.random()*2)*s, (-1+Math.random()*2)*s);
+		
+		this.mesh.rotation.set(this.rnd.x,this.rnd.y,this.rnd.z);
+		const p = {inc:0};
+		new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, window.clock16Time*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc =  p.inc;//+= OBJ.delta * this.speed;
+			const trans = self.spline.getTransforms({inc:self.inc});
+			self.mesh.position.copy(trans.pos)
+			//self.mesh.position.y+=((-127/2)+self.note)*.04;
+			//self.mesh.quaternion.copy(trans.quat);
+
+			const s = (trans.scl * self.vel * (self.sclOff))*.2;
+			
+			self.mesh.scale.set(s,s,s);
+		})
+		.start()
+		.onComplete(()=>{
+			self.kill();
+		});
+	}
+
+	update(OBJ){
+		//this.mixer.update(OBJ.delta*2);
+	}
+
+	kill(){
+		this.killed = true;
+		// this.mesh.traverse(function(obj){
+		// 	if(obj.isMesh){
+		// 		//obj.geometry.dispose();
+		// 		obj.material.dispose();
+		// 	}
+		// })
+		//this.scene.remove(this.mesh);
+	}
+}
+
+export { ParticleMetal };
