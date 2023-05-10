@@ -1,0 +1,1268 @@
+<REAPER_PROJECT 0.1 "6.79/win64" 1683590013
+  <NOTES 0 2
+  >
+  RIPPLE 0
+  GROUPOVERRIDE 0 0 0
+  AUTOXFADE 1
+  ENVATTACH 3
+  POOLEDENVATTACH 0
+  MIXERUIFLAGS 11 48
+  PEAKGAIN 1
+  FEEDBACK 0
+  PANLAW 1
+  PROJOFFS 0 0 0
+  MAXPROJLEN 0 0
+  GRID 3199 8 1 8 1 0 0 0
+  TIMEMODE 1 5 -1 30 0 0 -1
+  VIDEO_CONFIG 0 0 256
+  PANMODE 3
+  CURSOR 2.8
+  ZOOM 35.85960413809064 0 0
+  VZOOMEX 0 0
+  USE_REC_CFG 0
+  RECMODE 1
+  SMPTESYNC 0 30 100 40 1000 300 0 0 1 0 0
+  LOOP 1
+  LOOPGRAN 0 4
+  RECORD_PATH "" ""
+  <RECORD_CFG
+    ZXZhdxgAAQ==
+  >
+  <APPLYFX_CFG
+  >
+  RENDER_FILE ""
+  RENDER_PATTERN frog
+  RENDER_FMT 0 2 44100
+  RENDER_1X 0
+  RENDER_RANGE 2 0 0 18 1000
+  RENDER_RESAMPLE 3 0 1
+  RENDER_ADDTOPROJ 0
+  RENDER_STEMS 3
+  RENDER_DITHER 0
+  TIMELOCKMODE 1
+  TEMPOENVLOCKMODE 1
+  ITEMMIX 1
+  DEFPITCHMODE 589824 0
+  TAKELANE 1
+  SAMPLERATE 44100 0 0
+  <RENDER_CFG
+    ZXZhdxgAAQ==
+  >
+  LOCK 1
+  <METRONOME 6 2
+    VOL 0.25 0.125
+    FREQ 800 1600 1
+    BEATLEN 4
+    SAMPLES "" ""
+    PATTERN 2863311530 2863311529
+    MULT 1
+  >
+  GLOBAL_AUTO -1
+  TEMPO 150 4 4
+  PLAYRATE 1 0 0.25 4
+  SELECTION 1.6 4.8
+  SELECTION2 1.6 4.8
+  MASTERAUTOMODE 0
+  MASTERTRACKHEIGHT 0 0
+  MASTERPEAKCOL 16576
+  MASTERMUTESOLO 0
+  MASTERTRACKVIEW 0 0.6667 0.5 0.5 0 0 0 0 0 0 0 0 0
+  MASTERHWOUT 0 0 1 0 0 0 0 -1
+  MASTER_NCH 2 2
+  MASTER_VOLUME 1 0 -1 -1 1
+  MASTER_PANMODE 3
+  MASTER_FX 1
+  MASTER_SEL 0
+  <MASTERPLAYSPEEDENV
+    EGUID {D8F41C37-BD8E-458B-A504-AD7B3B1EAD49}
+    ACT 0 -1
+    VIS 0 1 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 0 -1 -1
+  >
+  <TEMPOENVEX
+    EGUID {A3434EE6-20B8-401E-9E07-13C06AD24F82}
+    ACT 0 -1
+    VIS 1 0 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 1 -1 -1
+  >
+  <PROJBAY
+  >
+  <TRACK {96F39785-BB0C-44BA-950D-32AD9750ED3B}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {96F39785-BB0C-44BA-950D-32AD9750ED3B}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.235
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {36C67273-F219-48C6-BE07-CD3E1BDA7324}
+      IID 5
+      NAME 01-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {27BD5201-3D40-43D9-8F59-791CB179D5D3}
+      RECPASS 3
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {0FD76772-9060-4748-938F-4CB12FA872AE}
+        E 0 90 3c 64
+        E 0 90 3c 00
+        E 224 90 3c 64
+        E 276 90 3c 00
+        E 447 90 3c 64
+        E 278 90 3c 00
+        E 223 90 3c 64
+        E 224 90 3c 00
+        E 278 90 3c 64
+        E 222 90 3c 00
+        E 223 90 3c 64
+        E 225 90 3c 00
+        E 724 90 3c 64
+        E 277 90 3c 00
+        E 447 90 3c 64
+        E 277 90 3c 00
+        E 446 90 3c 64
+        E 280 90 3c 00
+        E 669 90 3c 7f
+        E 199 90 3c 00
+        E 1250 90 3c 64
+        E 277 90 3c 00
+        E 448 90 3c 64
+        E 278 90 3c 00
+        E 444 90 3c 64
+        E 224 90 3c 00
+        E 278 90 3c 64
+        E 223 90 3c 00
+        E 224 90 3c 64
+        E 277 90 3c 00
+        E 224 90 3c 64
+        E 222 90 3c 00
+        E 725 90 3c 64
+        E 279 90 3c 00
+        E 445 90 3c 64
+        E 224 90 3c 00
+        E 501 90 3c 64
+        E 223 90 3c 00
+        E 725 90 3c 7f
+        E 200 90 3c 00
+        E 1248 90 3c 64
+        E 224 90 3c 00
+        E 501 90 3c 64
+        E 222 90 3c 00
+        E 502 90 3c 64
+        E 223 90 3c 00
+        E 279 90 3c 64
+        E 222 90 3c 00
+        E 223 90 3c 64
+        E 225 90 3c 00
+        E 277 90 3c 64
+        E 223 90 3c 00
+        E 725 90 3c 64
+        E 222 90 3c 00
+        E 502 90 3c 64
+        E 223 90 3c 00
+        E 501 90 3c 64
+        E 223 90 3c 00
+        E 726 90 3c 7f
+        E 199 90 3c 00
+        E 1249 90 3c 64
+        E 224 90 3c 00
+        E 500 90 3c 64
+        E 223 90 3c 00
+        E 501 90 3c 64
+        E 223 90 3c 00
+        E 225 90 3c 64
+        E 277 90 3c 00
+        E 223 90 3c 64
+        E 224 90 3c 00
+        E 277 90 3c 64
+        E 223 90 3c 00
+        E 724 90 3c 64
+        E 223 90 3c 00
+        E 502 90 3c 64
+        E 223 90 3c 00
+        E 501 90 3c 64
+        E 224 90 3c 00
+        E 724 90 3c 7f
+        E 168 90 3c 00
+        E 386 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {F7984C5B-73E5-4285-B4AC-9A941B037FBC}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 241
+      >
+    >
+  >
+  <TRACK {5EDA4F5B-81A5-4D8E-850F-90AE7AB769F3}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {5EDA4F5B-81A5-4D8E-850F-90AE7AB769F3}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.21514739229025
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {439826A7-7BB9-4287-886F-3D7A6908C5BB}
+      IID 6
+      NAME 02-230508_1622.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {A09A6684-8970-44A1-8AAF-9C4DD2C341C5}
+      RECPASS 3
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\02-230508_1622.wav"
+      >
+    >
+  >
+  <TRACK {CDFE81A8-9C14-4783-8837-941D80FCCF0B}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {CDFE81A8-9C14-4783-8837-941D80FCCF0B}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.69958333333333
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {ADF5A807-9997-45A5-82E9-87E12E751712}
+      IID 7
+      NAME 03-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {C0FB51A4-AED7-40DC-95AF-15E4BB24C56F}
+      RECPASS 4
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {95AD219C-0B22-4190-9B61-FD91655ECAE3}
+        E 501 91 3c 64
+        E 222 91 3c 00
+        E 1672 91 3c 64
+        E 224 91 3c 00
+        E 1726 91 3c 64
+        E 223 91 3c 00
+        E 1672 91 3c 7f
+        E 113 91 3c 00
+        E 1838 91 3c 64
+        E 223 91 3c 00
+        E 1672 91 3c 64
+        E 222 91 3c 00
+        E 1672 91 3c 64
+        E 279 91 3c 00
+        E 1672 91 3c 7f
+        E 111 91 3c 00
+        E 1784 91 3c 64
+        E 278 91 3c 00
+        E 1672 91 3c 64
+        E 224 91 3c 00
+        E 1672 91 3c 64
+        E 277 91 3c 00
+        E 1672 91 3c 7f
+        E 112 91 3c 00
+        E 1783 91 3c 64
+        E 224 91 3c 00
+        E 1726 91 3c 64
+        E 223 91 3c 00
+        E 1672 91 3c 64
+        E 223 91 3c 00
+        E 1727 91 3c 7f
+        E 112 91 3c 00
+        E 1056 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {1DE56511-0526-48F0-A4DA-C99DE209DBB2}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 244
+      >
+    >
+  >
+  <TRACK {A8D9E3F4-FFF9-40E0-8153-D2C74695190A}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {A8D9E3F4-FFF9-40E0-8153-D2C74695190A}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.67954648526077
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {D57DD1F2-F9A2-4F50-9EF7-536518F41C43}
+      IID 8
+      NAME 04-230508_1622.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {A9E00B35-946B-4E39-ADC9-1DEDA87D81CF}
+      RECPASS 4
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\04-230508_1622.wav"
+      >
+    >
+  >
+  <TRACK {357EB26F-8CF2-4AF7-B9B5-4B480FFB2376}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {357EB26F-8CF2-4AF7-B9B5-4B480FFB2376}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 13.46583333333333
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {D20B1564-17DF-470A-8DC1-D26945E176E9}
+      IID 9
+      NAME 05-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {18407328-B9BB-4F51-8AF1-F6D7557C23C1}
+      RECPASS 5
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {3BC58F79-9E0C-474F-860C-276A39589BF9}
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 500 92 3c 64
+        E 224 92 3c 00
+        E 1 92 3c 64
+        E 279 92 3c 00
+        E 0 92 3c 64
+        E 221 92 3c 00
+        E 225 92 3c 64
+        E 279 92 3c 00
+        E 0 92 3c 64
+        E 221 92 3c 00
+        E 0 92 3c 64
+        E 222 92 3c 00
+        E 502 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 502 92 3c 64
+        E 223 92 3c 00
+        E 500 92 3c 64
+        E 225 92 3c 00
+        E 0 92 3c 64
+        E 278 92 3c 00
+        E 1 92 3c 64
+        E 222 92 3c 00
+        E 221 92 3c 64
+        E 225 92 3c 00
+        E 1 92 3c 64
+        E 276 92 3c 00
+        E 2 92 3c 64
+        E 222 92 3c 00
+        E 503 92 3c 64
+        E 221 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 502 92 3c 64
+        E 223 92 3c 00
+        E 501 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 277 92 3c 00
+        E 224 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 279 92 3c 00
+        E 0 92 3c 64
+        E 220 92 3c 00
+        E 503 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 222 92 3c 00
+        E 502 92 3c 64
+        E 222 92 3c 00
+        E 503 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 278 92 3c 00
+        E 223 92 3c 64
+        E 222 92 3c 00
+        E 2 92 3c 64
+        E 279 92 3c 00
+        E 0 92 3c 64
+        E 221 92 3c 00
+        E 502 92 3c 64
+        E 222 92 3c 00
+        E 0 92 3c 64
+        E 222 92 3c 00
+        E 505 92 3c 64
+        E 222 92 3c 00
+        E 502 92 3c 64
+        E 222 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 278 92 3c 00
+        E 223 92 3c 64
+        E 222 92 3c 00
+        E 1 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 277 92 3c 00
+        E 446 92 3c 64
+        E 280 92 3c 00
+        E 1 92 3c 64
+        E 221 92 3c 00
+        E 503 92 3c 64
+        E 221 92 3c 00
+        E 504 92 3c 64
+        E 221 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 278 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 277 92 3c 00
+        E 446 92 3c 64
+        E 280 92 3c 00
+        E 0 92 3c 64
+        E 221 92 3c 00
+        E 503 92 3c 64
+        E 221 92 3c 00
+        E 448 92 3c 64
+        E 277 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 280 92 3c 64
+        E 221 92 3c 00
+        E 1 92 3c 64
+        E 224 92 3c 00
+        E 0 92 3c 64
+        E 277 92 3c 00
+        E 445 92 3c 64
+        E 281 92 3c 00
+        E 0 92 3c 64
+        E 221 92 3c 00
+        E 446 92 3c 64
+        E 278 92 3c 00
+        E 447 92 3c 64
+        E 278 92 3c 00
+        E 2 92 3c 64
+        E 221 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 280 92 3c 64
+        E 222 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 0 92 3c 64
+        E 278 92 3c 00
+        E 446 92 3c 64
+        E 224 92 3c 00
+        E 1 92 3c 64
+        E 276 92 3c 00
+        E 447 92 3c 64
+        E 278 92 3c 00
+        E 447 92 3c 64
+        E 278 92 3c 00
+        E 0 92 3c 64
+        E 222 92 3c 00
+        E 0 92 3c 64
+        E 223 92 3c 00
+        E 164 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {655188B0-7297-4BCC-B2BE-1E03C4D4002A}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 247
+      >
+    >
+  >
+  <TRACK {BF6A596F-ABFA-4B7D-A5E5-4EF2327726C5}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {BF6A596F-ABFA-4B7D-A5E5-4EF2327726C5}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 13.44580498866213
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {14760A16-EE5B-4160-B4F3-1819A1E6742C}
+      IID 10
+      NAME 06-230508_1623.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {4090E366-189C-463B-AA34-C291F6D228FE}
+      RECPASS 5
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\06-230508_1623.wav"
+      >
+    >
+  >
+  <TRACK {BB2D5191-96F5-402F-9F8D-6B9A7FF12783}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {BB2D5191-96F5-402F-9F8D-6B9A7FF12783}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.86208333333333
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {5E74309A-6912-4E29-991F-2F31CC7668CC}
+      IID 11
+      NAME 07-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {6E760213-CBED-4F16-A3DD-5070DB14A934}
+      RECPASS 6
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {F52AEA67-C9AF-4F3F-B8BA-1A8800BC801D}
+        E 3342 93 3e 77
+        E 233 93 3e 00
+        E 494 93 43 65
+        E 170 93 43 00
+        E 106 93 41 74
+        E 169 93 41 00
+        E 556 93 40 7f
+        E 116 93 40 00
+        E 553 93 3e 76
+        E 278 93 3e 00
+        E 223 93 40 77
+        E 172 93 40 00
+        E 330 93 54 77
+        E 140 93 54 00
+        E 4152 93 3e 77
+        E 231 93 3e 00
+        E 492 93 43 65
+        E 172 93 43 00
+        E 51 93 41 74
+        E 173 93 41 00
+        E 552 93 40 7f
+        E 172 93 40 00
+        E 554 93 3e 76
+        E 277 93 3e 00
+        E 223 93 40 77
+        E 167 93 40 00
+        E 334 93 54 77
+        E 112 93 54 00
+        E 4180 93 3e 77
+        E 223 93 3e 00
+        E 502 93 43 65
+        E 171 93 43 00
+        E 52 93 41 74
+        E 171 93 41 00
+        E 552 93 40 7f
+        E 171 93 40 00
+        E 554 93 3e 76
+        E 224 93 3e 00
+        E 278 93 40 77
+        E 167 93 40 00
+        E 278 93 54 77
+        E 141 93 54 00
+        E 4205 93 3e 77
+        E 180 93 3e 00
+        E 546 93 43 65
+        E 169 93 43 00
+        E 53 93 41 74
+        E 172 93 41 00
+        E 552 93 40 7f
+        E 173 93 40 00
+        E 552 93 3e 76
+        E 223 93 3e 00
+        E 279 93 40 77
+        E 116 93 40 00
+        E 330 93 54 77
+        E 141 93 54 00
+        E 970 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {0B0F1811-3C02-4A78-8D55-FD6D951D6F4A}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 250
+      >
+    >
+  >
+  <TRACK {7FF20926-D775-43BB-BCAC-D23986F5EDDE}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {7FF20926-D775-43BB-BCAC-D23986F5EDDE}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 12.84208616780045
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {609A38F0-184F-42DB-8090-8004FE821872}
+      IID 12
+      NAME 08-230508_1623.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {22944281-C787-4FEA-A8CA-C72AA97C0132}
+      RECPASS 6
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\08-230508_1623.wav"
+      >
+    >
+  >
+  <TRACK {A4CEEF73-01D3-40E6-813E-E63A0A583790}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {A4CEEF73-01D3-40E6-813E-E63A0A583790}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 15.76458333333333
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {7AC8F706-58D8-4659-AC6E-F95F6D0F511C}
+      IID 13
+      NAME 09-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {EBF72514-8F0E-4E58-88DC-515EE1F0DF89}
+      RECPASS 7
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {9B1C3FEF-F98F-48AA-B18E-018024D462D6}
+        E 0 94 39 72
+        E 0 94 39 00
+        E 0 94 39 6d
+        E 0 94 39 00
+        E 224 94 3c 76
+        E 165 94 3c 00
+        E 112 94 40 62
+        E 124 94 40 00
+        E 321 94 3c 77
+        E 125 94 3c 00
+        E 377 94 39 79
+        E 126 94 39 00
+        E 376 94 3c 78
+        E 79 94 3c 00
+        E 143 94 39 7f
+        E 126 94 39 00
+        E 1045 94 32 77
+        E 300 94 32 00
+        E 424 94 35 76
+        E 112 94 35 00
+        E 167 94 37 5c
+        E 111 94 37 00
+        E 334 94 35 72
+        E 141 94 35 00
+        E 361 94 32 74
+        E 126 94 32 00
+        E 320 94 2f 68
+        E 135 94 2f 00
+        E 366 94 2d 74
+        E 186 94 2d 00
+        E 762 94 39 72
+        E 111 94 39 00
+        E 168 94 39 6d
+        E 80 94 39 00
+        E 367 94 3c 76
+        E 124 94 3c 00
+        E 153 94 40 62
+        E 111 94 40 00
+        E 335 94 3c 77
+        E 126 94 3c 00
+        E 375 94 39 79
+        E 126 94 39 00
+        E 321 94 3c 78
+        E 134 94 3c 00
+        E 145 94 39 7f
+        E 125 94 39 00
+        E 1044 94 32 77
+        E 301 94 32 00
+        E 423 94 35 76
+        E 112 94 35 00
+        E 112 94 37 5c
+        E 167 94 37 00
+        E 334 94 35 72
+        E 140 94 35 00
+        E 362 94 32 74
+        E 125 94 32 00
+        E 321 94 2f 68
+        E 112 94 2f 00
+        E 388 94 2d 74
+        E 169 94 2d 00
+        E 779 94 39 72
+        E 111 94 39 00
+        E 112 94 39 6d
+        E 135 94 39 00
+        E 367 94 3c 76
+        E 125 94 3c 00
+        E 98 94 40 62
+        E 167 94 40 00
+        E 333 94 3c 77
+        E 127 94 3c 00
+        E 375 94 39 79
+        E 113 94 39 00
+        E 333 94 3c 78
+        E 111 94 3c 00
+        E 114 94 39 7f
+        E 165 94 39 00
+        E 1059 94 32 77
+        E 298 94 32 00
+        E 427 94 35 76
+        E 111 94 35 00
+        E 112 94 37 5c
+        E 112 94 37 00
+        E 389 94 35 72
+        E 142 94 35 00
+        E 305 94 32 74
+        E 167 94 32 00
+        E 333 94 2f 68
+        E 112 94 2f 00
+        E 390 94 2d 74
+        E 167 94 2d 00
+        E 780 94 39 72
+        E 112 94 39 00
+        E 113 94 39 6d
+        E 110 94 39 00
+        E 391 94 3c 76
+        E 125 94 3c 00
+        E 96 94 40 62
+        E 126 94 40 00
+        E 378 94 3c 77
+        E 125 94 3c 00
+        E 321 94 39 79
+        E 166 94 39 00
+        E 334 94 3c 78
+        E 81 94 3c 00
+        E 143 94 39 7f
+        E 125 94 39 00
+        E 1099 94 32 77
+        E 298 94 32 00
+        E 427 94 35 76
+        E 111 94 35 00
+        E 112 94 37 5c
+        E 113 94 37 00
+        E 388 94 35 72
+        E 140 94 35 00
+        E 308 94 32 74
+        E 125 94 32 00
+        E 375 94 2f 68
+        E 81 94 2f 00
+        E 420 94 2d 74
+        E 131 94 2d 00
+        E 817 94 39 72
+        E 111 94 39 00
+        E 112 94 39 6d
+        E 79 94 39 00
+        E 424 94 3c 76
+        E 124 94 3c 00
+        E 97 94 40 62
+        E 126 94 40 00
+        E 376 94 3c 77
+        E 111 94 3c 00
+        E 334 94 39 79
+        E 126 94 39 00
+        E 376 94 3c 78
+        E 79 94 3c 00
+        E 144 94 39 7f
+        E 127 94 39 00
+        E 1100 94 32 77
+        E 279 94 32 00
+        E 445 94 35 76
+        E 111 94 35 00
+        E 111 94 37 5c
+        E 112 94 37 00
+        E 336 94 35 72
+        E 166 94 35 00
+        E 333 94 32 74
+        E 128 94 32 00
+        E 374 94 2f 68
+        E 80 94 2f 00
+        E 367 94 2d 74
+        E 187 94 2d 00
+        E 701 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {A35B1C50-A3D7-427F-82DA-CC5B381A1846}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 253
+      >
+    >
+  >
+  <TRACK {5055F9E0-873C-49AB-B3AE-69B816F1308A}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {5055F9E0-873C-49AB-B3AE-69B816F1308A}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 15.74458049886621
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {3DDD78FB-43C7-48B4-BE77-275D63DA5AF9}
+      IID 14
+      NAME 10-230508_1624.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {22395C78-FBC7-4B33-920F-B65CFA0BD38B}
+      RECPASS 7
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\10-230508_1624.wav"
+      >
+    >
+  >
+  <TRACK {1CAAD7F7-A142-4B26-9A63-45EC5368CCBE}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 4096 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {1CAAD7F7-A142-4B26-9A63-45EC5368CCBE}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 14.71958333333333
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {1E88EFA5-B6F3-49C3-99B9-DB61AAFD42C5}
+      IID 15
+      NAME 11-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32 3.3
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {7312F1E4-AB1E-4C28-A2D7-2097F76C21D7}
+      RECPASS 8
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {23B9E021-758C-4805-B48C-EF415BB864F0}
+        E 0 95 37 64
+        E 0 95 37 00
+        E 0 95 37 64
+        E 223 95 37 00
+        E 278 95 3e 64
+        E 167 95 3e 00
+        E 56 95 3e 64
+        E 185 95 3e 00
+        E 317 95 3e 64
+        E 167 95 3e 00
+        E 280 95 41 64
+        E 184 95 41 00
+        E 92 95 41 64
+        E 131 95 41 00
+        E 315 95 41 64
+        E 127 95 41 00
+        E 4668 95 37 64
+        E 186 95 37 00
+        E 313 95 37 64
+        E 225 95 37 00
+        E 278 95 3e 64
+        E 132 95 3e 00
+        E 91 95 3e 64
+        E 166 95 3e 00
+        E 281 95 3e 64
+        E 171 95 3e 00
+        E 329 95 41 64
+        E 186 95 41 00
+        E 37 95 41 64
+        E 186 95 41 00
+        E 314 95 41 64
+        E 127 95 41 00
+        E 4667 95 37 64
+        E 186 95 37 00
+        E 315 95 37 64
+        E 177 95 37 00
+        E 269 95 3e 64
+        E 188 95 3e 00
+        E 91 95 3e 64
+        E 168 95 3e 00
+        E 277 95 3e 64
+        E 172 95 3e 00
+        E 330 95 41 64
+        E 167 95 41 00
+        E 56 95 41 64
+        E 186 95 41 00
+        E 315 95 41 64
+        E 125 95 41 00
+        E 4668 95 37 64
+        E 187 95 37 00
+        E 314 95 37 64
+        E 177 95 37 00
+        E 269 95 3e 64
+        E 187 95 3e 00
+        E 38 95 3e 64
+        E 184 95 3e 00
+        E 316 95 3e 64
+        <X 104 0
+          8Pc=
+        >
+        <X 0 0
+          8Pc=
+        >
+        <X 0 0
+          8Pc=
+        >
+        <X 0 0
+          8Pc=
+        >
+        E 68 95 3e 00
+        E 329 95 41 64
+        E 167 95 41 00
+        E 57 95 41 64
+        E 187 95 41 00
+        E 314 95 41 64
+        E 111 95 41 00
+        E 4682 95 37 64
+        E 167 95 37 00
+        E 279 95 37 64
+        E 231 95 37 00
+        E 270 95 3e 64
+        E 186 95 3e 00
+        E 38 95 3e 64
+        E 185 95 3e 00
+        E 315 95 3e 64
+        E 168 95 3e 00
+        E 333 95 41 64
+        E 131 95 41 00
+        E 93 95 41 64
+        E 167 95 41 00
+        E 279 95 41 64
+        E 167 95 41 00
+        E 2058 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {BB3DEAF0-8327-4324-B84B-1D7EB97F3BA2}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 256
+      >
+    >
+  >
+  <TRACK {7F01A7B0-1AB7-43EC-8138-3E40BD723C08}
+    NAME ""
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 0
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    SEL 0
+    REC 0 1024 1 0 0 0 0 0
+    VU 2
+    TRACKHEIGHT 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {7F01A7B0-1AB7-43EC-8138-3E40BD723C08}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 14.69968253968254
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0.01 0 1 0 0 0
+      FADEOUT 1 0.01 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {F9D6C76E-2B50-4334-A249-EDF6897E4F2F}
+      IID 16
+      NAME 12-230508_1624.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 1.32
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {5D1ED86D-1405-4B5C-BA42-A06700E509D2}
+      RECPASS 8
+      <SOURCE WAVE
+        FILE "C:\Users\vince\Documents\REAPER Media\12-230508_1624.wav"
+      >
+    >
+  >
+>

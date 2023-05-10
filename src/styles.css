@@ -44,11 +44,11 @@ body{
 }
 
 #controls{
-  position: fixed;
+  position: absolute;
+  padding-bottom:20px;
   left: 50%;
   bottom: 0px;
   width: 1200px;
-  height: 70px;
   z-index: 500;
   margin-left: -600px;
   padding: 20px;

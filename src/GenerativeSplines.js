@@ -65,7 +65,7 @@ class GenerativeSplines{
         const incRnd0 = Math.random();
         const incRnd1 = Math.random();
         const rndStart = OBJ.rndStart;
-    
+        
         for(let i = 0; i<len; i++){
     
             const angle = (i/len)*(Math.PI*curvAmt);

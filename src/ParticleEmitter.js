@@ -19,14 +19,43 @@ class ParticleEmitter {
 		this.max = OBJ.max;
 		this.obj;
 		this.particleClass = OBJ.particleClass;
+		
+		this.limitInc = 0;
+		this.shouldEmit = false;
+		this.limit = 20;
+		this.emitInc = 0;
+		this.canEmit = true;
+		this.special={};
 		//this.obj = {spline}
 	    //this.mesh = MESH;
 
 	}
 	
 	update(OBJ){
+
 		for(let i = 0; i < this.arr.length; i++){
 			this.arr[i].update(OBJ);	
+		}
+
+		this.emitInc += OBJ.delta;
+        
+		if(this.shouldEmit){
+            if(this.canEmit){
+                this.canEmit = false;
+                this.emit(this.special);
+            }
+            if(this.emitInc > .01){  
+                this.canEmit = true;
+                this.emitInc = 0;
+            }
+        }
+    
+	}
+
+	toggleEmit(SHOULDEMIT, OBJ){
+		this.shouldEmit = SHOULDEMIT;
+		if(this.shouldEmit){
+			this.special = OBJ; 
 		}
 	}
 
