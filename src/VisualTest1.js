@@ -375,7 +375,8 @@ class VisualTest1{
 		this.clip.play();
         //console.log(clip)
 
-        this.bufferImage.scene.add(wall, ground, this.boy);
+        //this.bufferImage.scene.add(wall, ground, this.boy);
+        this.bufferImage.scene.add(wall, ground);
 
         this.emitter = [];
 
@@ -409,7 +410,6 @@ class VisualTest1{
         
         this.bufferImage.scene.add( dirLight1 );
 
-    
         const dirLight2 = new DirectionalLight( 0xffffff, 0.2 );
         dirLight2.position.set( - 1,  1,  1 );
         this.bufferImage.scene.add( dirLight2 );
@@ -454,9 +454,6 @@ class VisualTest1{
 		// If set, the interval [ min, max ] must be a sub-interval of [ - 2 PI, 2 PI ], with ( max - min < 2 PI )
 		this.controls.minAzimuthAngle = -.5; // radians
 		this.controls.maxAzimuthAngle = .5; // radians
-
-
-
             
         this.composer = new EffectComposer( window.renderer );
         this.composer.addPass( new RenderPass( this.bufferImage.scene, window.camera ) );
@@ -471,7 +468,6 @@ class VisualTest1{
         this.brtCont.uniforms[ 'contrast' ].value = .1;
         this.brtCont.uniforms[ 'brightness' ].value = .1;
 
-            
         this.filmShader = new ShaderPass( FilmShader );
         this.filmShader.uniforms[ 'nIntensity' ].value = .2;
         this.filmShader.uniforms[ 'sIntensity' ].value = .3;
@@ -573,11 +569,20 @@ class VisualTest1{
         
         //this.emitter.update(OBJ);
     }
+    
+    parseCommand(COMMAND){
+        if(window.isLive){
+            return COMMAND;
+        }else{
+            return 144+COMMAND;
+        }
+    }
 
     midiIn(OBJ){
         const self= this;
         if(OBJ.note!=null){
-            switch(OBJ.command ){
+            //const com = this.parseCommand(OBJ.command)
+            switch( OBJ.command ){
                 case 144://track 1 on
                     if(OBJ.velocity > 0){
                         OBJ.instanceRandom = Math.random();

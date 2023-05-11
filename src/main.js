@@ -41,15 +41,14 @@ window.isLive = true;
 window.scene;
 window.camera;  
 window.renderer; 
+window.track = 0;
 
 let bpm = 134;
 let tempo = 60 / bpm / 24;
 
 window.clock16Time = ((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
-window.clock4Time = 0;
+window.clock4Time = ((60 / bpm) * 4);
 
-window.clock16Time = 0;//((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
-window.clock4Time = 0;
 
 let ktx2Loader, controls, loader, mainModel, audioContext;
 let initedTone = false;
@@ -99,7 +98,38 @@ window.loadObjs = [
 let master;
 
 
+
 init();
+
+
+function getQuery(){
+
+    const query = window.location.search.substring(1);
+   	const vars = query.split("&");
+    console.log(query)
+    return parseSingle(query);
+    
+}
+
+function parseQuery(vars){
+	for (let i = 0; i < vars.length; i++) {
+        const pair = vars[i].split('=');
+        if(pair != null){
+	        return decodeURIComponent(pair[1])
+    	}
+    }
+    return null;
+}
+
+function parseSingle(vars){
+	//for (let i = 0; i < vars.length; i++) {
+    const pair = vars.split('=');
+    if(pair != null){
+        return decodeURIComponent(pair[1])
+    }
+    //}
+    return null;
+}
 
 
 
@@ -110,50 +140,50 @@ window.checkIfAllSamplesAreLoaded = function(){
     return master.allSamplesLoaded();
 }
 
-window.initSongPlay = function(){
-    //if(window.i)
-    //master.playSong();
-    // for(let i = 0; i<200; i++){
-    //     const rndMeasure = i+Math.floor(-5+Math.random()*8);
-    //     if(rndMeasure<1)rndMeasure==1;
+// window.initSongPlay = function(){
+//     //if(window.i)
+//     //master.playSong();
+//     // for(let i = 0; i<200; i++){
+//     //     const rndMeasure = i+Math.floor(-5+Math.random()*8);
+//     //     if(rndMeasure<1)rndMeasure==1;
 
-    //     const rndBar = Math.floor(Math.random()*16);
+//     //     const rndBar = Math.floor(Math.random()*16);
 
-    //     Tone.Transport.schedule((time) => {
-    //         const rndEffect = Math.floor(Math.random()*8);
-    //         const chan = Math.floor( Math.random() * channels.length ); 
-    //         switch(rndEffect){
-    //             case 0:
-    //                 channels[chan].fadeFilter({time:Math.random()*4, dest : Math.random() });
-    //             break;
-    //             case 1:
-    //                 channels[chan].fadeCrusher({time:Math.random()*4, dest : Math.random() });
-    //             break;
-    //             case 2:
-    //                 channels[chan].fadeDistortion({time:Math.random()*4, dest : Math.random() });
-    //             break;
-    //             case 3:
-    //                 channels[chan].fadePhaser({time:Math.random()*4, dest : Math.random() });
-    //             break;
-    //             case 4:
-    //                 channels[chan].toggle();
-    //             break;
+//     //     Tone.Transport.schedule((time) => {
+//     //         const rndEffect = Math.floor(Math.random()*8);
+//     //         const chan = Math.floor( Math.random() * channels.length ); 
+//     //         switch(rndEffect){
+//     //             case 0:
+//     //                 channels[chan].fadeFilter({time:Math.random()*4, dest : Math.random() });
+//     //             break;
+//     //             case 1:
+//     //                 channels[chan].fadeCrusher({time:Math.random()*4, dest : Math.random() });
+//     //             break;
+//     //             case 2:
+//     //                 channels[chan].fadeDistortion({time:Math.random()*4, dest : Math.random() });
+//     //             break;
+//     //             case 3:
+//     //                 channels[chan].fadePhaser({time:Math.random()*4, dest : Math.random() });
+//     //             break;
+//     //             case 4:
+//     //                 channels[chan].toggle();
+//     //             break;
 
-    //         } 
-    //         channels[Math.floor( Math.random() * channels.length )].fadeIn({time:Math.random()*4});//channel.fadeIn();
-    //     }, ""+rndMeasure+":"+rndBar+":0");
+//     //         } 
+//     //         channels[Math.floor( Math.random() * channels.length )].fadeIn({time:Math.random()*4});//channel.fadeIn();
+//     //     }, ""+rndMeasure+":"+rndBar+":0");
     
-    // }
+//     // }
     
-    // Tone.Transport.schedule((time) => {
-    //     // invoked on measure 16
-    //     console.log("measure 4");
-    //     //channels[2].channel.fadIn();
-    // }, "4:0:0");
+//     // Tone.Transport.schedule((time) => {
+//     //     // invoked on measure 16
+//     //     console.log("measure 4");
+//     //     //channels[2].channel.fadIn();
+//     // }, "4:0:0");
     
-    //Tone.Transport.loopEnd = (lastNote.time + lastNote.duration + .01);
+//     //Tone.Transport.loopEnd = (lastNote.time + lastNote.duration + .01);
     
-}
+// }
 
 
 
@@ -167,6 +197,8 @@ $("#init-btn, #init-overlay").click(async function(){
         //master.initPlayback();
         if(window.isLive){
             master.initLive();
+        }else{
+            master.initPlayback();
         }
     }
  
@@ -371,8 +403,8 @@ window.midiOnMIDImessage = function(event) {
 
         //console.log(command)
         if(command!=248){
-            
-            master.midiIn({command:command, velocity:velocity, note:note});
+            if(master)
+                master.midiIn({command:command, velocity:velocity, note:note});
 
             switch(command){
                 case 252://stop
@@ -400,13 +432,7 @@ window.midiOnMIDImessage = function(event) {
             }
 
         }
-
-        //calculate bpm
-        
-        
-        
     }
-    
 }
 
 function handleMidiClock(){
@@ -467,6 +493,8 @@ function handleMidiClock(){
     }
 }
 
+
+
 function requestMIDIAccessSuccess(midi) {
     
     const outputs = [];
@@ -489,6 +517,8 @@ function requestMIDIAccessSuccess(midi) {
 
 
 function init() {
+
+
     
     //window.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, .1, 200 );
    // camera = new CinematicCamera( 60, window.innerWidth / window.innerHeight, .1, 200 );
@@ -517,43 +547,72 @@ function init() {
     loader.setKTX2Loader( ktx2Loader );
     loader.setMeshoptDecoder( MeshoptDecoder );
     for(let i = 0; i<window.loadObjs.length; i++){
-        //console.log(i)
         loadHelper(window.loadObjs[i]);    
     }
 
-    animate();
+    //animate();
 
 }
 
 function initMaster(){
-    const samplesArr = [
-        {
-            name:"melting sap",
-            bpm:134,
-            //midi:"./extras/test/mid.mid",
-            midi:"./extras/ms/mid_export.mid",
-            samples:
-            [
-                {url:"./extras/ms/melting-sap-redo-001.wav"},
-                {url:"./extras/ms/melting-sap-redo-002.wav"},
-                {url:"./extras/ms/melting-sap-redo-003.wav"},
-                {url:"./extras/ms/melting-sap-redo-004.wav"},
-                {url:"./extras/ms/melting-sap-redo-005.wav"},
-                {url:"./extras/ms/melting-sap-redo-006.wav"},
-            ],
-            visual:new Visuals({ class:VisualTest1 })
-            // [
-            //     {url:"./extras/test/1.wav"},
-            //     {url:"./extras/test/2.wav"},
-            //     {url:"./extras/test/3.wav"},
-            //     {url:"./extras/test/4.wav"},
-            //     {url:"./extras/test/5.wav"},
-            //     {url:"./extras/test/6.wav"},
-            // ]
-           
-        }
-    ];
-    master = new Master({samplesArr:samplesArr[0]});
+
+    const q = parseInt(getQuery());
+    if( !q && q!==0 ){
+        console.log("hii")
+        window.isLive = true;
+        master = new Master({
+            samplesArr:{ visual:new Visuals({ class:VisualTest1 }) }
+        });
+
+    }else{
+
+        console.log("track = "+q);
+    
+        window.isLive = false;
+        window.track = parseInt(q);
+        
+        const samplesArr = [
+            {
+                name:"melting sap",
+                bpm:134,
+                midi:"./extras/ms/mid_export.mid",
+                samples:
+                [
+                    {url:"./extras/ms/melting-sap-redo-001.wav"},
+                    {url:"./extras/ms/melting-sap-redo-002.wav"},
+                    {url:"./extras/ms/melting-sap-redo-003.wav"},
+                    {url:"./extras/ms/melting-sap-redo-004.wav"},
+                    {url:"./extras/ms/melting-sap-redo-005.wav"},
+                    {url:"./extras/ms/melting-sap-redo-006.wav"},
+                ],
+                visual:new Visuals({ class:VisualTest1 })
+            
+            },
+            {
+                name:"test",
+                bpm:134,
+                midi:"./extras/test/mid.mid",
+                samples:[
+                    {url:"./extras/test/1.wav"},
+                    {url:"./extras/test/2.wav"},
+                    {url:"./extras/test/3.wav"},
+                    {url:"./extras/test/4.wav"},
+                    {url:"./extras/test/5.wav"},
+                    {url:"./extras/test/6.wav"},
+                ],
+                visual:new Visuals({ class:VisualTest1 })
+            }
+
+        ];
+
+        bpm = samplesArr[window.track].bpm;
+        window.clock16Time = ((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
+        window.clock4Time = ((60 / bpm) * 4)/2;
+
+
+        master = new Master({samplesArr:samplesArr[window.track]});
+    }
+
 }
 
 

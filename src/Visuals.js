@@ -1,7 +1,6 @@
 class Visuals{
     constructor(OBJ){
         this.vis = new OBJ.class();
-        console.log(this.vis)
         this.active = false;
         
     }

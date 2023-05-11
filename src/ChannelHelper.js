@@ -43,7 +43,6 @@ class Master{
     }
 
     initLive(){
-        this.visual.init();
         this.input = new Tone.UserMedia();
         Tone.UserMedia.enumerateDevices().then(window.gotInputSources);
         // const inputFFT = new Tone.FFT();
@@ -100,6 +99,7 @@ class Master{
     async initPlayback(){
         const self = this;
         this.midi = await Midi.fromUrl(this.obj.samplesArr.midi);
+        console.log("loaded midi")
         this.midi.tracks.forEach((track) => {
 
            const synth = new Tone.PolySynth({
@@ -116,7 +116,7 @@ class Master{
         //this.initMidi();
         //console.log(this.obj.samplesArr.samples.length);
         for(let i = 0; i<this.obj.samplesArr.samples.length; i++){
-            this.channels.push( new Channel( this.obj.samplesArr.samples[i].url, i) );
+            this.channels.push( new Channel( this.obj.samplesArr.samples[i].url, i, this) );
         }
         this.initEffects();
       
@@ -124,6 +124,8 @@ class Master{
     }
 
     initEffects(){
+        this.visual.init();
+        
         this.effects = new ChannelEffects();
         this.compressor = new Tone.Compressor(-30, 3);
         
@@ -177,6 +179,7 @@ class Master{
     }
 
     playSong(){
+        
         const self = this;
         // for(let i = 0; i<6; i++){
         //     const rndMeasure = Math.floor(Math.random()*6);
@@ -202,12 +205,13 @@ class Master{
         //this.allChannelVolume(-100);
         this.muteAllChannels();
 
-        this.channels[4].fadeIn({time:5})
-        self.channels[4].setFilter(1);//filter= 1;
-        self.channels[4].setPhaser(1);//phaser = 1;//fadePhaser({time:3,dest:1});
-        self.channels[4].setDistortion(.3);//distortion.wet.value = .3;//({time:3,dest:1});
-        self.channels[4].setCrusher(1);//({time:3,dest:1});
-      
+        // this.channels[4].fadeIn({time:5})
+        // self.channels[4].setFilter(1);//filter= 1;
+        // self.channels[4].setPhaser(1);//phaser = 1;//fadePhaser({time:3,dest:1});
+        // self.channels[4].setDistortion(.3);//distortion.wet.value = .3;//({time:3,dest:1});
+        // self.channels[4].setCrusher(1);//({time:3,dest:1});
+        
+        /*
         const obj = [
             {
                 time:"4:0:0", 
@@ -241,6 +245,225 @@ class Master{
             },
             
         ]
+        */
+
+        this.channels[0].fadeIn({time:5})
+        self.channels[0].setFilter(1);//filter= 1;
+        self.channels[0].setPhaser(1);//phaser = 1;//fadePhaser({time:3,dest:1});
+        self.channels[0].setDistortion(.3);//distortion.wet.value = .3;//({time:3,dest:1});
+        self.channels[0].setCrusher(1);//({time:3,dest:1});
+
+        const obj = [
+    
+            {
+                time:"3:0:0", 
+                do:function(){
+                    self.channels[0].fadeCrusher({dest:0, time:5});
+                    self.channels[0].fadeDistortion({dest:.4, time:5});
+        
+                    self.channels[1].effect.filter.wet.value = 1;
+                    self.channels[1].effect.phaser.wet.value = 1;
+                    self.channels[1].effect.crusher.wet.value = 1;
+                    self.channels[1].effect.distortion.wet.value = 1;
+                    
+                    self.channels[1].fadeIn({time:7});
+                },
+                message:"fade snair in"
+            },
+            {
+                time:"4:0:0", 
+                do:function(){
+                    //self.channels[1].fadeFilter({time:2,dest:0})
+                    self.channels[1].fadeCrusher({time:4,dest:.5})
+                    self.channels[1].fadePhaser({time:2,dest:0})
+                },
+                message:"fade snair fx"
+            },
+            {
+                time:"6:0:0", 
+                do:function(){
+                    //self.channels[1].fadeFilter({time:2,dest:0})
+                    self.channels[1].fadeDistortion({time:5,dest:0})
+                    self.channels[1].fadeCrusher({time:5,dest:0})
+                    self.channels[1].fadeFilter({time:5,dest:0})
+                    
+                    self.channels[4].effect.filter.wet.value = 1;
+                    self.channels[4].effect.distortion.wet.value = .8;
+                    self.channels[4].effect.crusher.wet.value = .6;
+                    
+                    self.channels[4].fadeIn({time:5})
+                    
+                },
+                message:"fade in channel 4"
+            },
+            {
+                time:"9:8:0", 
+                do:function(){
+                    self.channels[1].fadeOut({time:5});//({dest:-10, })
+                    self.channels[4].fadeDistortion({dest:0,time:7})
+                },
+                message:"fade snair for build up "
+            },
+            {
+                time:"11:8:0", 
+                do:function(){
+                    self.channels[0].fadeFeedback({dest:.1,time:7})
+                    self.channels[0].fadeCrusher({dest:1,time:7})
+                    self.channels[0].fadeDistortion({dest:1,time:7})
+                    self.channels[0].fadeFilter({dest:1,time:7})
+        
+                    self.channels[4].fadeCrusher({dest:0,time:5})
+                    self.channels[4].fadeFeedback({dest:.3,time:5})
+                    self.channels[4].fadeTo({dest:-3,time:3})
+                },
+                message:"fade channel 4 for build up"
+            },
+            {
+                time:"15:2:0", 
+                do:function(){
+                    //self.channels[1].fadeFilter({time:2,dest:0})
+                    self.channels[0].fadeFeedback({dest:0,time:.2})
+                    self.channels[0].fadeCrusher({dest:0,time:.2})
+                    self.channels[0].fadeDistortion({dest:.2,time:.2})
+                    self.channels[0].fadeFilter({dest:0,time:.2})
+        
+        
+                    self.channels[4].fadeFilter({time:.2, dest:0});// = 0;
+                    self.channels[4].channel.volume.value = 0;
+                    self.channels[4].fadeDistortion({time:.2,dest:.2});// = .3;
+                    self.channels[4].fadeFeedback({time:.2,dest:0})
+                    
+                    self.channels[2].unmute();
+                    self.channels[2].channel.volume.value = -5;
+        
+                    self.channels[1].unmute();
+                    self.channels[1].channel.volume.value = 0;
+                    
+                    //self.channels[4].crusher.wet.value = .3;
+                    //self.channels[4].fadeIn({time:3})
+                    
+                },
+                message:"drop"
+            },
+        
+            {
+                time:"18:2:0", 
+                do:function(){
+                    self.channels[4].fadeFilter({time:7, dest:1});// = 0;
+                    
+                    //self.channels[3].fadeFeedback({dest:.1,time:7})
+                    //self.channels[3].fadeCrusher({dest:1,time:7})
+                    // self.channels[3].fadeDistortion({dest:1,time:4})
+                    //self.channels[3].fadeFilter({dest:1,time:4})
+                    
+                    self.channels[3].effect.filter.wet.value = 1;
+                    self.channels[3].fadeIn({time:7})
+                    
+                    //self.channels[4].crusher.wet.value = .3;
+                    //self.channels[4].fadeIn({time:3})
+                    
+                },
+                message:"fade in other melody"
+            },
+            {
+                time:"22:0:0", 
+                do:function(){
+        
+                    self.channels[4].fadeOut({time:4});// = 0;
+                    
+                    self.channels[3].fadeDistortion({dest:1,time:7})
+                    self.channels[3].fadeFilter({dest:1,time:7})
+                    
+                    
+                    self.channels[5].effect.filter.wet.value = 1;//({time:7})
+                    self.channels[5].effect.phaser.wet.value = 1;//({time:7})
+                    self.channels[5].fadeIn({time:7})
+                    
+                    
+                },
+                message:"fade chanel 5"
+            },
+            {
+                time:"30:2:0", 
+                do:function(){
+        
+                    self.channels[0].fadeOut({time:3});// = 0;
+                    self.channels[2].fadeOut({time:3});// = 0;
+                    
+                    self.channels[3].fadeFilter({time:.2,dest:0})
+                    self.channels[3].fadeFilter({time:.2,dest:0})
+                    
+                    self.channels[5].fadeFilter({time:.2,dest:0})
+                    self.channels[5].fadePhaser({time:.2,dest:0})
+                    
+                    //self.channels[5].fadeDistortion({time:.2,dest:1})
+                    //self.channels[5].fadeCrusher({time:.2,dest:1})
+                    
+                },
+                message:"out start"
+            },
+            
+            {
+                time:"35:2:0", 
+                do:function(){
+        
+                    self.channels[0].fadeIn({time:3});// = 0;
+                    self.channels[0].fadeDistortion({time:3, dest:.1});// = 0;
+                    
+                    //self.channels[3].fadeOut({time:4})
+                    self.channels[3].fadeFeedback({time:.5,dest:.3})
+                    
+                    self.channels[5].fadePhaser({time:5,dest:1})
+                    self.channels[5].fadeCrusher({time:4,dest:1})
+                    self.channels[5].fadeDistortion({time:4,dest:.3})
+                    
+                    //self.channels[5].fadeDistortion({time:.2,dest:1})
+                    //self.channels[5].fadeCrusher({time:.2,dest:1})
+                    
+                },
+                message:"fade base"
+            },
+            {
+                time:"40:2:0", 
+                do:function(){
+        
+                    self.channels[0].fadeFilter({time:3, dest:1});// = 0;
+                    self.channels[1].fadeFilter({time:2,dest:1})
+                    
+                    self.channels[3].fadeFilter({time:2,dest:1})
+                    
+                    self.channels[5].fadeFilter({time:4,dest:1})
+                    
+                },
+                message:"fade filter"
+            },
+        
+            {
+                time:"44:2:0", 
+                do:function(){
+        
+                    self.channels[0].fadeOut({time:6});// = 0;
+                    self.channels[1].fadeOut({time:6});// = 0;
+                    
+                    //self.channels[0].fadeDistortion({time:3, dest:.1});// = 0;
+                    
+                    //self.channels[3].fadeOut({time:4})
+                    self.channels[3].fadeOut({time:6})
+                    
+                    //self.channels[5].fadePhaser({time:5,dest:1})
+                    self.channels[5].fadeOut({time:6})
+                    //self.channels[5].fadeDistortion({time:4,dest:.3})
+                    
+                    //self.channels[5].fadeDistortion({time:.2,dest:1})
+                    //self.channels[5].fadeCrusher({time:.2,dest:1})
+                    
+                },
+                message:"fade all"
+            },
+            
+        ]
+
+
         
 
         //console.log("hii")
@@ -301,8 +524,10 @@ export { Master };
 
 class Channel{
 
-	constructor(URL, INDEX){
+	constructor(URL, INDEX, PARENT){
         const self = this;
+        this.parent = PARENT;
+
         this.index = INDEX;
         this.loaded = false;
         this.channel = new Tone.Channel();//.toDestination();
@@ -311,8 +536,9 @@ class Channel{
             loop: true,
             onload:function(){
                 self.loaded = true;
-                if(window.checkIfAllSamplesAreLoaded()){
-                    window.initSongPlay();
+                if(self.parent.allSamplesLoaded()){
+                    //window.initSongPlay();
+                    self.parent.playSong();
                 }
             }
         }).sync().start(0);
@@ -552,8 +778,7 @@ class ChannelEffects{
     }
 
     fadeFilter(OBJ){
-        const self = thi
-        s;
+        const self = this;
         const o = OBJ == null? {dest:1, time:1} : OBJ;
         
         if(this.filter.tween!=null)
