@@ -30,9 +30,11 @@
 				<div class="label label-top" >
 					Visuals
 				</div>
-				<div>
-					<button class="user-btns-vis">0</button>
-					<button class="user-btns-vis">1</button>
+				<div class="select-div">
+					<select id="visual-drop-down-input" style="max-width:100px;">
+						<option>visual 0</option>
+						<option>visual 1</option>
+					</select>
 				</div>	
 			</div>
 
@@ -40,88 +42,108 @@
 				<div class="label label-top" >
 					Audio
 				</div>
-				<div>
-					<button class="user-btns-live" id="a-live">live</button>
-					<button class="user-btns-audio">0</button>
-					<button class="user-btns-audio">1</button>
+				<div class="select-div">
+					<select id="audio-drop-down-input" style="max-width:100px;">
+						<option>live</option>
+						<option>track 0</option>
+						<option>track 1</option>
+					</select>
+					
 				</div>	
 			</div>
 		</div>
 		
 		<div id="controls">
 			
+
+			<div id="master-fx">
+				<div class="controls-holder">
+					<select id="audioinput" style="max-width:100px;">
+						<option>default (selection not supported)</option>
+					</select>
+				</div>
+				<div class="controls-holder">
+					Est BPM:<span id="bpm-info">0</span>
+				</div>
+
+				<div class="controls-holder">
+					<button class="my-button my-button-icon" id="play-btn">▶</button>
+					<button class="my-button my-button-icon" id="stop-btn" style="display:none;">◼</button>
+				</div>
+
+				<div class="controls-holder">
+					<button class="my-button my-button-icon record-btn" id="rec-btn">●</button>
+				</div>
+
+				
+				<div class="controls-holder">
+					<div class="label" >
+						Volume
+					</div>
+					<div>
+						<input class="fx-slider" id="volume" type="range" min="0" max="1" step="0.05" value="1"/>
+					</div>
+				</div>
+
+				<div class="controls-holder">
+					<div class="label" >
+						Threshold
+					</div>
+					<div>
+						<input class="fx-slider" id="compressor-threshold" type="range" min="-100" max="0" step="0.05" value="0"/>
+					</div>
+				</div>
+				
+				<div class="controls-holder">
+					<div class="label" >
+						Ratio
+					</div>
+					<div>
+						<input class="fx-slider" id="compressor-ratio" type="range" min="1" max="20" step="0.05" value="0"/>
+					</div>
+				</div>
+				
+				<!--
+				<div class="controls-holder">
+					<div class="label" >
+						Distortion
+					</div>
+					<div>
+						<input class="fx-slider" id="distortion" type="range" min="0" max="1" step="0.05" value="0"/>
+					</div>
+				</div>
+	
+				<div class="controls-holder">
+					<div class="label" >
+						Crush
+					</div>
+					<div>
+						<input class="fx-slider" id="crush" type="range" min="0" max="1" step="0.05" value="0"/>
+					</div>
+				</div>
+				<div class="controls-holder">
+					<div class="label" >
+						Chill
+					</div>
+					<div>
+						<input class="fx-slider" id="chill" type="range" min="0" max="1" step="0.05" value="0"/>
+					</div>
+				</div>
+				-->
+
+			</div>
+			<div id="channel-fx">
+				<div id="channel-fx-1"></div>
+				<div id="channel-fx-2"></div>
+				<div id="channel-fx-3"></div>
+				<div id="channel-fx-4"></div>
+				<div id="channel-fx-5"></div>
+				<div id="channel-fx-6"></div>
+			</div>
+
+
 			
-
-		
-
-			<div class="controls-holder">
-				<select id="audioinput" style="max-width:100px;">
-					<option>default (selection not supported)</option>
-				</select>
-			</div>
-			<div class="controls-holder">
-				Est BPM:<span id="bpm-info">0</span>
-			</div>
-
-			<div class="controls-holder">
-				<button class="my-button my-button-icon" id="play-btn">▶</button>
-				<button class="my-button my-button-icon" id="stop-btn" style="display:none;">◼</button>
-			</div>
-
-			<div class="controls-holder">
-				<button class="my-button my-button-icon record-btn" id="rec-btn">●</button>
-			</div>
-
 			<!--
-			<div class="controls-holder" id="recorded-audio">--
-				<div class="label">
-					Recorded Audio
-				</div>
-				<div>
-					<button class="my-button my-button-small" id="recorded-play-btn">▶</button>
-					<button class="my-button my-button-small" id="recorded-stop-btn" style="display:none;">◼</button>
-					<button class="my-button my-button-small" id="recorded-download-btn">↷</button>
-				</div>
-			</div>
-			-->
-
-			
-			<div class="controls-holder">
-				<div class="label" >
-					Volume
-				</div>
-				<div>
-					<input class="fx-slider" id="volume" type="range" min="0" max="1" step="0.05" value="1"/>
-				</div>
-			</div>
-
-			<div class="controls-holder">
-				<div class="label" >
-					Distortion
-				</div>
-				<div>
-					<input class="fx-slider" id="distortion" type="range" min="0" max="1" step="0.05" value="0"/>
-				</div>
-			</div>
-
-			<div class="controls-holder">
-				<div class="label" >
-					Crush
-				</div>
-				<div>
-					<input class="fx-slider" id="crush" type="range" min="0" max="1" step="0.05" value="0"/>
-				</div>
-			</div>
-
-			<div class="controls-holder">
-				<div class="label" >
-					Chill
-				</div>
-				<div>
-					<input class="fx-slider" id="chill" type="range" min="0" max="1" step="0.05" value="0"/>
-				</div>
-			</div>
-
 			<div class="controls-holder">
 				<div class="label" >
 					Filter
@@ -130,23 +152,8 @@
 					<input class="fx-slider" id="filter" type="range" min="0" max="1" step="0.05" value="0"/>
 				</div>
 			</div>
-			<div class="controls-holder">
-				<div class="label" >
-					Threshold
-				</div>
-				<div>
-					<input class="fx-slider" id="compressor-threshold" type="range" min="-100" max="0" step="0.05" value="0"/>
-				</div>
-			</div>
-
-			<div class="controls-holder">
-				<div class="label" >
-					Ratio
-				</div>
-				<div>
-					<input class="fx-slider" id="compressor-ratio" type="range" min="1" max="20" step="0.05" value="0"/>
-				</div>
-			</div>
+			-->
+			
 			
 			<!--<div style="clear:both"></div>-->
 

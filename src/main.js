@@ -32,8 +32,7 @@ import { VisualTest2 } from './VisualTest2.js';
 import { GenerativeSplines } from './GenerativeSplines.js';
 
 import TWEEN from './scripts/jsm/libs/tween.module.js';
-window.fadeTime = 1000;
-
+window.fadeTime = 0;
 
 window.TWEEN = TWEEN;
 
@@ -47,6 +46,8 @@ window.camera;
 window.renderer; 
 window.track = 0;
 
+let urlQuery;
+
 let currVis = 0;
 let currAudio = 0;
 
@@ -55,7 +56,6 @@ let tempo = 60 / bpm / 24;
 
 window.clock16Time = ((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
 window.clock4Time = ((60 / bpm) * 4);
-
 
 let ktx2Loader, controls, loader, mainModel, audioContext;
 let initedTone = false;
@@ -74,7 +74,6 @@ let didClock = false;
 let frameRate = 60;
 let clockAdd4 = 0;
 let clockAdd16 = 0;
-
 
 let clock4Active = false;
 const clock4 = new THREE.Clock();
@@ -98,11 +97,13 @@ const synths = [];
 
 window.playingTime = 60/134/24;
 window.loadObjs = [
-    {loaded:false, group:null, url:"boy.glb", name:"boy", model:null},
-    {loaded:false, group:null, url:"bench.glb", name:"bench", model:null},
-    {loaded:false, group:null, url:"walk.glb", name:"walk", model:null},
+    {loaded:false, group:null, url:"boy.glb", name:"boy", model:null, vis:0},
+    {loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
+    {loaded:false, group:null, url:"walk.glb", name:"walk", model:null, vis:1},
 ]
 
+const visSelect = document.getElementById("visual-drop-down-input");
+const trackSelect = document.getElementById("audio-drop-down-input");
 let master;
 
 init();
@@ -137,31 +138,8 @@ function parseQuery(vars){
 
 
 
-$('.user-btns-vis').each(function(index){
-    $(this).click(function(){
-        if(window.isLive){
-            const loc = window.location.href.split('?')[0];
-            location.href = loc+"?v="+index;
-        }else{
-            const loc = window.location.href.split('?')[0];
-            location.href = loc+"?v="+index+"&t="+currAudio;
-        }  
-    });
-});
-
-$('.user-btns-audio').each(function(index){
-    //console.log( index + ": " + $( this ).text() );
-    $(this).click(function(){
-        const loc = window.location.href.split('?')[0];
-        location.href = loc+"?v="+currVis+"&t="+index;
-    })
-});
 
 
-$("#a-live").click(function(){
-    const loc = window.location.href.split('?')[0];
-    location.href = loc+"?v="+currVis;
-})
 
 $("#init-btn, #init-overlay").click(async function(){
     
@@ -213,6 +191,7 @@ $("#rec-btn").click(function(){
 
 });
 
+/*
 async function bounceFile(){
     recordedFile = await master.recorder.stop();
     
@@ -237,46 +216,78 @@ async function bounceFile(){
     reader.readAsDataURL(recordedFile);
 
 }
+*/
 
 document.addEventListener("keydown",onKeyDown);
 
 function onKeyDown(e){
     console.log(e.keyCode)
     switch(e.keyCode){
+        case 32:
+            window.fadeTime = 0;
+            break;
         case 49:
             window.fadeTime = 0;
             break;
         case 50:
-            window.fadeTime = 500;
+            window.fadeTime = .5;
             break;
         case 51:
-            window.fadeTime = 1000;
+            window.fadeTime = 1;
             break;
         case 52:
-            window.fadeTime = 1500;
+            window.fadeTime = 1.5;
             break;
         case 53:
-            window.fadeTime = 2000;
+            window.fadeTime = 2;
             break;
         case 54:
-            window.fadeTime = 2500;
+            window.fadeTime = 2.5;
             break;
         case 55:
-            window.fadeTime = 3000;
+            window.fadeTime = 3.0;
             break;
         case 56:
-            window.fadeTime = 3500;
+            window.fadeTime = 3.5;
             break;
         case 57:
-            window.fadeTime = 4000;
+            window.fadeTime = 4;
             break;
         case 90://z
+            if(master != null && master.effects != null){
+                if(master.effects.distortion.wet.value>.5){
+                    master.effects.fadeDistortion({dest:0, time:window.fadeTime})        
+                }else{
+                    master.effects.fadeDistortion({dest:1, time:window.fadeTime})
+                }
+            }
             break;
         case 88://x
+            if(master != null && master.effects != null){
+                if(master.effects.crusher.wet.value>.5){   
+                    master.effects.fadeCrusher({dest:0, time:window.fadeTime})
+                }else{
+                    master.effects.fadeCrusher({dest:1, time:window.fadeTime})
+                }
+            }
             break;
         case 67://c
+            if(master != null && master.effects != null){
+                if(master.effects.filter.wet.value>.5){   
+                    master.effects.fadeFilter({dest:0, time:window.fadeTime})
+                }else{
+                    master.effects.fadeFilter({dest:1, time:window.fadeTime})
+                }
+            }
             break;
         case 86://v
+            if(master != null && master.effects != null){
+                if(master.effects.phaser.wet.value>.5){   
+                    master.effects.fadePhaser({dest:0, time:window.fadeTime})
+                }else{
+                    master.effects.fadePhaser({dest:1, time:window.fadeTime})
+                }
+            }
             break;
     }
 }
@@ -285,26 +296,25 @@ $( "#volume" ).bind( "input", function(event, ui) {
     let vol = -40+parseFloat(event.target.value)*50;
     Tone.getDestination().volume.value = vol;
 });
-$( "#distortion" ).bind( "input", function(event, ui) { 
-    console.log("asdf")
-    master.updateDistortion(parseFloat(event.target.value));   
-    //master.effects.distortion.wet.value = parseFloat(event.target.value);
-});
+// $( "#distortion" ).bind( "input", function(event, ui) { 
+//     master.updateDistortion(parseFloat(event.target.value));   
+//     //master.effects.distortion.wet.value = parseFloat(event.target.value);
+// });
 
-$( "#crush" ).bind( "input", function(event, ui) {
-    master.updateCrush(parseFloat(event.target.value));
-    //master.effects.crusher.wet.value = parseFloat(event.target.value);
-});
+// $( "#crush" ).bind( "input", function(event, ui) {
+//     master.updateCrush(parseFloat(event.target.value));
+//     //master.effects.crusher.wet.value = parseFloat(event.target.value);
+// });
 
-$( "#chill" ).bind( "input", function(event, ui) {
-    master.updateChill(parseFloat(event.target.value));
-    //master.effects.phaser.wet.value = parseFloat(event.target.value);
-});
+// $( "#chill" ).bind( "input", function(event, ui) {
+//     master.updateChill(parseFloat(event.target.value));
+//     //master.effects.phaser.wet.value = parseFloat(event.target.value);
+// });
 
-$( "#filter" ).bind( "input", function(event, ui) {
-    master.updateFilter(event.target.value);
-    //master.effects.filter.wet.value = parseFloat(event.target.value);
-});
+// $( "#filter" ).bind( "input", function(event, ui) {
+//     master.updateFilter(event.target.value);
+//     //master.effects.filter.wet.value = parseFloat(event.target.value);
+// });
 
 $( "#compressor-threshold" ).bind( "input", function(event, ui) {
     master.compressor.threshold.value = parseFloat(event.target.value);
@@ -314,30 +324,6 @@ $( "#compressor-ratio" ).bind( "input", function(event, ui) {
     master.compressor.ratio.value = parseFloat(event.target.value);
 });
 
-/*
-
-$("#recorded-stop-btn, #recorded-play-btn").bind( "click", function() {
-    
-    if(recordedFile==null) {
-        alert("record something"); 
-        return;
-    }
-    
-    if(!isPlayingRecordedAudio){
-        isPlayingRecordedAudio = true;
-        $("#recorded-play-btn").hide();
-        $("#recorded-stop-btn").show();
-        recordedAudioElement.play();
-    }else{
-        isPlayingRecordedAudio = false;
-        $("#recorded-play-btn").show();
-        $("#recorded-stop-btn").hide();
-        recordedAudioElement.pause();
-    }
-    
-});
-
-*/
 
 
 $("#recorded-download-btn").bind( "click", function() {
@@ -591,13 +577,29 @@ function init() {
     window.addEventListener( 'resize', onWindowResize );
 
     
+    urlQuery = getQuery();
+
+    if(urlQuery.t == null){
+        urlQuery.t = Math.floor(Math.random()*2);
+    }
+    if(urlQuery.v == null){
+        urlQuery.v = Math.floor(Math.random()*2);
+    }
+
+    currVis=urlQuery.v;
+    currAudio=urlQuery.t;
 
     ktx2Loader = new KTX2Loader().setTranscoderPath( 'scripts/jsm/libs/basis/' ).detectSupport( renderer );
     loader = new GLTFLoader().setPath( './extras/' );
     loader.setKTX2Loader( ktx2Loader );
     loader.setMeshoptDecoder( MeshoptDecoder );
     for(let i = 0; i<window.loadObjs.length; i++){
-        loadHelper(window.loadObjs[i]);    
+        if(window.loadObjs[i].vis == urlQuery.v){
+            loadHelper(window.loadObjs[i]);
+        }else{
+            window.loadObjs[i].loaded = true;
+        }
+            
     }
 
     //animate();
@@ -611,30 +613,23 @@ function initMaster(){
         VisualTest2
     ]
 
-    const q = getQuery();
-    
-    if(q.t==null){
-        q.t = Math.floor(Math.random()*2);
-    }
-    if(q.v==null){
-        q.v = Math.floor(Math.random()*2);
-    }
-
-    currVis=q.v;
-    currAudio=q.t;
-
-    if( q.live ){
+    if( urlQuery.live ){
       
         window.isLive = true;
+        visSelect.selectedIndex = urlQuery.v;
+        trackSelect.selectedIndex = 0;
         master = new Master({
-            samplesArr:{ visual:visuals[q.v] }
+            samplesArr:{ visual:visuals[urlQuery.v] }
         });
 
     }else{
 
         window.isLive = false;
-        window.track = q.t;//parseInt(q);
+        window.track = urlQuery.t;//parseInt(q);
         
+        visSelect.selectedIndex = urlQuery.v;
+        trackSelect.selectedIndex = urlQuery.t+1;
+
         const samplesArr = [
             {
                 name:"melting sap",
@@ -650,7 +645,7 @@ function initMaster(){
                     {url:"./extras/ms/melting-sap-redo-005.wav"},
                     {url:"./extras/ms/melting-sap-redo-006.wav"},
                 ],
-                visual:visuals[q.v] //new Visuals({ class:visuals[q.v] })
+                visual:visuals[urlQuery.v] //new Visuals({ class:visuals[q.v] })
                 
             },
             {
@@ -666,7 +661,7 @@ function initMaster(){
                     {url:"./extras/test/5.wav"},
                     {url:"./extras/test/6.wav"},
                 ],
-                visual: visuals[q.v]// new Visuals({ class:visuals[q.v] })
+                visual: visuals[urlQuery.v]// new Visuals({ class:visuals[q.v] })
             }
 
         ];
@@ -678,6 +673,32 @@ function initMaster(){
         master = new Master({samplesArr:samplesArr[window.track]});
     
     }
+
+
+    
+
+    visSelect.onchange = function(e){
+        const index = visSelect.selectedIndex;
+        if(window.isLive){
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+index;
+        }else{
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+index+"&t="+currAudio;
+        }  
+    };
+    
+    trackSelect.onchange = function(e){
+        const index = trackSelect.selectedIndex;
+        if(index==0){
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+currVis;
+        }else{
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+currVis+"&t="+(index-1);
+        }
+        
+    };
 
 }
 
@@ -735,12 +756,9 @@ function animate() {
     window.TWEEN.update();
     
     const d = clock.getDelta();
-    //controls.update();
+    
     if(master)
         master.update({delta:d});
     
-    //window.renderer.render( window.scene, window.camera );
-
-
 }
 

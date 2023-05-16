@@ -61,12 +61,15 @@ body{
   text-align: center;
 }
 
-.controls-holder{
+.controls-holder, .track-title{
   display: inline-block;
   text-align: center;
   margin-right: 20px;
 }
 
+.track-title{
+  font-size: 22px;
+}
 .my-button {
   box-shadow:inset 0px 1px 0px 0px #ffffff;
   background-color:#f9f9f9;
@@ -117,9 +120,12 @@ body{
 }
 
 .buttons-holder{
-  width: 150px;
+  width: 70px;
 }
 
+.select-div{
+
+}
 
 .user-btns-vis, .user-btns-audio, .user-btns-live{
   display: block;
@@ -130,3 +136,4 @@ body{
 #init-btn{
   display: none;
 }
+

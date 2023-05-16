@@ -60,25 +60,45 @@ class Master{
         this.playing = false;
         Tone.Transport.pause();
     }
+
+    autoFadeDistortion(OBJ){
+        updateDistortion(val);    
+    }
+
     updateDistortion(val){
-        this.effects.distortion.wet.value = val;
-        this.postVisualEffects();
+        if(this.effects){
+            //this.effects.distortion.wet.value = val;
+            this.postVisualEffects();
+        }
     }
     
     updateCrush(val){
-        this.effects.crusher.wet.value = val;
-        this.postVisualEffects();
+        if(this.effects){
+            //this.effects.crusher.wet.value = val;
+            this.postVisualEffects();
+        }
     }
     
     updateChill(val){
-        this.effects.phaser.wet.value = val;
-        this.postVisualEffects();
+        if(this.effects){
+            //this.effects.phaser.wet.value = val;
+            this.postVisualEffects();
+        }
     }
     
     updateFilter(val){
-        
-        this.effects.filter.wet.value = val;
-        this.postVisualEffects();
+        if(this.effects){
+            //this.effects.filter.wet.value = val;
+            this.postVisualEffects();
+        }
+    }
+
+    updateFeedback(val){
+        console.log("feed back= "+val);
+        // if(this.effects){
+        //     this.effects.filter.wet.value = val;
+        //     this.postVisualEffects();
+        // }
     }
 
     postVisualEffects(){
@@ -95,8 +115,15 @@ class Master{
         Tone.UserMedia.enumerateDevices().then(window.gotInputSources);
         
         this.input.open();
-
-        this.effects = new ChannelEffects();
+        
+        //this.filterObj = self.setUpSliderDom({param:this.filter, title:"filter", parent:OBJ.parent, do:OBJ.doFilter});//document.createElement("div");
+        
+        // this.effects = new ChannelEffects(
+        //     {
+        //         parent:document.getElementById("master-fx"),
+        //         doFilter:function(val){ this.updateFilter(val) }
+        //     }
+        // );
         
         this.input.chain(Tone.Destination);
         
@@ -141,9 +168,7 @@ class Master{
             this.mediaRecorder.start(100);
            
         }else{
-
             this.mediaRecorder.stop();
-
         }
 
     }
@@ -197,7 +222,18 @@ class Master{
         //this.initMidi();
         //console.log(this.obj.samplesArr.samples.length);
         for(let i = 0; i<this.obj.samplesArr.samples.length; i++){
-            this.channels.push( new Channel( this.obj.samplesArr.samples[i].url, i, this) );
+            
+            const sliderObj = {
+                parent:document.getElementById("channel-fx-"+(i+1) ),
+                doFilter:function(val){},
+                doFeedback:function(val){},
+                doCrusher:function(val){},
+                doPhaser:function(val){},
+                doDistortion:function(val){},
+            }
+
+            this.channels.push( new Channel( this.obj.samplesArr.samples[i].url, i, this, sliderObj) );
+        
         }
 
         this.initEffects();
@@ -206,10 +242,24 @@ class Master{
     }
 
     initEffects(){
-
+        const self = this;
         this.visual.init();
-        
-        this.effects = new ChannelEffects();
+        /*
+doFilter:function(val){},
+                doFeedback:function(val){},
+                doCrusher:function(val){},
+                doPhaser:function(val){},
+        */
+        this.effects = new ChannelEffects(  
+            {
+                parent:document.getElementById("master-fx"),
+                doFilter:function(val){ self.updateFilter(val) },
+                doCrusher:function(val){ self.updateCrush(val) },
+                doPhaser:function(val){ self.updateChill(val) },
+                doFeedback:function(val){ self.updateFeedback(val) },
+                doDistortion:function(val){ self.updateDistortion(val) },
+            }
+        );
         this.compressor = new Tone.Compressor(-30, 3);
         
         Tone.Destination.chain(this.effects.distortion, this.effects.crusher, this.effects.phaser, this.effects.filter, this.effects.feedbackDelay, this.compressor);
@@ -382,10 +432,10 @@ class Master{
                     self.channels[0].fadeCrusher({dest:0, time:5});
                     self.channels[0].fadeDistortion({dest:.4, time:5});
         
-                    self.channels[1].effect.filter.wet.value = 1;
-                    self.channels[1].effect.phaser.wet.value = 1;
-                    self.channels[1].effect.crusher.wet.value = 1;
-                    self.channels[1].effect.distortion.wet.value = 1;
+                    self.channels[1].setFilter(1);//filter.wet.value = 1;
+                    self.channels[1].setPhaser(1);//phaser.wet.value = 1;
+                    self.channels[1].setCrusher(1);//crusher.wet.value = 1;
+                    self.channels[1].setDistortion(1);//distortion.wet.value = 1;
                     
                     self.channels[1].fadeIn({time:7});
                 },
@@ -408,9 +458,9 @@ class Master{
                     self.channels[1].fadeCrusher({time:5,dest:0})
                     self.channels[1].fadeFilter({time:5,dest:0})
                     
-                    self.channels[4].effect.filter.wet.value = 1;
-                    self.channels[4].effect.distortion.wet.value = .8;
-                    self.channels[4].effect.crusher.wet.value = .6;
+                    self.channels[4].setFilter(1);//filter.wet.value = 1;
+                    self.channels[4].setDistortion(.8);//distortion.wet.value = .8;
+                    self.channels[4].setCrusher(.6);//crusher.wet.value = .6;
                     
                     self.channels[4].fadeIn({time:5})
                     
@@ -450,7 +500,7 @@ class Master{
         
         
                     self.channels[4].fadeFilter({time:.2, dest:0});// = 0;
-                    self.channels[4].channel.volume.value = 0;
+                    self.channels[4].setVol(0);//channel.volume.value = 0;
                     self.channels[4].fadeDistortion({time:.2,dest:.2});// = .3;
                     self.channels[4].fadeFeedback({time:.2,dest:0})
                     
@@ -477,7 +527,7 @@ class Master{
                     // self.channels[3].fadeDistortion({dest:1,time:4})
                     //self.channels[3].fadeFilter({dest:1,time:4})
                     
-                    self.channels[3].effect.filter.wet.value = 1;
+                    self.channels[3].setFilter(1)//.wet.value = 1;
                     self.channels[3].fadeIn({time:7})
                     
                     //self.channels[4].crusher.wet.value = .3;
@@ -496,8 +546,8 @@ class Master{
                     self.channels[3].fadeFilter({dest:1,time:7})
                     
                     
-                    self.channels[5].effect.filter.wet.value = 1;//({time:7})
-                    self.channels[5].effect.phaser.wet.value = 1;//({time:7})
+                    self.channels[5].setFilter(1);//.wet.value = 1;//({time:7})
+                    self.channels[5].setPhaser(1);//effect.phaser.wet.value = 1;//({time:7})
                     self.channels[5].fadeIn({time:7})
                     
                     
@@ -646,10 +696,10 @@ export { Master };
 
 class Channel{
 
-	constructor(URL, INDEX, PARENT){
+	constructor(URL, INDEX, PARENT, SLIDER){
+        
         const self = this;
         this.parent = PARENT;
-
         this.index = INDEX;
         this.loaded = false;
         this.channel = new Tone.Channel();//.toDestination();
@@ -669,11 +719,19 @@ class Channel{
 
         this.player.connect(this.channel);
         this.volumeTween;
-        this.effect = new ChannelEffects();
-
-        this.channel.chain(this.effect.distortion, this.effect.crusher, this.effect.phaser, this.effect.filter, this.effect.feedbackDelay, Tone.Destination);
         
         this.volume = this.muteVol;
+        
+        const trackTitle = document.createElement("div");
+        trackTitle.className = "track-title";
+        trackTitle.innerHTML = "track "+INDEX;
+        SLIDER.parent.appendChild(trackTitle);
+
+        this.volObj = this.filterObj = self.setUpSliderDom({param:this.volume, title:"volume", parent:SLIDER.parent, do:function(val){self.sliderSetVol(val)}});//document.createElement("div");
+        
+        this.effect = new ChannelEffects(SLIDER);
+        this.channel.chain(this.effect.distortion, this.effect.crusher, this.effect.phaser, this.effect.filter, this.effect.feedbackDelay, Tone.Destination);
+        
         this.channel.mute = true;
         
         // if(this.index != 0){
@@ -682,6 +740,37 @@ class Channel{
         // }
 
 	}
+
+    setUpSliderDom(OBJ){
+        const self = this;
+        const div = document.createElement("div");
+        div.className = "controls-holder";
+        
+        const titleDiv = document.createElement("div");
+        titleDiv.innerHTML = OBJ.title;
+        titleDiv.className = "label";
+        
+        const sliderHolder = document.createElement("div");
+
+        div.appendChild(titleDiv);
+        div.appendChild(sliderHolder);
+
+        const input = document.createElement("input");
+        input.className = "fx-slider";
+        input.type = "range";
+        input.min = this.muteVol;
+        input.max = 0;
+        input.step = .05;
+        input.value = this.muteVol;
+        input.oninput = function(e){ self.onVolumeChange(self) };
+        sliderHolder.appendChild(input);
+
+        OBJ.parent.appendChild(div);
+        
+        return { div:div, slider:input, param:OBJ.param, do:OBJ.do };
+    }
+
+    
 
     toggle(){
         // this.channel.mute = !this.channel.mute;
@@ -692,19 +781,41 @@ class Channel{
         // }
     }
 
+    onVolumeChange(self){
+        //console.log("hiiiii")
+        self.channel.mute = false;
+        self.channel.volume.value = this.volObj.slider.value;
+    }
+
+    sliderSetVol(val){
+        this.channel.mute = false;
+        this.channel.volume.value = val;
+        
+    }
+
+    setVol(val){
+        this.channel.mute = false;
+        this.channel.volume.value = val;
+        this.volObj.slider.value = this.channel.volume.value;
+    }
+
     unmute(){
         this.channel.mute = false;
         this.channel.volume.value = 0;
+        this.volObj.slider.value = this.channel.volume.value;
     }
 
     echoStop(){
         this.effect.feedbackDelay.wet.value=1;
-        this.player.stop();
-        
+        this.volObj.slider.value = this.muteVol;
+        this.player.stop();   
     }
 
+
     mute(){
-        this.player.stop();//.mute = true;
+        this.player.mute = true;
+        this.channel.volume.value = this.muteVol;
+        this.volObj.slider.value = this.channel.volume.value;
     }
     
 
@@ -722,6 +833,7 @@ class Channel{
 		.onUpdate(() => {
             self.channel.mute = false;
 			self.channel.volume.value = p.vol;
+            self.volObj.slider.value = p.vol;
 		})
 		.start()
 		.onComplete(()=>{
@@ -743,6 +855,7 @@ class Channel{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.channel.volume.value = p.vol;
+            self.volObj.slider.value = p.vol;
 		})
 		.start()
 		.onComplete(()=>{
@@ -762,6 +875,7 @@ class Channel{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.channel.volume.value = p.vol;
+            self.volObj.slider.value = p.vol;
 		})
 		.start()
 		.onComplete(()=>{
@@ -770,30 +884,54 @@ class Channel{
 
     setCrusher(val){
         this.effect.crusher.wet.value = val;
+        if(this.effect.crusherObj != null){
+            this.effect.crusherObj.do(val);
+            this.effect.crusherObj.slider.value = val;
+        }
     }
     fadeCrusher(OBJ){
         this.effect.fadeCrusher(OBJ);
     }
+
     setFeedback(val){
         this.effect.feedbackDelay.wet.value = val;
+        if(this.effect.feedbackObj != null){
+            this.effect.feedbackObj.do(val);
+            this.effect.feedbackObj.slider.value = val;
+        }
     }
     fadeFeedback(OBJ){
         this.effect.fadeFeedback(OBJ);
     }
     setDistortion(val){
         this.effect.distortion.wet.value = val;
+        if(this.effect.distortionObj != null){
+            this.effect.distortionObj.do(val);
+            this.effect.distortionObj.slider.value = val;
+        }
+        
     }
     fadeDistortion(OBJ){
         this.effect.fadeDistortion(OBJ)
     }
+
     setPhaser(val){
         this.effect.phaser.wet.value = val;
+        if(this.effect.phaserObj != null){
+            this.effect.phaserObj.do(val);
+            this.effect.phaserObj.slider.value = val;
+        }
     }
     fadePhaser(OBJ){
         this.effect.fadePhaser(OBJ);
     }
+
     setFilter(val){
         this.effect.filter.wet.value = val;
+        if(this.effect.filterObj != null){
+            this.effect.filterObj.do(val);
+            this.effect.filterObj.slider.value = val;
+        }
     }
     fadeFilter(OBJ){
        this.effect.fadeFilter(OBJ);
@@ -805,7 +943,9 @@ class Channel{
 export { Channel };
 
 class ChannelEffects{
-    constructor(){
+    constructor(OBJ){
+        const self = this;
+        
         this.filter = new Tone.AutoFilter(.01).start();
         this.filter.wet.value = 0;
         this.distortion = new Tone.Distortion(.5);
@@ -816,10 +956,48 @@ class ChannelEffects{
         this.phaser.wet.value = 0;
         this.feedbackDelay = new Tone.FeedbackDelay("8n", 0.5);
         this.feedbackDelay.wet.value = 0;
-        const self = this;
+
+        this.filterObj = self.setUpSliderDom({param:this.filter, title:"filter", parent:OBJ.parent, do:OBJ.doFilter});//document.createElement("div");
+        this.crusherObj = self.setUpSliderDom({param:this.crusher, title:"crusher", parent:OBJ.parent, do:OBJ.doCrusher});//document.createElement("div");
+        this.phaserObj = self.setUpSliderDom({param:this.phaser, title:"phaser", parent:OBJ.parent, do:OBJ.doPhaser});//document.createElement("div");
+        this.feedbackObj = self.setUpSliderDom({param:this.feedbackDelay, title:"feedback", parent:OBJ.parent, do:OBJ.doFeedback});//document.createElement("div");
+        this.distortionObj = self.setUpSliderDom({param:this.distortion, title:"distortion", parent:OBJ.parent, do:OBJ.doDistortion});//document.createElement("div");
+       
         setTimeout(function(){//
             self.reInitWetVals();
         },100)
+    }
+
+    setUpSliderDom(OBJ){
+
+        const div = document.createElement("div");
+        div.className = "controls-holder";
+        
+        const titleDiv = document.createElement("div");
+        titleDiv.innerHTML = OBJ.title;
+        titleDiv.className = "label";
+        
+        const sliderHolder = document.createElement("div");
+
+        div.appendChild(titleDiv);
+        div.appendChild(sliderHolder);
+
+        const input = document.createElement("input");
+        input.className = "fx-slider";
+        input.type = "range";
+        input.min = 0;
+        input.max = 1;
+        input.step = .05;
+        input.value = 0;
+        input.oninput=function(e){
+            OBJ.param.wet.value = input.value;
+            OBJ.do(input.value);
+        }
+        sliderHolder.appendChild(input);
+
+        OBJ.parent.appendChild(div);
+        
+        return { div:div, slider:input, param:OBJ.param, do:OBJ.do };
     }
 
     reInitWetVals(){
@@ -843,6 +1021,10 @@ class ChannelEffects{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.crusher.wet.value = p.wet;
+            if(self.crusherObj != null){
+                self.crusherObj.do(p.wet);
+                self.crusherObj.slider.value = p.wet;
+            }
 		})
 		.start()
 		.onComplete(()=>{
@@ -868,6 +1050,10 @@ class ChannelEffects{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.feedbackDelay.wet.value = p.wet;
+            if(self.feedbackObj != null){
+                self.feedbackObj.do(p.wet);
+                self.feedbackObj.slider.value = p.wet;
+            }
 		})
 		.start()
 		.onComplete(()=>{
@@ -885,6 +1071,10 @@ class ChannelEffects{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.distortion.wet.value = p.wet;
+            if(self.distortionObj != null){
+                self.distortionObj.do(p.wet);
+                self.distortionObj.slider.value = p.wet;
+            }
 		})
 		.start()
 		.onComplete(()=>{
@@ -903,6 +1093,10 @@ class ChannelEffects{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.phaser.wet.value = p.wet;
+            if(self.phaerObj != null){
+                self.phaserObj.do(p.wet);
+                self.phaserObj.slider.value = p.wet;
+            }
 		})
 		.start()
 		.onComplete(()=>{
@@ -911,9 +1105,13 @@ class ChannelEffects{
     }
 
     fadeFilter(OBJ){
+        console.log("fade filter")
+        console.log(OBJ)
         const self = this;
         const o = OBJ == null? {dest:1, time:1} : OBJ;
-        
+
+
+        //const fo = 
         if(this.filter.tween!=null)
             this.filter.tween.stop();
 
@@ -923,6 +1121,10 @@ class ChannelEffects{
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.filter.wet.value = p.wet;
+            if(self.filterObj != null){
+                self.filterObj.do(p.wet);
+                self.filterObj.slider.value = p.wet;
+            }
 		})
 		.start()
 		.onComplete(()=>{
