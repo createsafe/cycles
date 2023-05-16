@@ -25,14 +25,18 @@ import {Master} from './ChannelHelper.js';
 // import { ParticleMetal } from './Particle.js';
 // import { ParticleFire } from './Particle.js';
 
-import { Visuals } from './Visuals.js';
+//import { Visuals } from './Visuals.js';
 import { VisualTest1 } from './VisualTest1.js';
+import { VisualTest2 } from './VisualTest2.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
 import TWEEN from './scripts/jsm/libs/tween.module.js';
+window.fadeTime = 1000;
+
 
 window.TWEEN = TWEEN;
+
 // import { TransformControls } from './scripts/jsm/controls/TransformControls.js';
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
 window.fftMult = 1;
@@ -42,6 +46,9 @@ window.scene;
 window.camera;  
 window.renderer; 
 window.track = 0;
+
+let currVis = 0;
+let currAudio = 0;
 
 let bpm = 134;
 let tempo = 60 / bpm / 24;
@@ -60,7 +67,6 @@ let phaser;
 let compressor;
 let clockInc = 0;
 let input;
-let recording = false;
 let recordedFile;
 const midiClock = new THREE.Clock();
 midiClock.autoStart = false;
@@ -89,103 +95,73 @@ const clock = new THREE.Clock();
 
 const fairies = [];
 const synths = [];
+
 window.playingTime = 60/134/24;
 window.loadObjs = [
-    {loaded:false, group:null, url:"boy.glb", name:"boy", animated:false, model:null},
+    {loaded:false, group:null, url:"boy.glb", name:"boy", model:null},
+    {loaded:false, group:null, url:"bench.glb", name:"bench", model:null},
+    {loaded:false, group:null, url:"walk.glb", name:"walk", model:null},
 ]
-
 
 let master;
 
-
-
 init();
-
 
 function getQuery(){
 
     const query = window.location.search.substring(1);
    	const vars = query.split("&");
     console.log(query)
-    return parseSingle(query);
+    return parseQuery(vars);
     
 }
 
 function parseQuery(vars){
-	for (let i = 0; i < vars.length; i++) {
+    
+    let obj = {live:true};
+    for (let i = 0; i < vars.length; i++) {
         const pair = vars[i].split('=');
-        if(pair != null){
-	        return decodeURIComponent(pair[1])
+        if(pair[0] == "v"){
+            obj.v = parseInt(pair[1]); 
+    	}
+        if(pair[0] == "t"){
+            obj.t = parseInt(pair[1]);
+            obj.live = false; 
     	}
     }
-    return null;
-}
 
-function parseSingle(vars){
-	//for (let i = 0; i < vars.length; i++) {
-    const pair = vars.split('=');
-    if(pair != null){
-        return decodeURIComponent(pair[1])
-    }
-    //}
-    return null;
+    //if(vars.length > 0)
+    return obj;
+    //return false;
 }
 
 
 
-//midi();
-//initInput();
+$('.user-btns-vis').each(function(index){
+    $(this).click(function(){
+        if(window.isLive){
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+index;
+        }else{
+            const loc = window.location.href.split('?')[0];
+            location.href = loc+"?v="+index+"&t="+currAudio;
+        }  
+    });
+});
 
-window.checkIfAllSamplesAreLoaded = function(){
-    return master.allSamplesLoaded();
-}
-
-// window.initSongPlay = function(){
-//     //if(window.i)
-//     //master.playSong();
-//     // for(let i = 0; i<200; i++){
-//     //     const rndMeasure = i+Math.floor(-5+Math.random()*8);
-//     //     if(rndMeasure<1)rndMeasure==1;
-
-//     //     const rndBar = Math.floor(Math.random()*16);
-
-//     //     Tone.Transport.schedule((time) => {
-//     //         const rndEffect = Math.floor(Math.random()*8);
-//     //         const chan = Math.floor( Math.random() * channels.length ); 
-//     //         switch(rndEffect){
-//     //             case 0:
-//     //                 channels[chan].fadeFilter({time:Math.random()*4, dest : Math.random() });
-//     //             break;
-//     //             case 1:
-//     //                 channels[chan].fadeCrusher({time:Math.random()*4, dest : Math.random() });
-//     //             break;
-//     //             case 2:
-//     //                 channels[chan].fadeDistortion({time:Math.random()*4, dest : Math.random() });
-//     //             break;
-//     //             case 3:
-//     //                 channels[chan].fadePhaser({time:Math.random()*4, dest : Math.random() });
-//     //             break;
-//     //             case 4:
-//     //                 channels[chan].toggle();
-//     //             break;
-
-//     //         } 
-//     //         channels[Math.floor( Math.random() * channels.length )].fadeIn({time:Math.random()*4});//channel.fadeIn();
-//     //     }, ""+rndMeasure+":"+rndBar+":0");
-    
-//     // }
-    
-//     // Tone.Transport.schedule((time) => {
-//     //     // invoked on measure 16
-//     //     console.log("measure 4");
-//     //     //channels[2].channel.fadIn();
-//     // }, "4:0:0");
-    
-//     //Tone.Transport.loopEnd = (lastNote.time + lastNote.duration + .01);
-    
-// }
+$('.user-btns-audio').each(function(index){
+    //console.log( index + ": " + $( this ).text() );
+    $(this).click(function(){
+        const loc = window.location.href.split('?')[0];
+        location.href = loc+"?v="+currVis+"&t="+index;
+    })
+});
 
 
+$("#a-live").click(function(){
+    const loc = window.location.href.split('?')[0];
+    location.href = loc+"?v="+currVis;
+})
 
 $("#init-btn, #init-overlay").click(async function(){
     
@@ -206,7 +182,21 @@ $("#init-btn, #init-overlay").click(async function(){
 
 
 $("#play-btn, #stop-btn").click(function(){
-    togglePlayMidi();
+    if(window.isLive){
+        togglePlayMidi();
+    }else{
+        if(master.playing){
+            master.pause();
+            $("#play-btn").show();
+            $("#stop-btn").hide();
+        }else{
+            master.play();
+            $("#play-btn").hide();
+            $("#stop-btn").show();
+
+                   
+        }
+    }
 });
 
 $("#rec-btn").click(function(){
@@ -216,7 +206,7 @@ $("#rec-btn").click(function(){
         $("#rec-btn").css("background-color","#e9e9e9");
     }else{
         master.toggleRecording(false);   
-        bounceFile();
+        //bounceFile();
         killPlaying();
         killRecording();
     }
@@ -248,29 +238,83 @@ async function bounceFile(){
 
 }
 
+document.addEventListener("keydown",onKeyDown);
+
+function onKeyDown(e){
+    console.log(e.keyCode)
+    switch(e.keyCode){
+        case 49:
+            window.fadeTime = 0;
+            break;
+        case 50:
+            window.fadeTime = 500;
+            break;
+        case 51:
+            window.fadeTime = 1000;
+            break;
+        case 52:
+            window.fadeTime = 1500;
+            break;
+        case 53:
+            window.fadeTime = 2000;
+            break;
+        case 54:
+            window.fadeTime = 2500;
+            break;
+        case 55:
+            window.fadeTime = 3000;
+            break;
+        case 56:
+            window.fadeTime = 3500;
+            break;
+        case 57:
+            window.fadeTime = 4000;
+            break;
+        case 90://z
+            break;
+        case 88://x
+            break;
+        case 67://c
+            break;
+        case 86://v
+            break;
+    }
+}
+
 $( "#volume" ).bind( "input", function(event, ui) {
     let vol = -40+parseFloat(event.target.value)*50;
     Tone.getDestination().volume.value = vol;
 });
-$( "#distortion" ).bind( "input", function(event, ui) {
-    master.effects.distortion.wet.value = parseFloat(event.target.value);
-    
+$( "#distortion" ).bind( "input", function(event, ui) { 
+    console.log("asdf")
+    master.updateDistortion(parseFloat(event.target.value));   
+    //master.effects.distortion.wet.value = parseFloat(event.target.value);
 });
+
 $( "#crush" ).bind( "input", function(event, ui) {
-    master.effects.crusher.wet.value = parseFloat(event.target.value);
+    master.updateCrush(parseFloat(event.target.value));
+    //master.effects.crusher.wet.value = parseFloat(event.target.value);
 });
+
 $( "#chill" ).bind( "input", function(event, ui) {
-    master.effects.phaser.wet.value = parseFloat(event.target.value);
+    master.updateChill(parseFloat(event.target.value));
+    //master.effects.phaser.wet.value = parseFloat(event.target.value);
 });
+
 $( "#filter" ).bind( "input", function(event, ui) {
-    master.effects.filter.wet.value = parseFloat(event.target.value);
+    master.updateFilter(event.target.value);
+    //master.effects.filter.wet.value = parseFloat(event.target.value);
 });
+
 $( "#compressor-threshold" ).bind( "input", function(event, ui) {
     master.compressor.threshold.value = parseFloat(event.target.value);
 });
+
 $( "#compressor-ratio" ).bind( "input", function(event, ui) {
     master.compressor.ratio.value = parseFloat(event.target.value);
 });
+
+/*
 
 $("#recorded-stop-btn, #recorded-play-btn").bind( "click", function() {
     
@@ -292,6 +336,9 @@ $("#recorded-stop-btn, #recorded-play-btn").bind( "click", function() {
     }
     
 });
+
+*/
+
 
 $("#recorded-download-btn").bind( "click", function() {
     if(recordedFile){
@@ -346,8 +393,9 @@ function togglePlayMidi(){
     }else{
         isPlaying = false;
         killPlaying();
-        if(recording){
-            bounceFile();
+        if(master.recording){
+            master.toggleRecording(false);   
+            //bounceFile();
             killRecording();   
         }
 
@@ -380,7 +428,6 @@ function killPlaying(){
 
 function killRecording(){
     $("#recorded-audio").fadeIn();
-    recording = false;
     $("#rec-btn").css("background-color","#f00");
 }
 
@@ -436,6 +483,7 @@ window.midiOnMIDImessage = function(event) {
 }
 
 function handleMidiClock(){
+    
     if(!didClock){
 
         if(clockAdd4 == 0){
@@ -446,6 +494,7 @@ function handleMidiClock(){
                 clock4Active = false;
                 clock4.stop();
                 window.clock4Time = clock4.getElapsedTime();
+                $("#bpm-info").html(bpm);
                 //console.log(window.clock4Time)
             }
 
@@ -462,7 +511,6 @@ function handleMidiClock(){
                 clock16Active = false;
                 clock16.stop();
                 window.clock16Time = clock16.getElapsedTime()*2;
-            // console.log(window.clock16Time*2)
             }
             
             $("#16-test").show();
@@ -483,12 +531,15 @@ function handleMidiClock(){
         $("#bpm-test").hide();
         $("#16-test").hide();
         
-        didClock = false;
-        midiClock.stop();
+    
         const time = midiClock.getElapsedTime();
         bpm = Math.round( ( ( 60 / time ) / 24) );
         
         tempo = 60/bpm/24;
+        
+        didClock = false;
+        midiClock.stop();
+     
 
     }
 }
@@ -503,6 +554,7 @@ function requestMIDIAccessSuccess(midi) {
       outputs.push(i.value);
     }
     midiOuts = outputs[0];
+
     if(midiOuts)
         midiOuts.send([0xFC]);
   
@@ -518,8 +570,6 @@ function requestMIDIAccessSuccess(midi) {
 
 function init() {
 
-
-    
     //window.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, .1, 200 );
    // camera = new CinematicCamera( 60, window.innerWidth / window.innerHeight, .1, 200 );
     window.scene = new THREE.Scene();
@@ -555,27 +605,42 @@ function init() {
 }
 
 function initMaster(){
+    
+    const visuals = [
+        VisualTest1,
+        VisualTest2
+    ]
 
-    const q = parseInt(getQuery());
-    if( !q && q!==0 ){
-        console.log("hii")
+    const q = getQuery();
+    
+    if(q.t==null){
+        q.t = Math.floor(Math.random()*2);
+    }
+    if(q.v==null){
+        q.v = Math.floor(Math.random()*2);
+    }
+
+    currVis=q.v;
+    currAudio=q.t;
+
+    if( q.live ){
+      
         window.isLive = true;
         master = new Master({
-            samplesArr:{ visual:new Visuals({ class:VisualTest1 }) }
+            samplesArr:{ visual:visuals[q.v] }
         });
 
     }else{
 
-        console.log("track = "+q);
-    
         window.isLive = false;
-        window.track = parseInt(q);
+        window.track = q.t;//parseInt(q);
         
         const samplesArr = [
             {
                 name:"melting sap",
                 bpm:134,
                 midi:"./extras/ms/mid_export.mid",
+                midiMeasureLength:4,
                 samples:
                 [
                     {url:"./extras/ms/melting-sap-redo-001.wav"},
@@ -585,13 +650,14 @@ function initMaster(){
                     {url:"./extras/ms/melting-sap-redo-005.wav"},
                     {url:"./extras/ms/melting-sap-redo-006.wav"},
                 ],
-                visual:new Visuals({ class:VisualTest1 })
-            
+                visual:visuals[q.v] //new Visuals({ class:visuals[q.v] })
+                
             },
             {
                 name:"test",
                 bpm:134,
                 midi:"./extras/test/mid.mid",
+                midiMeasureLength:2,
                 samples:[
                     {url:"./extras/test/1.wav"},
                     {url:"./extras/test/2.wav"},
@@ -600,7 +666,7 @@ function initMaster(){
                     {url:"./extras/test/5.wav"},
                     {url:"./extras/test/6.wav"},
                 ],
-                visual:new Visuals({ class:VisualTest1 })
+                visual: visuals[q.v]// new Visuals({ class:visuals[q.v] })
             }
 
         ];
@@ -609,8 +675,8 @@ function initMaster(){
         window.clock16Time = ((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
         window.clock4Time = ((60 / bpm) * 4)/2;
 
-
         master = new Master({samplesArr:samplesArr[window.track]});
+    
     }
 
 }
@@ -638,7 +704,8 @@ function loadHelper(OBJ){
         OBJ.group = gltf;
         //console.log(isAllLoaded())
         if(isAllLoaded()){
-            $("#init-overlay").show();
+            $("#loading").show();
+            $("#init-btn").show();
             initMaster();
             animate();
         }
@@ -658,7 +725,6 @@ function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     window.renderer.setSize( window.innerWidth, window.innerHeight );
 
 }

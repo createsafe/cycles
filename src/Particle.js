@@ -17,10 +17,10 @@ import { SplineAnimation } from './SplineAnimation.js';
 import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
 
-const bassGeo = new BoxGeometry( .03, .03, .03  );
+const bassGeo = new BoxGeometry( .05, .05, .05  );
 const bassMat = new MeshStandardMaterial({color:0xff0000});
 const bassMesh = new Mesh(bassGeo, bassMat);
-const snairGeo = new BoxGeometry( .05, .05, .05 );
+const snairGeo = new BoxGeometry( .08, .08, .08 );
 const snairMat = new MeshStandardMaterial();
 const snairMesh = new Mesh(snairGeo, snairMat);
 const toneGeo = new BoxGeometry( .03, .5, .03 );
@@ -342,7 +342,9 @@ class ParticleTone{
 		let st = new Vector3();
 		if(SPECIAL.start != null)
 			st.copy(SPECIAL.start)
-
+		
+		st.add(SPECIAL.notePos)
+		
 		let hue = 0;
 		if(SPECIAL.inc!=null)
 			hue = .6+(( .5 + Math.sin(SPECIAL.inc) *.5 )*.3);//%1.0;
@@ -557,7 +559,7 @@ class ParticlePerc{
 		.onUpdate(() => {
 
 			self.inc = p.inc;
-			const s = (p.inc*2);
+			const s = (p.inc*1.2);
 			self.parent.scale.set(s,s,s);
 
 		})
@@ -583,7 +585,6 @@ class ParticlePerc{
 
 	kill(){
 		this.killed = true;
-		this.
 		this.mesh.geometry.dispose();
 		this.mesh.material.dispose();
 		this.scene.remove(this.mesh);

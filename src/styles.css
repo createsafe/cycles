@@ -43,14 +43,20 @@ body{
   max-width: 60px !important;
 }
 
+#top{
+  position: absolute;
+  padding-top: 20px;
+  padding-left: 20px;
+}
+
 #controls{
   position: absolute;
   padding-bottom:20px;
   left: 50%;
   bottom: 0px;
-  width: 1200px;
+  width: 1500px;
   z-index: 500;
-  margin-left: -600px;
+  margin-left: -750px;
   padding: 20px;
   text-align: center;
 }
@@ -104,4 +110,23 @@ body{
 .label{
   font-size: 14px;
   padding-bottom:5px;
+}
+
+.label-top{
+  text-align: left;
+}
+
+.buttons-holder{
+  width: 150px;
+}
+
+
+.user-btns-vis, .user-btns-audio, .user-btns-live{
+  display: block;
+  float: left;
+  margin-right:5px;
+  margin-bottom:5px;
+}
+#init-btn{
+  display: none;
 }

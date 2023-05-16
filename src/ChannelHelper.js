@@ -15,6 +15,7 @@ import {
 } from './build/three.module.js';
 import { SplineAnimation } from './SplineAnimation.js';
 import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
+import { Visuals } from './Visuals.js';
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
 
 class Master{
@@ -29,6 +30,9 @@ class Master{
         this.crusher;
         this.phaser;
         this.toneMeter;
+        
+        this.midiMeasureLength = OBJ.samplesArr.midiMeasureLength || 0;
+        console.log(this.midiMeasureLength);
 
 		this.toneMeter = new Tone.Meter({ channels: 2 });
 		Tone.Destination.chain(this.toneMeter);
@@ -37,80 +41,157 @@ class Master{
         this.input;
         this.recorder = new Tone.Recorder();
         this.recording = false;
+        this.mediaRecorder;
+        this.recordedChunks = [];
+        this.playing = false;
 
-        this.visual = OBJ.samplesArr.visual;
+        this.activeArr = [];
+        //this.aStream;// = this.dest.stream;
+
+        this.visual = new Visuals({class:OBJ.samplesArr.visual});
 		
+    }
+
+    play(){
+        this.playing = true;
+        Tone.Transport.start();
+    }
+    pause(){
+        this.playing = false;
+        Tone.Transport.pause();
+    }
+    updateDistortion(val){
+        this.effects.distortion.wet.value = val;
+        this.postVisualEffects();
+    }
+    
+    updateCrush(val){
+        this.effects.crusher.wet.value = val;
+        this.postVisualEffects();
+    }
+    
+    updateChill(val){
+        this.effects.phaser.wet.value = val;
+        this.postVisualEffects();
+    }
+    
+    updateFilter(val){
+        
+        this.effects.filter.wet.value = val;
+        this.postVisualEffects();
+    }
+
+    postVisualEffects(){
+        this.visual.vis.postVisualEffects({
+            crush:this.effects.crusher.wet.value,
+            phaser:this.effects.phaser.wet.value,
+            filter:this.effects.filter.wet.value,
+            distortion:this.effects.distortion.wet.value,
+        });
     }
 
     initLive(){
         this.input = new Tone.UserMedia();
         Tone.UserMedia.enumerateDevices().then(window.gotInputSources);
-        // const inputFFT = new Tone.FFT();
-        // input.connect(inputFFT);
+        
         this.input.open();
-
-        // filter = new Tone.AutoFilter(0).start();
-        // filter.wet.value = 0;
-        // distortion = new Tone.Distortion(.5);
-        // distortion.wet.value = 0;
-        // crusher = new Tone.BitCrusher(1);
-        // crusher.wet.value = 0;
-        
-        // // phaser = new Tone.Phaser({
-        // //     frequency: 15,
-        // //     octaves: 5,
-        // //     baseFrequency: 1000
-        // // });
-
-        // phaser = new Tone.Phaser(3.4);
-        
-        
-        // phaser.wet.value = 0;
-        // // connect the player to the filter, distortion and then to the master output
-        // compressor = new Tone.Compressor(-30, 3);
-        // input.chain(distortion, crusher, phaser, filter, compressor, Tone.Destination);
 
         this.effects = new ChannelEffects();
         
         this.input.chain(Tone.Destination);
         
         this.initEffects();
-        
-     
-     
-        
 
     }
 
     toggleRecording(shouldRecord){
+        const self = this;
         this.recording = shouldRecord;
         
         if(this.recording){
-            this.recorder.start();
+            
+            //this.recorder.start();
+
+            const vStream = window.renderer.domElement.captureStream(60);
+            
+            const dest = Tone.Destination.context.createMediaStreamDestination();
+  			const aStream = dest.stream;
+            
+            Tone.Destination.connect(dest);
+
+            const stream = new MediaStream([ vStream.getTracks()[0], aStream.getTracks()[0]]);
+            
+            const options = {
+                mimeType: "video/webm; codecs=vp8",
+                audioBitsPerSecond : 128000,
+                videoBitsPerSecond : 90500000
+            }
+
+            this.mediaRecorder = new MediaRecorder( stream, options );
+            
+            this.mediaRecorder.ondataavailable = function(event){
+                self.handleDataAvailable(event, self);
+            }
+
+            this.mediaRecorder.onstop = function () {
+                self.downloadVideo();
+                self.recordedChunks = [];
+             };
+
+            this.mediaRecorder.start(100);
+           
+        }else{
+
+            this.mediaRecorder.stop();
+
         }
 
     }
 
+    handleDataAvailable(event, self) {
+        if (event.data.size > 0) {
+          self.recordedChunks.push(event.data);
+        }
+    }
+
+    downloadVideo() {
+        const blob = new Blob(this.recordedChunks, {
+          type: "video/webm"
+        });
+        console.log("download")
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.href = url;
+        a.download = "test.webm";
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+      
     switchInput(AUDIOSOURCE){
         this.input.close();
         this.input.open(AUDIOSOURCE);
     }
 
     async initPlayback(){
+        
         const self = this;
+        
         this.midi = await Midi.fromUrl(this.obj.samplesArr.midi);
-        console.log("loaded midi")
+        
         this.midi.tracks.forEach((track) => {
+            self.activeArr.push(false);
+        //    const synth = new Tone.PolySynth({
+        //        envelope: {
+        //            attack: 0.02,
+        //            decay: 0.1,
+        //            sustain: 0.3,
+        //            release: 1,
+        //        },
+        //    });//.toDestination();
 
-           const synth = new Tone.PolySynth({
-               envelope: {
-                   attack: 0.02,
-                   decay: 0.1,
-                   sustain: 0.3,
-                   release: 1,
-               },
-           });//.toDestination();
-           this.synths.push(synth);
+           //this.synths.push(synth);
 
         });
         //this.initMidi();
@@ -118,12 +199,14 @@ class Master{
         for(let i = 0; i<this.obj.samplesArr.samples.length; i++){
             this.channels.push( new Channel( this.obj.samplesArr.samples[i].url, i, this) );
         }
+
         this.initEffects();
       
 
     }
 
     initEffects(){
+
         this.visual.init();
         
         this.effects = new ChannelEffects();
@@ -145,42 +228,78 @@ class Master{
     playMidi(time){
          //const now = Tone.now();
          //let lastNote;
+         console.log("midi playback")
          const self = this;
          let index = 0;
          this.midi.tracks.forEach((track) => {
-            
+
             if(index>5)return;  
+            
             const i = index;
             
-            const synth = self.synths[i];
-            synth.sync();
+            // const synth = self.synths[i];
+            // synth.sync();
             
             track.notes.forEach((note) => {
-                self.synths[i].triggerAttackRelease(
-                    note.name,
-                    note.duration,
-                    note.time+time,
-                    note.velocity
-                );
-              
+                // if(i==0)
+                //     console.log(note)
+
+                // self.synths[i].triggerAttackRelease(
+                //     note.name,
+                //     note.duration,
+                //     note.time+time,
+                //     note.velocity
+                // );
+                const tm = note.time+time;
+                    
                 Tone.Draw.schedule(function(){
+                    //console.log(time)
                    // console.log(self.channels[i])
-                    if(!self.channels[i].channel.muted){                    
+                   //console.log()
+                    if( !self.channels[i].channel.muted && self.channels[i].channel.volume.value > -25 && !self.activeArr[i]){           
+
+                        //console.log()
                         const command = 144+(i%6);
                         const data = {data:[command, note.midi, Math.floor(note.velocity*127) ]};
-                        window.midiOnMIDImessage(data);
-                    }
+                        
+                        //if( self.lastTime != tm && self.lastCommand != command  ){
 
-                 }, note.time+time)
+                            window.midiOnMIDImessage(data);
+                            self.activeArr[i] = true;
+                                
+
+                            setTimeout(function(){
+                                self.activeArr[i] = false;
+                                const dataStop = {data:[command, note.midi, 0 ]};//same as above with velocity at zero to stop the note
+                                window.midiOnMIDImessage(dataStop);
+                                
+                            }, note.duration*1000)   
+                        //}
+
+                      
+                        
+                        
+
+                    }
+                      
+
+                 }, tm)
  
              });
+
              index++;
+
         });
     }
 
     playSong(){
         
         const self = this;
+
+        this.playing = true;
+        $("#play-btn").hide();
+        $("#stop-btn").show();
+        
         // for(let i = 0; i<6; i++){
         //     const rndMeasure = Math.floor(Math.random()*6);
         //     const rndBar = Math.floor(Math.random()*16);
@@ -189,11 +308,11 @@ class Master{
         //     }, ""+rndMeasure+":"+rndBar+":0");
         // }
 
-        for(let i = 0; i<100; i++){//playback 100 times
-            const measure = i*2;
+        for(let i = 0; i<100; i++){//loop midi 100 times
+            const measure = i*this.midiMeasureLength;
             Tone.Transport.schedule((time) => {
                 self.playMidi(time);
-            }, ""+measure+":"+0+":0");
+            }, ""+measure+":0:0");
         
         }
         
@@ -253,6 +372,8 @@ class Master{
         self.channels[0].setDistortion(.3);//distortion.wet.value = .3;//({time:3,dest:1});
         self.channels[0].setCrusher(1);//({time:3,dest:1});
 
+        //const obj=[]
+        
         const obj = [
     
             {
@@ -462,7 +583,7 @@ class Master{
             },
             
         ]
-
+        
 
         
 
@@ -470,11 +591,12 @@ class Master{
 
         for(let t = 0; t< obj.length; t++){
             Tone.Transport.schedule((time) => {
+                
                 obj[t].do();
+                
                 if(obj[t].message!=null)
                     console.log(obj[t].message);
-                //self.channels[0].fadeFilter();
-                //self.channels[0].fadeIn({time:4});
+
             }, obj[t].time);
             console.log(obj[t].time)
     
@@ -694,7 +816,18 @@ class ChannelEffects{
         this.phaser.wet.value = 0;
         this.feedbackDelay = new Tone.FeedbackDelay("8n", 0.5);
         this.feedbackDelay.wet.value = 0;
+        const self = this;
+        setTimeout(function(){//
+            self.reInitWetVals();
+        },100)
+    }
 
+    reInitWetVals(){
+        this.filter.wet.value = 0;
+        this.distortion.wet.value = 0;
+        this.crusher.wet.value = 0;
+        this.phaser.wet.value = 0;
+        this.feedbackDelay.wet.value = 0;
     }
 
     fadeCrusher(OBJ){

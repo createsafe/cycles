@@ -35,6 +35,7 @@ class GlitchPass extends Pass {
 		this.goWild = false;
 		this.curF = 0;
 		this.generateTrigger();
+		this.glitchAmt = 0;
 
 	}
 
@@ -71,24 +72,24 @@ class GlitchPass extends Pass {
 
 		// }
 
+		//console.log(this.glitchAmt)
 
+		//if ( this.goWild == true ) {
 
-		if ( this.goWild == true ) {
-
-			this.uniforms[ 'amount' ].value = Math.random() / 110;
-			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
-			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - .3, .3 );
-			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - .3, .3 );
-			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, .3 );
-			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, .3 );
+			this.uniforms[ 'amount' ].value = (Math.random() / 110)*this.glitchAmt;
+			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI ) *this.glitchAmt;
+			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - .3, .3 )*this.glitchAmt;
+			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - .3, .3 )*this.glitchAmt;
+			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, .3 )*this.glitchAmt;
+			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, .3 )*this.glitchAmt;
 			this.curF = 0;
 			this.generateTrigger();
 
-		} else {
+		//} else {
 
-			this.uniforms[ 'byp' ].value = 1;
+			this.uniforms[ 'byp' ].value = 1-this.glitchAmt;
 
-		}
+		//}
 
 
 

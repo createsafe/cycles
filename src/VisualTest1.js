@@ -55,7 +55,7 @@ import { BrightnessContrastShader } from './scripts/jsm/shaders/BrightnessContra
 import { HueSaturationShader } from './scripts/jsm/shaders/HueSaturationShader.js';
 import { FilmShader } from './scripts/jsm/shaders/FilmShader.js';
 import { GlitchPass } from './scripts/jsm/postprocessing/GlitchPass.js';
-
+import { RenderPixelatedPass }from './scripts/jsm/postprocessing/RenderPixelatedPass.js';
 
 const VERTEX_SHADER = `
     varying vec2 vUv;
@@ -201,24 +201,7 @@ void main() {
 
 class VisualTest1{
     constructor(){
-
-        //const splineGenerator = new GenerativeSplines();
-        //     const bassEmitter = new ParticleEmitter({max:100, particleClass  :ParticleFire});
-        //     const snairEmitter = new ParticleEmitter({max:100, particleClass :ParticleFire});
-        //     const metalEmitter = new ParticleEmitter({max:100, particleClass :ParticleFire});
-        //     const percEmitter = new ParticleEmitter({max:100, particleClass  :ParticleFire});
-        //     const toneEmitter = new ParticleEmitter({max:100, particleClass  :ParticleFire});
-        //     const chordEmitter = new ParticleEmitter({max:100, particleClass :ParticleFire});
-            
-        //     anis.push( new TrackAni({spline:splineGenerator.getRndSuperEllipse({rndStart:.3,verticalSize:Math.random()*.1, circleAmt:Math.PI, rad:2.2}), scene:scene, emitter:bassEmitter }) )//bass
-        //     anis.push( new TrackAni({spline:splineGenerator.getRndSuperEllipse({rndStart:.3,verticalSize:Math.random()*.1, circleAmt:Math.PI, rad:2.2}), scene:scene, emitter:snairEmitter}) )//snair
-        //     anis.push( new TrackAni({spline:splineGenerator.getRndSuperEllipse({rndStart:.3,verticalSize:Math.random()*.1, circleAmt:Math.PI, rad:2.2}), scene:scene, emitter:metalEmitter}) )//perc
-        //     anis.push( new TrackAni({spline:splineGenerator.getRndSuperEllipse({rndStart:.3,verticalSize:Math.random()*.1, circleAmt:Math.PI, rad:2.2}), scene:scene, emitter:percEmitter}) )//perc
-        //     anis.push( new TrackAni({spline:splineGenerator.getRndSuperEllipse({rndStart:.3,verticalSize:Math.random()*.1, circleAmt:Math.PI, rad:2.2}), scene:scene, emitter:toneEmitter}) )//tone
-        //     anis.push( new TrackAni({sp
-        
-
-
+        const self = this;
 
         // this.height = window.innerHeight;
         this.time = 0;
@@ -338,7 +321,6 @@ class VisualTest1{
         const wall = new Mesh(
             new PlaneGeometry(2000,2000),
             new MeshPhysicalMaterial({color:0x888888, side:DoubleSide})
-           
         )
         wall.position.z = -.1;//Math.PI/2;
 
@@ -363,20 +345,31 @@ class VisualTest1{
             }
         })
         this.boy.position.y = -2.5;
-        this.boy.position.x = 1.4;
-        this.boy.position.z = .8;
-        this.boy.rotation.y-=Math.PI/1.5;
-        const s =.1;
+        this.boy.position.x = 1.8;
+        this.boy.position.z = 1.2;
+        this.boy.rotation.y=-Math.PI/1.5;
+        let s = .1;
         this.boy.scale.set(s,s,s);
-
         this.mixer = new AnimationMixer(this.boy);
 		const ani = this.boyAni.animations[0];
 		this.clip = this.mixer.clipAction(ani);  
 		this.clip.play();
+        
+        this.bench = window.getLoadedObjectByName("bench").model;
+        this.bench.position.z = 2;
+        this.bench.position.y = -2.5;
+        s = .2;
+        this.bench.scale.set(s,s,s);
+        this.bench.traverse(function(obj){
+            if(obj.isMesh){
+                obj.castShadow = true;
+            }
+        })
+        
         //console.log(clip)
 
-        //this.bufferImage.scene.add(wall, ground, this.boy);
-        this.bufferImage.scene.add(wall, ground);
+        this.bufferImage.scene.add(wall, ground, this.boy, this.bench);
+        //this.bufferImage.scene.add(wall, ground);
 
         this.emitter = [];
 
@@ -392,6 +385,7 @@ class VisualTest1{
         }
         
         this.tonePerlin = new NoiseVector({scale:.3, speed:.3});
+        this.cameraPerlin = new NoiseVector({scale:.3, speed:.3});
         
         window.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, .1, 200 );
    
@@ -399,7 +393,7 @@ class VisualTest1{
         window.camera.position.y = .2;
         
         const dirLight1 = new DirectionalLight( 0xffffff, 2.2 );
-        dirLight1.position.set( -.2, .3, 1 );
+        dirLight1.position.set( -1.2, 1.3, 1 );
         
         dirLight1.castShadow = true;
         dirLight1.shadow.camera.near = 0;
@@ -432,6 +426,10 @@ class VisualTest1{
         //     pl.position.copy(pos); 
         // }
         
+
+
+
+        /*
         this.controls = new OrbitControls( window.camera, window.renderer.domElement );
         this.controls.listenToKeyEvents( window ); // optional
 
@@ -454,12 +452,38 @@ class VisualTest1{
 		// If set, the interval [ min, max ] must be a sub-interval of [ - 2 PI, 2 PI ], with ( max - min < 2 PI )
 		this.controls.minAzimuthAngle = -.5; // radians
 		this.controls.maxAzimuthAngle = .5; // radians
-            
+        */
+
         this.composer = new EffectComposer( window.renderer );
         this.composer.addPass( new RenderPass( this.bufferImage.scene, window.camera ) );
 
+        
+        this.renderPixelatedPass = new RenderPixelatedPass( 1, this.bufferImage.scene, window.camera );
+		this.composer.addPass( this.renderPixelatedPass );
+
+        // gui.add( renderPixelatedPass, 'normalEdgeStrength' ).min( 0 ).max( 2 ).step( .05 );
+		// gui.add( renderPixelatedPass, 'depthEdgeStrength' ).min( 0 ).max( 1 ).step( .05 );
+        this.renderPixelatedPass.normalEdgeStrength = 4;
+        this.renderPixelatedPass.depthEdgeStrength = 0;
+
+        this.filmShader = new ShaderPass( FilmShader );
+        this.filmShader.uniforms[ 'nIntensity' ].value = 0;
+        this.filmShader.uniforms[ 'sIntensity' ].value = 0;
+        this.filmShader.uniforms[ 'grayscale' ].value = 0;
+        this.composer.addPass(this.filmShader)
+
+        
+        this.glitchPass = new GlitchPass();
+        this.composer.addPass( this.glitchPass );
+        
+
+        this.rbgShift = new ShaderPass( RGBShiftShader );
+        this.rbgShift.uniforms[ 'amount' ].value = 0.00;
+        //this.rbgShift.addedToComposer = false;
+        this.composer.addPass( this.rbgShift );
+
         this.brtCont = new ShaderPass( BrightnessContrastShader );
-        this.composer.addPass(this.brtCont)
+        this.composer.addPass(this.brtCont);
 
         this.hue = new ShaderPass( HueSaturationShader );
         this.composer.addPass(this.hue)
@@ -468,20 +492,12 @@ class VisualTest1{
         this.brtCont.uniforms[ 'contrast' ].value = .1;
         this.brtCont.uniforms[ 'brightness' ].value = .1;
 
-        this.filmShader = new ShaderPass( FilmShader );
-        this.filmShader.uniforms[ 'nIntensity' ].value = .2;
-        this.filmShader.uniforms[ 'sIntensity' ].value = .3;
-        this.filmShader.uniforms[ 'grayscale' ].value = .3;
-        this.filmShader.addedToComposer = false;
-        this.composer.addPass(this.filmShader)
 
-        this.glitchPass = new GlitchPass();
-        this.composer.addPass( this.glitchPass );
+        this.cameraTween;
+        this.cameraNoiseSpeed = .2+Math.random()*.5;
+        self.initCam();
+
         
-        this.rbgShift = new ShaderPass( RGBShiftShader );
-        this.rbgShift.uniforms[ 'amount' ].value = 0.0025;
-        //this.rbgShift.addedToComposer = false;
-        this.composer.addPass( this.rbgShift );
 
         // const params = {
         //     exposure: 1,
@@ -526,9 +542,12 @@ class VisualTest1{
         for(let i = 0; i<this.emitter.length; i++){
             this.emitter[i].update(OBJ); 
         }
-        this.tonePerlin.update(OBJ);
-        this.emitter[3].special.start = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z+.75);// this.tonePerlinPos.x, this.tonePerlinPos.y, this.tonePerlinPos.z);
+        this.tonePerlin.update({delta:OBJ.delta*4});
+        this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
+        const tp = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z).multiplyScalar(.2);
+        this.emitter[3].special.start = new Vector3().set(tp.x, tp.y, .75+tp.z);// this.tonePerlinPos.x, this.tonePerlinPos.y, this.tonePerlinPos.z);
         this.emitter[3].special.inc = this.inc*.1;
+        
         // for(let i = 0; i < this.lightsArr.length; i++){
             
         //     const fft = window.fft.getValue()[ this.lightsArr[i].fftIndex ];
@@ -562,22 +581,83 @@ class VisualTest1{
         this.bufferImage.uniforms['deformInc'].value = this.deformInc;
         this.bufferImage.uniforms['feedbackInc'].value = this.feedbackInc;
 
-        this.controls.update();
 
-
-       
-        
+        //this.controls.update();
         //this.emitter.update(OBJ);
     }
-    
-    parseCommand(COMMAND){
-        if(window.isLive){
-            return COMMAND;
-        }else{
-            return 144+COMMAND;
-        }
-    }
 
+    initCam(){
+
+      const self = this;
+      const p = {inc:0}
+      const xFrom = -16+Math.random()*32;
+      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 6 + Math.random() * 22);
+      let xTo = Math.random()*16;
+      if(xFrom>0)
+          xTo *=-1;
+      
+      const toPos = new Vector3().set(xTo, -1+Math.random() * 7, 6 + Math.random() * 22);
+      const fnlPos = new Vector3(); 
+      const noiseMult = -5+Math.random()*10;
+
+      window.camera.position.copy(fromPos);
+      window.camera.fov = 15+Math.random()*40;
+      this.cameraNoiseSpeed = .2+Math.random()*.5;
+      
+      this.cameraTween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+      .to({ inc:1 }, ((window.clock16Time)*(1+Math.random()*5))*1000) // Move to (300, 200) in 1 second.
+      .easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+      .onUpdate(() => {
+              fnlPos.lerpVectors(fromPos, toPos, p.inc);
+              window.camera.position.copy(fnlPos).add(self.cameraPerlin.vector.multiplyScalar(noiseMult));
+              window.camera.lookAt(new Vector3())
+      })
+      .start()
+      .onComplete(()=>{
+        //self.kill();
+        self.initCam();
+      });
+    }
+    
+    postVisualEffects(OBJ){
+
+        
+        this.hue.uniforms[ 'saturation' ].value = 0-OBJ.filter;// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .1+((OBJ.filter)*.6);
+        this.brtCont.uniforms[ 'brightness' ].value = .1+((OBJ.filter)*.1);
+
+        // this.filmShader.uniforms[ 'nIntensity' ].value = .2;
+        // this.filmShader.uniforms[ 'sIntensity' ].value = .3;
+        // this.filmShader.uniforms[ 'grayscale' ].value = .3;
+        // this.filmShader.addedToComposer = false;
+        // this.composer.addPass(this.filmShader)
+
+        // this.composer.addPass( this.glitchPass );
+        this.glitchPass.glitchAmt = OBJ.crush;
+        // this.rbgShift.uniforms[ 'amount' ].value = 0.0025;
+        //this.filmShader.uniforms[ 'nIntensity' ].value = .2
+        
+        this.rbgShift.uniforms[ 'amount' ].value = OBJ.distortion*.007;
+        this.filmShader.uniforms[ 'nIntensity' ].value = OBJ.distortion*4;
+        this.filmShader.uniforms[ 'sIntensity' ].value = OBJ.distortion*4;
+
+        this.renderPixelatedPass.setPixelSize( 1+Math.floor(OBJ.phaser*8) );
+
+
+
+        
+
+
+        
+        // this.visual.vis.postVisualEffects({
+        //     crush:this.effects.crusher.wet.value,
+        //     phaser:this.effects.phaser.wet.value,
+        //     filter:this.effects.filter.wet.value,
+        //     distortion:this.effects.distortion.wet.value,
+        // });
+
+    }
+    
     midiIn(OBJ){
         const self= this;
         if(OBJ.note!=null){
@@ -658,7 +738,9 @@ class VisualTest1{
                         //         self.emitter[2].emit(OBJ);
                         //     },0);
                         // }
-
+                        
+                        OBJ.notePos = new Vector3( 0 , ((-62+OBJ.note)*.1) + (-.2+Math.random()*.4), 0).multiplyScalar(1);
+                        
                         self.emitter[3].toggleEmit(true, OBJ);
                     }else{
                         self.emitter[3].toggleEmit(false);

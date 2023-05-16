@@ -14,23 +14,53 @@
 		<div id="bpm-test" style="position: fixed;bottom: 20px;right: 0px; width: 20px; height: 20px;z-index: 2000; background-color: #f00;"></div>
 		<div id="16-test" style="position: fixed;bottom: 0px;right: 0px; width: 20px; height: 20px;z-index: 2000; background-color: #00f;"></div>
 			
-		<div id="init-overlay" style="display:none">
+		<div id="init-overlay">
 			<div>
+				<div id="loading">loading...</div>
 				<button class="my-button" id="init-btn">
 					Start
 				</button>
 			</div>
 		</div>
-		<div id="content" style="position:absolute; top:0px; left:0px;"></div>
+
+		
+		<div id="top">
+			
+			<div class="controls-holder buttons-holder">
+				<div class="label label-top" >
+					Visuals
+				</div>
+				<div>
+					<button class="user-btns-vis">0</button>
+					<button class="user-btns-vis">1</button>
+				</div>	
+			</div>
+
+			<div class="controls-holder buttons-holder">
+				<div class="label label-top" >
+					Audio
+				</div>
+				<div>
+					<button class="user-btns-live" id="a-live">live</button>
+					<button class="user-btns-audio">0</button>
+					<button class="user-btns-audio">1</button>
+				</div>	
+			</div>
+		</div>
+		
 		<div id="controls">
 			
+			
+
+		
+
 			<div class="controls-holder">
 				<select id="audioinput" style="max-width:100px;">
 					<option>default (selection not supported)</option>
 				</select>
 			</div>
 			<div class="controls-holder">
-				BPM:<span id="bpm-info">0</span>
+				Est BPM:<span id="bpm-info">0</span>
 			</div>
 
 			<div class="controls-holder">
@@ -42,8 +72,8 @@
 				<button class="my-button my-button-icon record-btn" id="rec-btn">●</button>
 			</div>
 
-			
-			<div class="controls-holder" id="recorded-audio">
+			<!--
+			<div class="controls-holder" id="recorded-audio">--
 				<div class="label">
 					Recorded Audio
 				</div>
@@ -52,8 +82,8 @@
 					<button class="my-button my-button-small" id="recorded-stop-btn" style="display:none;">◼</button>
 					<button class="my-button my-button-small" id="recorded-download-btn">↷</button>
 				</div>
-
 			</div>
+			-->
 
 			
 			<div class="controls-holder">
