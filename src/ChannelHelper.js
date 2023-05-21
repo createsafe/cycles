@@ -81,6 +81,7 @@ class Master{
     
     updateChill(val){
         if(this.effects){
+            console.log("phaser")
             //this.effects.phaser.wet.value = val;
             this.postVisualEffects();
         }
@@ -94,7 +95,10 @@ class Master{
     }
 
     updateFeedback(val){
-        console.log("feed back= "+val);
+        if(this.effects){
+            //this.effects.filter.wet.value = val;
+            this.postVisualEffects();
+        }
         // if(this.effects){
         //     this.effects.filter.wet.value = val;
         //     this.postVisualEffects();
@@ -107,6 +111,7 @@ class Master{
             phaser:this.effects.phaser.wet.value,
             filter:this.effects.filter.wet.value,
             distortion:this.effects.distortion.wet.value,
+            feedback:this.effects.feedbackDelay.wet.value,
         });
     }
 
@@ -115,15 +120,6 @@ class Master{
         Tone.UserMedia.enumerateDevices().then(window.gotInputSources);
         
         this.input.open();
-        
-        //this.filterObj = self.setUpSliderDom({param:this.filter, title:"filter", parent:OBJ.parent, do:OBJ.doFilter});//document.createElement("div");
-        
-        // this.effects = new ChannelEffects(
-        //     {
-        //         parent:document.getElementById("master-fx"),
-        //         doFilter:function(val){ this.updateFilter(val) }
-        //     }
-        // );
         
         this.input.chain(Tone.Destination);
         
@@ -1082,18 +1078,20 @@ class ChannelEffects{
     }
 
     fadePhaser(OBJ){
-
+        console.log("phaser")
         const self = this;
         const o = OBJ == null? {dest:1, time:1} : OBJ;
         if(this.phaser.tween!=null)
             this.phaser.tween.stop();
+        
         const p = {wet: this.phaser.wet.value };
         this.phaser.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ wet: o.dest}, o.time*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             self.phaser.wet.value = p.wet;
-            if(self.phaerObj != null){
+            if(self.phaserObj != null){
+                console.log("hiii")
                 self.phaserObj.do(p.wet);
                 self.phaserObj.slider.value = p.wet;
             }

@@ -29,7 +29,8 @@ import {
     AmbientLight,
     PointLight,
     PerspectiveCamera,
-    SkeletonHelper
+    SkeletonHelper,
+    AdditiveBlending
 
 } from './build/three.module.js';
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
@@ -42,6 +43,8 @@ import { ParticleTone } from "./Particle2.js";
 import { ParticleChord } from "./Particle2.js";
 import { ParticlePerc } from "./Particle2.js";
 
+import { CustomMaterial } from "./CustomMaterial.js"
+
 import { NoiseVector } from "./NoiseHelper.js";
 
 import { EffectComposer } from './scripts/jsm/postprocessing/EffectComposer.js';
@@ -49,7 +52,6 @@ import { RenderPass } from './scripts/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from './scripts/jsm/postprocessing/ShaderPass.js';
 import { RGBShiftShader } from './scripts/jsm/shaders/RGBShiftShader.js';
 import { AfterimagePass } from './scripts/jsm/postprocessing/AfterimagePass.js';
-import { DotScreenShader } from './scripts/jsm/shaders/DotScreenShader.js';
 import { BrightnessContrastShader } from './scripts/jsm/shaders/BrightnessContrastShader.js';
 import { HueSaturationShader } from './scripts/jsm/shaders/HueSaturationShader.js';
 import { FilmShader } from './scripts/jsm/shaders/FilmShader.js';
@@ -62,7 +64,7 @@ import { RenderPixelatedPass }from './scripts/jsm/postprocessing/RenderPixelated
 class VisualTest2{
     constructor(){
         const self = this;
-
+        this.mats = new CustomMaterial(  );
         // this.height = window.innerHeight;
         this.time = 0;
         this.scene = window.scene;
@@ -81,14 +83,42 @@ class VisualTest2{
         this.boy = window.getLoadedObjectByName("walk").model;
         this.boyAni = window.getLoadedObjectByName("walk").group;
         this.meshArray = [];
+        
         ///this.boy.castShadow = true; 
         this.boy.traverse(function(obj){
             if(obj.isMesh){
                 obj.castShadow = true;
-                obj.material.visible = false;
-                self.meshArray.push(obj);
-                //obj.material.transparent = true;
-                //obj.material.opacity = 0;
+                obj.side=DoubleSide;
+                //obj.material.visible = false;
+                
+                self.meshArray.push( {mesh:obj, index: Math.floor(Math.random()*1024), mult : Math.random() });
+
+                const hue = Math.random();
+                const hue2 = (hue+(.2+Math.random()*.2))%1.0
+                const rnbAmt = Math.random()*1;
+                const params = {
+                    twistAmt:(-1+Math.random()*2)*0,
+                    noiseSize:100+(-1+Math.random()*2)*1500.,
+                    twistSize:100+(Math.random()*1000),
+                    noiseAmt:(-1+Math.random()*2)*.2,
+                    rainbowAmt:rnbAmt,
+                    gradientSize: (1+Math.random()*4.0),
+                    gradientAngle: Math.random()*Math.PI*2,
+                    gradientAdd:.5+Math.random()*.5,
+                    rainbowGradientSize:200+(.2+Math.random())*500,
+                    gradientOffset:-100+Math.random()*200,
+                    topColor:new Color().setHSL(hue, .6+Math.random()*.2,.25+(Math.random()*.1)),
+                    bottomColor:new Color().setHSL(hue2, .6+Math.random()*.2,.25+(Math.random()*.1)),
+                    deformSpeed:(-1+Math.random()*2)*5,
+                    colorSpeed:(-1+Math.random()*2)*5,
+                    shouldLoopGradient:1,
+                }
+                
+                const mat = self.mats.getCustomMaterial(obj.material, params)
+                obj.material = mat;
+                 //obj.material.transparent = true;
+                 //obj.material.opacity = .8;
+                // obj.material.blendMode = AdditiveBlending;
                 
             }
         })
@@ -118,7 +148,6 @@ class VisualTest2{
         this.emitter.push(new ParticleEmitter({max:200, particleClass:ParticlePerc}));
         this.emitter.push(new ParticleEmitter({max:toneLength, particleClass:ParticleTone}));
         this.emitter.push(new ParticleEmitter({max:chordLength, particleClass:ParticleChord}));
-        
 
         for(let i = 0; i<this.emitter.length; i++){
             this.emitter[i].obj = {scene:this.parent}; 
@@ -159,15 +188,11 @@ class VisualTest2{
         this.composer = new EffectComposer( window.renderer );
         this.composer.addPass( new RenderPass( this.scene, window.camera ) );
 
-        
         this.renderPixelatedPass = new RenderPixelatedPass( 1, this.scene, window.camera );
 		this.composer.addPass( this.renderPixelatedPass );
 
         this.renderPixelatedPass.normalEdgeStrength = 4;
         this.renderPixelatedPass.depthEdgeStrength = 0;
-
-        this.afterimagePass = new AfterimagePass();
-        //this.composer.addPass( this.afterimagePass );
 
         this.filmShader = new ShaderPass( FilmShader );
         this.filmShader.uniforms[ 'nIntensity' ].value = 0;
@@ -183,6 +208,11 @@ class VisualTest2{
         //this.rbgShift.addedToComposer = false;
         this.composer.addPass( this.rbgShift );
 
+        this.afterimagePass = new AfterimagePass();
+        this.composer.addPass( this.afterimagePass );
+        this.afterimagePass.uniforms[ 'damp' ].value = 0;
+
+
         this.brtCont = new ShaderPass( BrightnessContrastShader );
         this.composer.addPass(this.brtCont);
 
@@ -192,6 +222,8 @@ class VisualTest2{
         this.hue.uniforms[ 'saturation' ].value = 0;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .1;
         this.brtCont.uniforms[ 'brightness' ].value = .1;
+
+        
 
         this.bones = [
             "pelvis",
@@ -255,8 +287,11 @@ class VisualTest2{
     
     update(OBJ){
         //console.log();
-        
+        this.mats.update(OBJ);
         const aniSpeed = this.map(window.clock4Time, .2, 2, 2, .2);// = this.map(window.clock4Time, );
+
+        this.afterimagePass.uniforms[ 'time' ].value += OBJ.delta;
+
         //60 bpm = 1 beat per second 
         //ani is one second 
         this.clip.timeScale = aniSpeed/2; 
@@ -293,6 +328,20 @@ class VisualTest2{
                 this.chordInc++;
             }
         }
+
+        for(let i = 0; i<this.meshArray.length; i++){
+            //-150
+            //-30
+
+            const val = this.map(window.fft.getValue()[ this.meshArray[i].index ], -160, -30, -1, 1);// (50 + (window.fft.getValue()[ this.meshArray[i].index ]))*.1;
+            //console.log(val)
+            //console.log( window.fft.getValue()[ this.meshArray[i].index ] );  
+            if(this.meshArray[i].mesh.material.userData.shader!=null){
+                this.meshArray[i].mesh.material.userData.shader.uniforms.noiseAmt.value = val*this.meshArray[i].mult;
+            }
+        }
+
+
         
         this.composer.render();
 
@@ -303,6 +352,7 @@ class VisualTest2{
         this.feedbackInc += OBJ.delta*3;
         
     }
+  
 
     initCam(){
 
@@ -311,16 +361,21 @@ class VisualTest2{
         
         const noiseMult = -5+Math.random()*10;
 
-        window.camera.fov = 15+Math.random()*40;
+        window.camera.fov = 9+Math.random()*25;
+        window.camera.updateProjectionMatrix();
+        
 		this.cameraNoiseSpeed = .2+Math.random()*.5;
         
         const rotRnd = (Math.PI*2)*Math.random();
-        const rndY = -1+Math.random()*7;
-        const rndRotAmt = Math.random()*2;
+        const rndY = 1+Math.random()*7;
+        
+        let rndRotAmt = 1+Math.random()*3;
+        if(Math.random()>.5)rndRotAmt *=-1;
+
         const rndRad = 12+Math.random()*20;
         
         this.cameraTween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, ((window.clock16Time)*(1+Math.random()*5))*1000) // Move to (300, 200) in 1 second.
+		.to({ inc:1 }, ((window.clock16Time)*(.5+Math.random()*2))*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             //fnlPos.lerpVectors(fromPos, toPos, p.inc);
@@ -341,6 +396,7 @@ class VisualTest2{
     
     postVisualEffects(OBJ){
 
+        this.afterimagePass.uniforms[ 'damp' ].value = OBJ.feedback;
         
         this.hue.uniforms[ 'saturation' ].value = 0-OBJ.filter;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .1+((OBJ.filter)*.6);
@@ -395,31 +451,35 @@ class VisualTest2{
     }
 
     toggleMesh(){
-        const self = this;
+        
+        const self = this;  
         
         const mesh = this.meshArray [ Math.floor( Math.random() * this.meshArray.length ) ]; 
-        mesh.material.visible = true;
-        if(Math.random()>.5){
-            mesh.material.transparent = true;
-            mesh.material.opacity = .7;//Math.random();
-        }else{
-            mesh.material.transparent = false;
-        }
+        mesh.mesh.material.visible = false;
+        // if(Math.random()>.5){
+        //     mesh.material.transparent = true;
+        //     mesh.material.opacity = .7;//Math.random();
+        // }else{
+        //     mesh.material.transparent = false;
+        // }
 
-        mesh.material.color = new Color().setHSL(Math.random(), 1, .4);
+        // mesh.material.color = new Color().setHSL(Math.random(), 1, .4);
 
         setTimeout(function(){
-            mesh.material.visible = false;
-        }, 200+Math.random()*700)
+            mesh.mesh.material.visible = true;
+        }, 300+Math.random()*500)
     }
 
     midiIn(OBJ){
         const self= this;
         if(OBJ.note!=null){
             //const com = this.parseCommand(OBJ.command)
+            
             if(OBJ.velocity>0){
                 //if(Math.random()>.2){
+                for(let i = 0; i < Math.floor(200+Math.random()*200); i++){
                     self.toggleMesh();
+                }
                 //}
         
             }
@@ -431,7 +491,7 @@ class VisualTest2{
                     if(OBJ.velocity > 0){
                         OBJ.instanceRandom = Math.random();
                         OBJ.globalInc = this.inc;
-                        for(let i = 0; i < 100; i++){
+                        for(let i = 0; i < 80; i++){
                             setTimeout(function(){
                                 const transforms = self.getRndBonePosition() 
                                 OBJ.from = transforms.from;
@@ -448,7 +508,7 @@ class VisualTest2{
                         OBJ.instanceRandom = -.5+Math.random();
                         OBJ.globalInc = this.inc;
                         
-                        for(let i = 0; i < 100; i++){
+                        for(let i = 0; i < 80; i++){
                             setTimeout(function(){
                                 const transforms = self.getRndBonePosition() 
                                 OBJ.from = transforms.from;
@@ -465,14 +525,14 @@ class VisualTest2{
                         OBJ.instanceRandom = -.5+Math.random();
                         OBJ.globalInc = this.inc;
                         
-                        for(let i = 0; i < 100; i++){
+                        for(let i = 0; i < 80; i++){
                             setTimeout(function(){
                                 const transforms = self.getRndBonePosition() 
                                 OBJ.from = transforms.from;
                                 OBJ.to = transforms.to;
                                 OBJ.index = i;
                                 self.emitter[2].emit(OBJ);
-                            },i*5);
+                            },0);
                         }
                     }
                     break;
@@ -482,14 +542,14 @@ class VisualTest2{
                         OBJ.instanceRandom = -.5+Math.random();
                         OBJ.globalInc = this.inc;
                         
-                        for(let i = 0; i < 100; i++){
+                        for(let i = 0; i < 80; i++){
                             setTimeout(function(){
                                 const transforms = self.getRndBonePosition() 
                                 OBJ.from = transforms.from;
                                 OBJ.to = transforms.to;
                                 OBJ.index = i;
                                 self.emitter[3].emit(OBJ);
-                            },i*1);
+                            },0);
                         }
                     }
 
@@ -538,88 +598,5 @@ class VisualTest2{
     }
 }
 
-class BufferShader {
-
-    constructor(fragmentShader, uniforms = {}, objs) {
-
-        this.uniforms = uniforms;
-        this.material = new ShaderMaterial({
-            fragmentShader: fragmentShader,
-            vertexShader: VERTEX_SHADER,
-            uniforms: uniforms
-        });
-
-        this.scene = new Scene();
-        this.meshes = objs;
-
-        // for(let i = 0; i < this.meshes.length; i++){
-        //     this.meshes[i].position.y = 0;// -.5+Math.random();
-        //     this.scene.add(this.meshes[i]);
-        // }
-
-        const bgMesh = new Mesh(new BoxGeometry(4, 4, .1), this.material); 
-        //bgMesh.position.z=-3;
-        this.scene.add(bgMesh);
-
-        this.speed = -1+Math.random()*2;
-        this.inc = Math.random()*200;
-        
-    }
-
-    update(OBJ){
-        // for(let i = 0; i<this.meshes.length; i++){
-        //     this.meshes[i].rotation.z += OBJ.delta*(this.speed);
-        //     this.inc+=(OBJ.delta*(this.speed));
-        //     this.meshes[i].position.x = (Math.sin(this.inc*.1)) * .4;
-        // }
-    }
-
-}
-  
-
-
-class BufferManager {
-
-    constructor(renderer, size) {
-  
-      this.renderer = renderer;
-  
-      this.readBuffer = new WebGLRenderTarget(size.width, size.height, {
-        minFilter: LinearFilter,
-        magFilter: LinearFilter,
-        format: RGBAFormat,
-        type: FloatType,
-        stencilBuffer: false
-      });
-  
-      this.writeBuffer = this.readBuffer.clone();
-  
-    }
-  
-    swap() {
-      const temp = this.readBuffer;
-      this.readBuffer = this.writeBuffer;
-      this.writeBuffer = temp;
-    }
-  
-    render(scene, camera, toScreen = false) {
-      if (toScreen) {
-        this.renderer.setRenderTarget(this.writeBuffer);
-        //this.renderer.clear();
-        this.renderer.render(scene, camera)
-        this.renderer.setRenderTarget(null);
-        //this.swap();
-      } else {
-        this.renderer.setRenderTarget(this.writeBuffer);
-        this.renderer.clear();
-        this.renderer.render(scene, camera)
-        this.renderer.setRenderTarget(null);
-        this.swap();
-      }
-      
-    }
-  
-  }
-  
 
 export {VisualTest2};

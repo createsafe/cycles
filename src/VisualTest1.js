@@ -29,6 +29,7 @@ import {
     AmbientLight,
     PointLight,
     PerspectiveCamera,
+    BackSide
 
 
 } from './build/three.module.js';
@@ -44,13 +45,12 @@ import { ParticlePerc } from "./Particle.js";
 
 import { NoiseVector } from "./NoiseHelper.js";
 
-
+import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
 
 import { EffectComposer } from './scripts/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from './scripts/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from './scripts/jsm/postprocessing/ShaderPass.js';
 import { RGBShiftShader } from './scripts/jsm/shaders/RGBShiftShader.js';
-import { DotScreenShader } from './scripts/jsm/shaders/DotScreenShader.js';
 import { BrightnessContrastShader } from './scripts/jsm/shaders/BrightnessContrastShader.js';
 import { HueSaturationShader } from './scripts/jsm/shaders/HueSaturationShader.js';
 import { FilmShader } from './scripts/jsm/shaders/FilmShader.js';
@@ -154,26 +154,30 @@ vec4 when_gt( vec4 x, float y ) {
 }
 
 void main() {
-  float m = .1;
-  float sm = .1;
+
+  float rainbowSin = sin((vUv.y*2.)+(inc*0.3))*2.1;
+  float m = .01;//rainbowSin*.01;
+  float sm = 4.1;
   
-  vec3 rainbow = vec3( .5 + sin( ( (inc*sm) + ((vUv.x*m) * uvXMult) ) )*.5, .5 + sin( ( ( (inc*sm) + ( (vUv.x*m) * uvXMult) ) ) + ( 3.14 / 2.) ) *.5, .5 + sin( ( ( (inc*sm) - ( (vUv.x*m) * uvXMult) ) ) + (3.14) )*.5 ) * rainbowFinalMult;
+  vec3 rainbow = vec3( .5 + sin( ( (inc*sm) + ((vUv.x * m) * uvXMult) ) )*.5, .5 + sin( ( ( (inc*sm) + ( (vUv.x*m) * uvXMult) ) ) + ( 3.14 / 2.) ) *.5, .5 + sin( ( ( (inc*sm) - ( (vUv.x*m) * uvXMult) ) ) + (3.14) )*.5 ) * (rainbowFinalMult*0.1);
   //vec3 rainbow = vec3( .5 + sin( ( inc + (vUv.x*50.2) ) * m )*.5, .5+sin( (( inc + (vUv.x * 50.2) ) * m) + ( 3.14 / 2.) ) *.5, .5 + sin( ( (inc - (vUv.y * 200.2) ) * 20. )+( 3.14) )*.5 ) * 4.4;
-        
-  float scl = 1.0+0.0111;
+  
+  float scSin = sin( (vUv.y * (feedbackFreq * 200.) ) +( feedbackInc*100.1 ) ) * .1;
+  
+  float scl = 1.0+(0.0111*scSin);
   float off = (1.0 -  scl ) * .5;
         
   // float snY = sin( (vUv.y*.1)+(inc*.1) ) * 0.005;
   // float snX = cos( (vUv.x*.1)+(inc*.1) ) * 0.005;
 
-  float snY = sin( (vUv.y*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount;
-  float snX = cos( (vUv.x*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount;
+  float snY = sin( (vUv.y*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*2.;
+  float snX = cos( (vUv.x*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*2.;
 
   // float snY1 = sin( (vUv.y*10.1)+(inc*.1) ) * 0.04;
   // float snX1 = cos( (vUv.x*10.1)+(inc*.1) ) * 0.04;
 
-  float snY1 = sin( (vUv.y*deformFreq)+(deformInc*.1) ) * deformAmount;
-  float snX1 = cos( (vUv.x*deformFreq)+(deformInc*.1) ) * deformAmount;
+  float snY1 = sin( (vUv.y*deformFreq)+(deformInc) ) * deformAmount;
+  float snX1 = cos( (vUv.x*deformFreq)+(deformInc) ) * deformAmount;
   
   //vec4 texelOld = texture2D( tOld, vec2( off+vUv.x*(scl), off+vUv.y * (scl)) );
   vec4 texelOld = texture2D( tOld, vec2( off + vUv.x * (scl+snX), off + vUv.y * (scl+snY)) );
@@ -182,9 +186,10 @@ void main() {
 
   //texelOld *= 0.101 / when_gt( texelOld, .2	 );
   //texelOld *= .8 / when_gt( texelOld, 0.4	 );
-  texelOld *= ((texelStart+texOldMult)*texelMult) / when_gt( texelOld, wGetVal	 );
+  texelOld *= ((texelStart+texOldMult) * .1) / when_gt( texelOld, .4	 );
+  float rainbowMult2 = 1.;
   
-  gl_FragColor = (1.0 - min( 1.0 - texelNew, ( vecDiv / vec4( (texelOld.r * colR) / (rainbow.x*rainbowMult), (texelOld.r * colG) / (rainbow.y*rainbowMult), (texelOld.r * colB) / (rainbow.z * rainbowMult) , 1. )) / finalDiv));
+  gl_FragColor = (1.0 - min( 1.0 - texelNew, ( vecDiv / vec4( (texelOld.r * colR) / (rainbow.x*rainbowMult2), (texelOld.r * colG) / (rainbow.y*rainbowMult2), (texelOld.r * colB) / (rainbow.z * rainbowMult2) , 1. )) / finalDiv));
   
   //gl_FragColor = ( 1.0 - min( 1.0 - texelNew, ( 1.8 / vec4( (texelOld.r * colorMult.x) * rainbow.x, (texelOld.r * colorMult.y) * rainbow.y, (texelOld.r * colorMult.z) / rainbow.z ,1. )) * .9025));
   //gl_FragColor = (1.0 - min( 1.0 - texelNew, (0.8 / texelOld.r) / .91025));
@@ -196,6 +201,38 @@ void main() {
 }
 `;
 
+
+class Chicken{
+  constructor(OBJ){
+    //this.mesh = 
+    this.mesh = OBJ.mesh;//window.getLoadedObjectByName("boy").model;
+    this.ani = OBJ.group;
+    ///this.boy.castShadow = true; 
+    this.mesh.traverse(function(obj){
+        if(obj.isMesh){
+            obj.castShadow = true;
+        }
+    })
+    this.mesh.position.copy(OBJ.pos);
+
+    let s = .6+Math.random()*.3;
+    this.mesh.scale.set(s,s,s);
+    
+    this.mixer = new AnimationMixer(this.mesh);
+    const ani = OBJ.group.animations[1];
+    this.idle = this.mixer.clipAction(ani);  
+    this.idle.play();
+    this.mesh.rotation.y+=Math.random()*(Math.PI*2)
+    
+    OBJ.scene.add(this.mesh)
+        
+  }
+
+  update(OBJ){
+    this.mixer.update(OBJ.delta);
+  }
+
+}
 
 
 
@@ -323,10 +360,20 @@ class VisualTest1{
             new MeshPhysicalMaterial({color:0x888888, side:DoubleSide})
         )
         wall.position.z = -.1;//Math.PI/2;
+        const tex = new TextureLoader().load( './extras/a-site.png' );
+        const sticker = new Mesh( 
+          new PlaneGeometry(3,3),
+          new MeshPhysicalMaterial({color:0x888888, side:DoubleSide, transparent:true, map:tex})
+      )
+      sticker.position.x-=(3+Math.random());
+      sticker.position.y+=(Math.random());
+      
+      sticker.rotation.z+=Math.random()*(Math.PI*.2)
+      sticker.position.z = -.09;//Math.PI/2;
 
         const ground = new Mesh(
             new PlaneGeometry(2000,2000),
-            new MeshPhysicalMaterial({color:0x555555, side:DoubleSide})
+            new MeshPhysicalMaterial({color:0x555555, side:BackSide})
         )
         ground.position.y = -2.5;
         ground.rotation.x += Math.PI/2;
@@ -336,29 +383,38 @@ class VisualTest1{
         this.parent = new Object3D();
         //window.scene.add(this.parent);
         this.bufferImage.scene.add(this.parent);
-        this.boy = window.getLoadedObjectByName("boy").model;
-        this.boyAni = window.getLoadedObjectByName("boy").group;
-        ///this.boy.castShadow = true; 
-        this.boy.traverse(function(obj){
-            if(obj.isMesh){
-                obj.castShadow = true;
-            }
-        })
-        this.boy.position.y = -2.5;
-        this.boy.position.x = 1.8;
-        this.boy.position.z = 1.2;
-        this.boy.rotation.y=-Math.PI/1.5;
-        let s = .1;
-        this.boy.scale.set(s,s,s);
-        this.mixer = new AnimationMixer(this.boy);
-		const ani = this.boyAni.animations[0];
-		this.clip = this.mixer.clipAction(ani);  
-		this.clip.play();
+
+        this.chickens = [];
+        for(let i = 0; i<20; i++){
+          const chick = "chicken-" + Math.floor( Math.random()*2 );
+          const mesh = clone( window.getLoadedObjectByName(chick).model );
+          const group = window.getLoadedObjectByName(chick).group ;
+          const pos = new Vector3( -5+Math.random()*10, -2.5, -2+Math.random()*10 );
+          this.chickens.push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
+        }
+        // this.boy = window.getLoadedObjectByName("boy").model;
+        // this.boyAni = window.getLoadedObjectByName("boy").group;
+        // ///this.boy.castShadow = true; 
+        // this.boy.traverse(function(obj){
+        //     if(obj.isMesh){
+        //         obj.castShadow = true;
+        //     }
+        // })
+        // this.boy.position.y = -2.5;
+        // this.boy.position.x = 1.8;
+        // this.boy.position.z = 1.2;
+        // this.boy.rotation.y=-Math.PI/1.5;
+        // let s = .1;
+        // this.boy.scale.set(s,s,s);
+        // this.mixer = new AnimationMixer(this.boy);
+        // const ani = this.boyAni.animations[0];
+        // this.clip = this.mixer.clipAction(ani);  
+        // this.clip.play();
         
         this.bench = window.getLoadedObjectByName("bench").model;
         this.bench.position.z = 2;
         this.bench.position.y = -2.5;
-        s = .2;
+        let s = .2;
         this.bench.scale.set(s,s,s);
         this.bench.traverse(function(obj){
             if(obj.isMesh){
@@ -368,7 +424,7 @@ class VisualTest1{
         
         //console.log(clip)
 
-        this.bufferImage.scene.add(wall, ground, this.boy, this.bench);
+        this.bufferImage.scene.add(wall, ground, this.bench, sticker);
         //this.bufferImage.scene.add(wall, ground);
 
         this.emitter = [];
@@ -526,64 +582,68 @@ class VisualTest1{
     }
     
     update(OBJ){
-        //console.log();
-        
-        const aniSpeed = this.map(window.clock4Time, .2, 2, 2, .2);// = this.map(window.clock4Time, );
-        //60 bpm = 1 beat per second 
-        //ani is one second 
-        this.clip.timeScale = aniSpeed; 
-        
-        this.mixer.update(OBJ.delta);
-        this.filmShader.uniforms[ 'time' ].value += OBJ.delta*2%10;
 
-        this.lightsParent.rotation.x+=OBJ.delta*2;
-        this.lightsParent.rotation.z+=OBJ.delta*2;
-        //this.parent.rotation.y+=OBJ.delta*.3;
-        for(let i = 0; i<this.emitter.length; i++){
-            this.emitter[i].update(OBJ); 
-        }
-        this.tonePerlin.update({delta:OBJ.delta*4});
-        this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
-        const tp = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z).multiplyScalar(.2);
-        this.emitter[3].special.start = new Vector3().set(tp.x, tp.y, .75+tp.z);// this.tonePerlinPos.x, this.tonePerlinPos.y, this.tonePerlinPos.z);
-        this.emitter[3].special.inc = this.inc*.1;
-        
-        // for(let i = 0; i < this.lightsArr.length; i++){
-            
-        //     const fft = window.fft.getValue()[ this.lightsArr[i].fftIndex ];
-        //     const fftFnl = ( ( (100 + fft ) / 100 ) * window.fftMult );
-        //     let fnl = (2 + fftFnl * 20)*.2;
-        //     if(fnl<0)fnl=0;
-        //     this.lightsArr[i].light.intensity = fnl;
-        //    //this.lightsArr[i].light.color = new Color().lerpColors( new Color(0xff0000), new Color(0x0000ff), 0);
-        // }
+      
+      for(let i = 0; i<this.chickens.length; i++){
+        this.chickens[i].update(OBJ);//push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
+      }
+      //console.log();
+      
+      //const aniSpeed = this.map(window.clock4Time, .2, 2, 2, .2);// = this.map(window.clock4Time, );
+      //60 bpm = 1 beat per second 
+      //ani is one second 
+      //this.clip.timeScale = aniSpeed; 
+      //this.mixer.update(OBJ.delta);
+      this.filmShader.uniforms[ 'time' ].value += OBJ.delta*2%10;
 
-        this.bufferA.uniforms['uTex1'].value = this.targetC.readBuffer.texture;
-        this.targetA.render(this.bufferA.scene, this.orthoCamera, true);
-        
-        this.bufferImage.uniforms['tNew'].value = this.targetA.readBuffer.texture;
-        this.bufferImage.uniforms['tOld'].value = this.targetC.readBuffer.texture;
-        this.targetC.render(this.bufferImage.scene, this.orthoCamera, false);
-        //this.targetC.render(window.scene, window.camera, false);
-        
-        this.bufferA.update(OBJ);
-        this.bufferImage.update(OBJ);
-        //window.renderer.render(   this.bufferImage.scene, window.camera );
-        //this.renderer.render(this.scene, this.camera);
-        this.composer.render();
-        //const d = this.clock.getDelta()*200; 
-        const d = OBJ.delta*200;
-        this.inc += OBJ.delta*20.1;
-        this.deformInc += OBJ.delta*200;
-        this.feedbackInc += OBJ.delta*3;
-        
-        this.bufferImage.uniforms['inc'].value = this.inc;
-        this.bufferImage.uniforms['deformInc'].value = this.deformInc;
-        this.bufferImage.uniforms['feedbackInc'].value = this.feedbackInc;
+      this.lightsParent.rotation.x+=OBJ.delta*2;
+      this.lightsParent.rotation.z+=OBJ.delta*2;
+      //this.parent.rotation.y+=OBJ.delta*.3;
+      for(let i = 0; i<this.emitter.length; i++){
+          this.emitter[i].update(OBJ); 
+      }
+      this.tonePerlin.update({delta:OBJ.delta*4});
+      this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
+      const tp = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z).multiplyScalar(.2);
+      this.emitter[3].special.start = new Vector3().set(tp.x, tp.y, .75+tp.z);// this.tonePerlinPos.x, this.tonePerlinPos.y, this.tonePerlinPos.z);
+      this.emitter[3].special.inc = this.inc*.1;
+      
+      // for(let i = 0; i < this.lightsArr.length; i++){
+          
+      //     const fft = window.fft.getValue()[ this.lightsArr[i].fftIndex ];
+      //     const fftFnl = ( ( (100 + fft ) / 100 ) * window.fftMult );
+      //     let fnl = (2 + fftFnl * 20)*.2;
+      //     if(fnl<0)fnl=0;
+      //     this.lightsArr[i].light.intensity = fnl;
+      //    //this.lightsArr[i].light.color = new Color().lerpColors( new Color(0xff0000), new Color(0x0000ff), 0);
+      // }
+
+      this.bufferA.uniforms['uTex1'].value = this.targetC.readBuffer.texture;
+      this.targetA.render(this.bufferA.scene, this.orthoCamera, true);
+      
+      this.bufferImage.uniforms['tNew'].value = this.targetA.readBuffer.texture;
+      this.bufferImage.uniforms['tOld'].value = this.targetC.readBuffer.texture;
+      this.targetC.render(this.bufferImage.scene, this.orthoCamera, false);
+      //this.targetC.render(window.scene, window.camera, false);
+      
+      this.bufferA.update(OBJ);
+      this.bufferImage.update(OBJ);
+      //window.renderer.render(   this.bufferImage.scene, window.camera );
+      //this.renderer.render(this.scene, this.camera);
+      this.composer.render();
+      //const d = this.clock.getDelta()*200; 
+      const d = OBJ.delta*200;
+      this.inc += OBJ.delta*20.1;
+      this.deformInc += OBJ.delta*200;
+      this.feedbackInc += OBJ.delta*3;
+      
+      this.bufferImage.uniforms['inc'].value = this.inc;
+      this.bufferImage.uniforms['deformInc'].value = this.deformInc;
+      this.bufferImage.uniforms['feedbackInc'].value = this.feedbackInc;
 
 
-        //this.controls.update();
-        //this.emitter.update(OBJ);
+      //this.controls.update();
+      //this.emitter.update(OBJ);
     }
 
     initCam(){
@@ -591,21 +651,24 @@ class VisualTest1{
       const self = this;
       const p = {inc:0}
       const xFrom = -16+Math.random()*32;
-      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 6 + Math.random() * 22);
+      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 8 + Math.random() * 22);
       let xTo = Math.random()*16;
       if(xFrom>0)
           xTo *=-1;
       
-      const toPos = new Vector3().set(xTo, -1+Math.random() * 7, 6 + Math.random() * 22);
+      const toPos = new Vector3().set(xTo, -1+Math.random() * 7, 8 + Math.random() * 22);
+      
       const fnlPos = new Vector3(); 
       const noiseMult = -5+Math.random()*10;
 
       window.camera.position.copy(fromPos);
       window.camera.fov = 15+Math.random()*40;
+      window.camera.updateProjectionMatrix();
+        
       this.cameraNoiseSpeed = .2+Math.random()*.5;
       
       this.cameraTween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-      .to({ inc:1 }, ((window.clock16Time)*(1+Math.random()*5))*1000) // Move to (300, 200) in 1 second.
+      .to({ inc:1 }, ((window.clock16Time)*(.5+Math.random()*2))*1000) // Move to (300, 200) in 1 second.
       .easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
       .onUpdate(() => {
               fnlPos.lerpVectors(fromPos, toPos, p.inc);
@@ -758,7 +821,7 @@ class VisualTest1{
                         for(let i = 0; i < amt; i++){
                             
                             setTimeout(function(){
-                                OBJ.rndStart = new Vector3( ((-62+OBJ.note)*.3) + (-.2+Math.random()*.4) , 1 + (-.2+Math.random()*.4), .2).multiplyScalar(1);
+                                OBJ.rndStart = new Vector3( ((-60+OBJ.note)*.1) + (-.2+Math.random()*.4) , 1 + (-.2+Math.random()*.4), .2).multiplyScalar(1);
                         
                                 //OBJ.index = (i/amt);
                                 self.emitter[4].emit(OBJ);

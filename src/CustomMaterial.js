@@ -13,7 +13,7 @@ import {
 
 class CustomMaterial {
     
-    constructor(OBJ){
+    constructor(){
         this.all = [];
         this.inc = 0;
 
@@ -71,6 +71,8 @@ class CustomMaterial {
                 uniform float twistSize;
                 uniform float deformSpeed;
                 uniform float shouldLoopGradient;
+                varying vec3 vNormals;
+					
 
                 float hash(float n) {
                     return fract(sin(n)*43758.5453);
@@ -132,17 +134,20 @@ class CustomMaterial {
                 'uniform float gradientAdd;\n' +
                 'uniform float shouldLoopGradient;\n'+
                 
-              
                 shader.fragmentShader;
                 shader.fragmentShader = shader.fragmentShader.replace(
                     //'#include <map_fragment>',
                     'vec4 diffuseColor = vec4( diffuse, opacity );',
                     `
+                    
+					
                     vec4 ogColor = vec4(col.xyz,1.);//texture2D( map, vUv );
                     
                     vec3 color = vec3(1., 1., 1.);
                     vec3 viewDirectionW = normalize(cameraPosition - vPositionW);
                     float fresnelTerm = ( 1.0 - -min(dot(vPositionW, normalize(vNormalW)*2.4 ), 0.0) ); 
+
+                    //vec3 mm = mix( vec4( sampledDiffuseColor1.xzy, 1.), vec4(trip2.xzy/sampledDiffuseColor1.rgb, 1.2), fresnelTerm*.15).rgb;
 
                     vec3 trip = ogColor.rgb;
                     float mod = (vPos.x*sin(gradientAngle)) + (vPos.y*cos(gradientAngle));

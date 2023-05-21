@@ -87,7 +87,7 @@ class ParticleBass{
 		
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, window.clock4Time*1000) // Move to (300, 200) in 1 second.
-		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.easing(TWEEN.Easing.Cubic.Out) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			
 			self.inc = p.inc;
@@ -103,8 +103,8 @@ class ParticleBass{
 			self.mesh.lookAt(toPos);
 
 			// const s2 = (.5+Math.sin(p.inc * Math.PI)*.5)*3;
-			// const s = ( 1.3 - p.inc )+.4;
-			self.mesh.scale.set(1,1,1);
+			 const s = ( 1.4 - p.inc );
+			self.mesh.scale.set(s,s,s);
 		})
 		.start()
 		.onComplete(()=>{
@@ -181,7 +181,7 @@ class ParticleSnair{
 		
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, window.clock4Time*1000) // Move to (300, 200) in 1 second.
-		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.easing(TWEEN.Easing.Cubic.Out) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			self.inc = p.inc;
 
@@ -261,9 +261,9 @@ class ParticleMetal{
 
 		this.mesh.scale.set(0,0,0);
         this.mesh.visible = true;
-
-        const rndTo = new Vector3().set(-.5+Math.random(),-.5+Math.random(),-.5+Math.random()).multiplyScalar(.3);
-		const rndFrom = new Vector3().set(-.5+Math.random(),-.5+Math.random(),-.5+Math.random()).multiplyScalar(.3);
+		this.mesh.material.color = new Color().setHSL(.6+Math.random()*.1, 0.8, .4);
+        const rndTo = new Vector3().set(-.5+Math.random(),-.5+Math.random(),-.5+Math.random()).multiplyScalar(1.3);
+		const rndFrom = new Vector3().set(-.5+Math.random(),-.5+Math.random(),-.5+Math.random()).multiplyScalar(1.3);
         
         const startPos = new Vector3().copy(SPECIAL.from).add(rndFrom);
 		const toPos = new Vector3().copy(SPECIAL.to).add(rndTo);
@@ -286,7 +286,7 @@ class ParticleMetal{
 			self.mesh.rotation.z+=rotSpeed.z*.2;
 			//self.mesh.material.needsUpdate = true;
 			
-			const s = (.5+Math.sin( (-Math.PI/2) + (p.inc * (Math.PI*2)) )*.5);
+			const s = (.5+Math.sin( (-Math.PI/2) + (p.inc * (Math.PI*2)) )*.5)*1.3;
 			//const s = 1-p.inc;
             
 			self.mesh.scale.set(s,s,s);
@@ -378,6 +378,8 @@ class ParticleTone{
 			//const col = new Color().setHSL(0, 1,.2 );
 			const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
 			self.mesh.position.copy(fnlPos);
+			const s = ((1-p.inc)+.3)*2.;
+			self.mesh.scale.set(s,s,s);
 
 		})
 		.start()
@@ -447,7 +449,7 @@ class ParticleChord{
 
 		const self = this;
 
-		this.mesh.scale.set( Math.random()*.8, Math.random()*.4, Math.random());
+		this.mesh.scale.set( Math.random()*.8, Math.random()*.4, Math.random()).multiplyScalar(1.3);
 		this.mesh.material.color.setHSL(0,0,.8);
 
 		const startPos = new Vector3().copy(SPECIAL.from);
@@ -461,11 +463,11 @@ class ParticleChord{
 		this.mesh.position.copy(startPos)// Math.random()*2,0);//SPECIAL.rndStart);
 		this.mesh.rotation.set(0,0,0);
 		this.mesh.visible = true;
-		
+		//this.mesh.scale.set(s,s,s)
 		const p = {inc:0};
 		
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, (window.clock4Time/2)*1000) // Move to (300, 200) in 1 second.
+		.to({ inc:1 }, (window.clock4Time/1.2)*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 
@@ -563,7 +565,11 @@ class ParticlePerc{
 		
 
 		this.mesh.position.y = .4;//Math.random()*.2;
-
+		
+		const s = .8;
+		
+		this.mesh.scale.set(s,s,s);
+		
 		this.mesh.visible = true;
 		
 		const p = {inc:0};

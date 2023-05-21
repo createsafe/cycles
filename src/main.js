@@ -28,6 +28,7 @@ import {Master} from './ChannelHelper.js';
 //import { Visuals } from './Visuals.js';
 import { VisualTest1 } from './VisualTest1.js';
 import { VisualTest2 } from './VisualTest2.js';
+import { VisualTest3 } from './VisualTest3.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
@@ -47,7 +48,7 @@ window.renderer;
 window.track = 0;
 
 let urlQuery;
-
+let loadingComplete = false;
 let currVis = 0;
 let currAudio = 0;
 
@@ -59,14 +60,7 @@ window.clock4Time = ((60 / bpm) * 4);
 
 let ktx2Loader, controls, loader, mainModel, audioContext;
 let initedTone = false;
-let volume;
-let filter;
-let distortion;
-let crusher;
-let phaser;
-let compressor;
-let clockInc = 0;
-let input;
+
 let recordedFile;
 const midiClock = new THREE.Clock();
 midiClock.autoStart = false;
@@ -92,14 +86,20 @@ let isPlaying = false;
 
 const clock = new THREE.Clock();
 
-const fairies = [];
-const synths = [];
 
 window.playingTime = 60/134/24;
 window.loadObjs = [
-    {loaded:false, group:null, url:"boy.glb", name:"boy", model:null, vis:0},
+
+    {loaded:false, group:null, url:"chicken-1.glb", name:"chicken-0", model:null, vis:0},
+    {loaded:false, group:null, url:"chicken-2.glb", name:"chicken-1", model:null, vis:0},
     {loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
-    {loaded:false, group:null, url:"walk.glb", name:"walk", model:null, vis:1},
+
+    {loaded:false, group:null, url:"walk-3.glb", name:"walk", model:null, vis:1},
+
+    {loaded:false, group:null, url:"flower-pedal.glb", name:"flower-pedal", model:null, vis:2},
+    {loaded:false, group:null, url:"flower-center.glb", name:"flower-center", model:null, vis:2},
+    {loaded:false, group:null, url:"flower-ring.glb", name:"flower-ring", model:null, vis:2},
+    {loaded:false, group:null, url:"flower-stem.glb", name:"flower-stem", model:null, vis:2},
 ]
 
 const visSelect = document.getElementById("visual-drop-down-input");
@@ -112,7 +112,6 @@ function getQuery(){
 
     const query = window.location.search.substring(1);
    	const vars = query.split("&");
-    console.log(query)
     return parseQuery(vars);
     
 }
@@ -143,16 +142,19 @@ function parseQuery(vars){
 
 $("#init-btn, #init-overlay").click(async function(){
     
-    $("#init-overlay").fadeOut();
-    
-    await Tone.start();
-    if(!initedTone){
-        initedTone = true;
-        //master.initPlayback();
-        if(window.isLive){
-            master.initLive();
-        }else{
-            master.initPlayback();
+    if(loadingComplete){
+        $("#init-overlay").fadeOut();
+        
+        await Tone.start();
+
+        if(!initedTone && master != null ){
+            initedTone = true;
+            //master.initPlayback();
+            if(window.isLive){
+                master.initLive();
+            }else{
+                master.initPlayback();
+            }
         }
     }
  
@@ -221,7 +223,7 @@ async function bounceFile(){
 document.addEventListener("keydown",onKeyDown);
 
 function onKeyDown(e){
-    console.log(e.keyCode)
+    //console.log(e.keyCode)
     switch(e.keyCode){
         case 32:
             window.fadeTime = 0;
@@ -282,13 +284,24 @@ function onKeyDown(e){
             break;
         case 86://v
             if(master != null && master.effects != null){
-                if(master.effects.phaser.wet.value>.5){   
+                if(master.effects.phaser.wet.value >.5){
+                    console.log("hii")   
                     master.effects.fadePhaser({dest:0, time:window.fadeTime})
                 }else{
                     master.effects.fadePhaser({dest:1, time:window.fadeTime})
                 }
             }
             break;
+        case 66://b
+            if(master != null && master.effects != null){
+                if(master.effects.feedbackDelay.wet.value > .5){   
+                    master.effects.fadeFeedback({dest:0, time:window.fadeTime})
+                }else{
+                    master.effects.fadeFeedback({dest:1, time:window.fadeTime})
+                }
+            }
+            break;
+            
     }
 }
 
@@ -296,6 +309,15 @@ $( "#volume" ).bind( "input", function(event, ui) {
     let vol = -40+parseFloat(event.target.value)*50;
     Tone.getDestination().volume.value = vol;
 });
+
+$( "#compressor-threshold" ).bind( "input", function(event, ui) {
+    master.compressor.threshold.value = parseFloat(event.target.value);
+});
+
+$( "#compressor-ratio" ).bind( "input", function(event, ui) {
+    master.compressor.ratio.value = parseFloat(event.target.value);
+});
+
 // $( "#distortion" ).bind( "input", function(event, ui) { 
 //     master.updateDistortion(parseFloat(event.target.value));   
 //     //master.effects.distortion.wet.value = parseFloat(event.target.value);
@@ -316,13 +338,6 @@ $( "#volume" ).bind( "input", function(event, ui) {
 //     //master.effects.filter.wet.value = parseFloat(event.target.value);
 // });
 
-$( "#compressor-threshold" ).bind( "input", function(event, ui) {
-    master.compressor.threshold.value = parseFloat(event.target.value);
-});
-
-$( "#compressor-ratio" ).bind( "input", function(event, ui) {
-    master.compressor.ratio.value = parseFloat(event.target.value);
-});
 
 
 
@@ -594,6 +609,7 @@ function init() {
     loader.setKTX2Loader( ktx2Loader );
     loader.setMeshoptDecoder( MeshoptDecoder );
     for(let i = 0; i<window.loadObjs.length; i++){
+        console.log(urlQuery.v)
         if(window.loadObjs[i].vis == urlQuery.v){
             loadHelper(window.loadObjs[i]);
         }else{
@@ -610,7 +626,8 @@ function initMaster(){
     
     const visuals = [
         VisualTest1,
-        VisualTest2
+        VisualTest2, 
+        VisualTest3
     ]
 
     if( urlQuery.live ){
@@ -715,16 +732,14 @@ window.getLoadedObjectByName = function(name){
 
 function loadHelper(OBJ){
     loader.load( OBJ.url, function ( gltf ) {
-        switch(OBJ.name){
-           case "boy":
-            break;
-        }
+        
            
         OBJ.loaded = true;
         OBJ.model = gltf.scene;
         OBJ.group = gltf;
         //console.log(isAllLoaded())
         if(isAllLoaded()){
+            loadingComplete = true;
             $("#loading").show();
             $("#init-btn").show();
             initMaster();
@@ -743,11 +758,14 @@ function isAllLoaded(){
 }
 
 function onWindowResize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    window.renderer.setSize( window.innerWidth, window.innerHeight );
-
+    if( window.camera && window.renderer ){
+        window.camera.aspect = window.innerWidth / window.innerHeight;
+        window.camera.updateProjectionMatrix();
+        window.renderer.setSize( window.innerWidth, window.innerHeight );
+        //if(master!=null){
+            //master.visual.vis.composer.setSize()
+        //}
+    }
 }
 
 function animate() {

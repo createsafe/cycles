@@ -475,11 +475,17 @@ class ParticleChord{
 		});
 	}
 	
-
+	map(current, in_min, in_max, out_min, out_max) {
+        const mapped = ((current - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+        return mapped;//this.clamp(mapped, out_min, out_max);
+    }
 	update(OBJ){
 		//console.log(window.fft.getValue()[this.fftIndex]);
-		const fft = (70 + window.fft.getValue()[this.fftIndex] )*.07;
-		this.fftFnl += (fft-this.fftFnl) * (OBJ.delta*5.3)
+		//const fft = (70 + window.fft.getValue()[this.fftIndex] )*.07;
+		//this.fftFnl += (fft-this.fftFnl) * (OBJ.delta*5.3)
+		const fft = this.map(window.fft.getValue()[ this.fftIndex ], -160, -20, 0, 1.3);// (50 + (window.fft.getValue()[ this.meshArray[i].index ]))*.1;   
+		//const fft = (70 + window.fft.getValue()[this.fftIndex] )*.07;
+		this.fftFnl = fft;// (fft-this.fftFnl) * (OBJ.delta*5.3)
 		
 		const col1 = new Color().setHSL(0,1,.25);
 		const col2 = new Color().setHSL(.65,1,.55);
@@ -569,12 +575,17 @@ class ParticlePerc{
 			self.hide();
 		});
 	}
-	
+	map(current, in_min, in_max, out_min, out_max) {
+        const mapped = ((current - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+        return mapped;//this.clamp(mapped, out_min, out_max);
+    }
 
 	update(OBJ){
 		//console.log(window.fft.getValue()[this.fftIndex]);
-		const fft = (70 + window.fft.getValue()[this.fftIndex] )*.07;
-		this.fftFnl += (fft-this.fftFnl) * (OBJ.delta*5.3)
+		//const fft = this.map(window.fft.getValue()[ this.fftIndex ], -160, -30, -1, 1);// (50 + (window.fft.getValue()[ this.meshArray[i].index ]))*.1;
+            
+		//const fft = (70 + window.fft.getValue()[this.fftIndex] )*.07;
+		//this.fftFnl += (fft-this.fftFnl) * (OBJ.delta*5.3)
 		
 		//const col1 = new Color().setHSL(0, 1, .25);
 		const col2 = new Color().setHSL(Math.random()*.2, 1, .45);
