@@ -78,10 +78,10 @@ class GlitchPass extends Pass {
 
 			this.uniforms[ 'amount' ].value = (Math.random() / 110)*this.glitchAmt;
 			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI ) *this.glitchAmt;
-			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - .3, .3 )*this.glitchAmt;
-			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - .3, .3 )*this.glitchAmt;
-			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, .3 )*this.glitchAmt;
-			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, .3 )*this.glitchAmt;
+			this.uniforms[ 'seed_x' ].value = MathUtils.randFloat( - .2, .2 )*this.glitchAmt;
+			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - .2, .2 )*this.glitchAmt;
+			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( -.2, .2 )*this.glitchAmt;
+			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( -.2, .2 )*this.glitchAmt;
 			this.curF = 0;
 			this.generateTrigger();
 

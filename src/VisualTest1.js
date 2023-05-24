@@ -29,8 +29,12 @@ import {
     AmbientLight,
     PointLight,
     PerspectiveCamera,
-    BackSide
-
+    BackSide,
+    SRGBColorSpace,
+    RepeatWrapping,
+    MultiplyBlending ,
+    EquirectangularReflectionMapping,
+    AdditiveBlending,
 
 } from './build/three.module.js';
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
@@ -42,6 +46,7 @@ import { ParticleMetal } from "./Particle.js";
 import { ParticleTone } from "./Particle.js";
 import { ParticleChord } from "./Particle.js";
 import { ParticlePerc } from "./Particle.js";
+import { RGBELoader } from './scripts/jsm/loaders/RGBELoader.js';
 
 import { NoiseVector } from "./NoiseHelper.js";
 
@@ -157,7 +162,7 @@ void main() {
 
   float rainbowSin = sin((vUv.y*2.)+(inc*0.3))*2.1;
   float m = .01;//rainbowSin*.01;
-  float sm = 4.1;
+  float sm = .4+(damp*4.);//4.1;
   
   vec3 rainbow = vec3( .5 + sin( ( (inc*sm) + ((vUv.x * m) * uvXMult) ) )*.5, .5 + sin( ( ( (inc*sm) + ( (vUv.x*m) * uvXMult) ) ) + ( 3.14 / 2.) ) *.5, .5 + sin( ( ( (inc*sm) - ( (vUv.x*m) * uvXMult) ) ) + (3.14) )*.5 ) * (rainbowFinalMult*0.1);
   //vec3 rainbow = vec3( .5 + sin( ( inc + (vUv.x*50.2) ) * m )*.5, .5+sin( (( inc + (vUv.x * 50.2) ) * m) + ( 3.14 / 2.) ) *.5, .5 + sin( ( (inc - (vUv.y * 200.2) ) * 20. )+( 3.14) )*.5 ) * 4.4;
@@ -219,7 +224,7 @@ class Chicken{
     this.mesh.scale.set(s,s,s);
     
     this.mixer = new AnimationMixer(this.mesh);
-    const ani = OBJ.group.animations[1];
+    const ani = OBJ.group.animations[0];
     this.idle = this.mixer.clipAction(ani);  
     this.idle.play();
     this.mesh.rotation.y+=Math.random()*(Math.PI*2)
@@ -245,7 +250,7 @@ class VisualTest1{
         this.scene = window.scene;
         
         this.mousePosition = new Vector4();
-        this.orthoCamera = new OrthographicCamera(-2, 2, 2, -2, -200, 200);
+        this.orthoCamera = new OrthographicCamera(-2, 2, 2, -2, -2, 2);
         
         this.orthoCamera.position.z = 0;
 
@@ -272,7 +277,7 @@ class VisualTest1{
         
         this.bufferImage = new BufferShader(BUFFER_FINAL_FRAG, {
             damp: {
-              value: .99
+              value: 0
             },
             tOld: {
               value: null
@@ -345,40 +350,44 @@ class VisualTest1{
         this.speed = .1;
         this.deformSpeed = .1;
         this.feedbackSpeed = .1;
-  
+
         //this.inc = Math.random()*200;
         this.deformInc = Math.random()*200; 
         this.feedbackInc = Math.random()*200; 
-      
-        // const ground = new Mesh(
-        //     new PlaneGeometry(200,200),
-        //     new MeshPhysicalMaterial({map:this.targetC.readBuffer.texture, })
-        //     //new MeshStandardMaterial({side:DoubleSide})
-        // )
-        const wall = new Mesh(
-            new PlaneGeometry(2000,2000),
-            new MeshPhysicalMaterial({color:0x888888, side:DoubleSide})
-        )
-        wall.position.z = -.1;//Math.PI/2;
-        const tex = new TextureLoader().load( './extras/a-site.png' );
-        const sticker = new Mesh( 
-          new PlaneGeometry(3,3),
-          new MeshPhysicalMaterial({color:0x888888, side:DoubleSide, transparent:true, map:tex})
+      //this.inc = Math.random()*200;
+      this.deformInc = Math.random()*200; 
+      this.feedbackInc = Math.random()*200; 
+    
+      // const ground = new Mesh(
+      //     new PlaneGeometry(200,200),
+      //     new MeshPhysicalMaterial({map:this.targetC.readBuffer.texture, })
+      //     //new MeshStandardMaterial({side:DoubleSide})
+      // )
+      const wall = new Mesh(
+          new PlaneGeometry(2000,2000),
+          new MeshPhysicalMaterial({color:0x888888, side:DoubleSide})
+      )
+      wall.position.z = -.1;//Math.PI/2;
+      const tex = new TextureLoader().load( './extras/b-site.png' );
+      const sticker = new Mesh( 
+        new PlaneGeometry(3,3),
+        new MeshBasicMaterial({color:0xdd6666, transparent:true, map:tex, blending:AdditiveBlending , opacity:0.8})
       )
       sticker.position.x-=(3+Math.random());
       sticker.position.y+=(Math.random());
-      
-      sticker.rotation.z+=Math.random()*(Math.PI*.2)
-      sticker.position.z = -.09;//Math.PI/2;
 
-        const ground = new Mesh(
-            new PlaneGeometry(2000,2000),
-            new MeshPhysicalMaterial({color:0x555555, side:BackSide})
-        )
-        ground.position.y = -2.5;
-        ground.rotation.x += Math.PI/2;
-        ground.receiveShadow = true;
-        wall.receiveShadow = true;
+      sticker.rotation.z+=Math.random()*(Math.PI*.2)
+      sticker.position.z = -.04;//Math.PI/2;
+
+      const ground = new Mesh(
+          new PlaneGeometry(2000,2000),
+          new MeshPhysicalMaterial({color:0x555555, side:BackSide})
+      )
+      ground.position.y = -2.5;
+      
+      ground.rotation.x += Math.PI/2;
+      ground.receiveShadow = true;
+      wall.receiveShadow = true;
 
         this.parent = new Object3D();
         //window.scene.add(this.parent);
@@ -410,6 +419,17 @@ class VisualTest1{
         // const ani = this.boyAni.animations[0];
         // this.clip = this.mixer.clipAction(ani);  
         // this.clip.play();
+        const dust = window.getLoadedObjectByName("dust").model;
+        dust.traverse(function(obj){
+          if(obj.isMesh){
+              obj.receiveShadow = true;
+              // if(obj.material.map!=null)
+              //   obj.material.map.colorSpace = SRGBColorSpace;
+
+          }
+      })
+        // let s = .2;
+        // dust.scale.set(s,s,s);
         
         this.bench = window.getLoadedObjectByName("bench").model;
         this.bench.position.z = 2;
@@ -424,7 +444,9 @@ class VisualTest1{
         
         //console.log(clip)
 
-        this.bufferImage.scene.add(wall, ground, this.bench, sticker);
+        //this.bufferImage.scene.add(wall, ground, this.bench, sticker);
+        //this.scene.add(dust);
+        this.bufferImage.scene.add(   dust);
         //this.bufferImage.scene.add(wall, ground);
 
         this.emitter = [];
@@ -449,11 +471,11 @@ class VisualTest1{
         window.camera.position.y = .2;
         
         const dirLight1 = new DirectionalLight( 0xffffff, 2.2 );
-        dirLight1.position.set( -1.2, 1.3, 1 );
+        dirLight1.position.set( 1.2, 1.3, 1 );
         
         dirLight1.castShadow = true;
         dirLight1.shadow.camera.near = 0;
-        dirLight1.shadow.camera.far = 100;
+        dirLight1.shadow.camera.far = 5;
         dirLight1.shadow.bias = 0.0001;
         dirLight1.shadow.mapSize.width = 512;
         dirLight1.shadow.mapSize.height = 512;
@@ -515,11 +537,11 @@ class VisualTest1{
 
         
         this.renderPixelatedPass = new RenderPixelatedPass( 1, this.bufferImage.scene, window.camera );
-		this.composer.addPass( this.renderPixelatedPass );
+		    this.composer.addPass( this.renderPixelatedPass );
 
         // gui.add( renderPixelatedPass, 'normalEdgeStrength' ).min( 0 ).max( 2 ).step( .05 );
 		// gui.add( renderPixelatedPass, 'depthEdgeStrength' ).min( 0 ).max( 1 ).step( .05 );
-        this.renderPixelatedPass.normalEdgeStrength = 4;
+        this.renderPixelatedPass.normalEdgeStrength = 400;
         this.renderPixelatedPass.depthEdgeStrength = 0;
 
         this.filmShader = new ShaderPass( FilmShader );
@@ -534,7 +556,7 @@ class VisualTest1{
         
 
         this.rbgShift = new ShaderPass( RGBShiftShader );
-        this.rbgShift.uniforms[ 'amount' ].value = 0.00;
+        this.rbgShift.uniforms[ 'amount' ].value = 0.001;
         //this.rbgShift.addedToComposer = false;
         this.composer.addPass( this.rbgShift );
 
@@ -544,7 +566,7 @@ class VisualTest1{
         this.hue = new ShaderPass( HueSaturationShader );
         this.composer.addPass(this.hue)
 
-        this.hue.uniforms[ 'saturation' ].value = 0;// parseFloat(event.target.value);
+        this.hue.uniforms[ 'saturation' ].value = .1;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .1;
         this.brtCont.uniforms[ 'brightness' ].value = .1;
 
@@ -553,6 +575,13 @@ class VisualTest1{
         this.cameraNoiseSpeed = .2+Math.random()*.5;
         self.initCam();
 
+        new RGBELoader()
+        .setPath( './extras/' )
+        .load( 'quarry_01_1k.hdr', function ( texture ) {
+						texture.mapping = EquirectangularReflectionMapping;
+						self.bufferImage.scene.background = texture;
+						self.bufferImage.scene.environment = texture;
+        });
         
 
         // const params = {
@@ -645,24 +674,24 @@ class VisualTest1{
       //this.controls.update();
       //this.emitter.update(OBJ);
     }
-
+zvxc
     initCam(){
 
       const self = this;
       const p = {inc:0}
-      const xFrom = -16+Math.random()*32;
-      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 8 + Math.random() * 22);
-      let xTo = Math.random()*16;
+      const xFrom = -10+Math.random()*20;
+      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 6 + Math.random() * 5);
+      let xTo = Math.random()*10;
       if(xFrom>0)
           xTo *=-1;
       
-      const toPos = new Vector3().set(xTo, -1+Math.random() * 7, 8 + Math.random() * 22);
+      const toPos = new Vector3().set(xTo, -1+Math.random() * 7, 6 + Math.random() * 5);
       
       const fnlPos = new Vector3(); 
-      const noiseMult = -5+Math.random()*10;
+      const noiseMult = -3+Math.random()*6;
 
       window.camera.position.copy(fromPos);
-      window.camera.fov = 15+Math.random()*40;
+      window.camera.fov = 35+Math.random()*20;
       window.camera.updateProjectionMatrix();
         
       this.cameraNoiseSpeed = .2+Math.random()*.5;
@@ -684,7 +713,8 @@ class VisualTest1{
     
     postVisualEffects(OBJ){
 
-        
+      this.bufferImage.uniforms['damp'].value = OBJ.feedback;
+      
         this.hue.uniforms[ 'saturation' ].value = 0-OBJ.filter;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .1+((OBJ.filter)*.6);
         this.brtCont.uniforms[ 'brightness' ].value = .1+((OBJ.filter)*.1);
@@ -700,7 +730,7 @@ class VisualTest1{
         // this.rbgShift.uniforms[ 'amount' ].value = 0.0025;
         //this.filmShader.uniforms[ 'nIntensity' ].value = .2
         
-        this.rbgShift.uniforms[ 'amount' ].value = OBJ.distortion*.007;
+        this.rbgShift.uniforms[ 'amount' ].value = .001+OBJ.distortion*.007;
         this.filmShader.uniforms[ 'nIntensity' ].value = OBJ.distortion*4;
         this.filmShader.uniforms[ 'sIntensity' ].value = OBJ.distortion*4;
 
@@ -873,8 +903,9 @@ class BufferShader {
         //     this.scene.add(this.meshes[i]);
         // }
 
-        const bgMesh = new Mesh(new BoxGeometry(4, 4, .1), this.material); 
-        //bgMesh.position.z=-3;
+        const bgMesh = new Mesh(new PlaneGeometry(4, 4), this.material); 
+        bgMesh.position.z=-.01;
+
         this.scene.add(bgMesh);
 
         this.speed = -1+Math.random()*2;

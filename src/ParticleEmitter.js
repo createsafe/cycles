@@ -25,7 +25,8 @@ class ParticleEmitter {
 		this.limit = 20;
 		this.emitInc = 0;
 		this.canEmit = true;
-		this.special={};
+		this.special = {};
+		this.freq = OBJ.freq == null ? .01 : OBJ.freq;
 		//this.obj = {spline}
 	    //this.mesh = MESH;
 
@@ -42,9 +43,10 @@ class ParticleEmitter {
 		if(this.shouldEmit){
             if(this.canEmit){
                 this.canEmit = false;
+				this.special.index = this.index;
                 this.emit(this.special);
             }
-            if(this.emitInc > .01){  
+            if(this.emitInc > this.freq){  
                 this.canEmit = true;
                 this.emitInc = 0;
             }

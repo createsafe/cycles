@@ -67,7 +67,7 @@ class AfterimagePass extends Pass {
 			this.copyFsQuad.render( renderer );
 
 		}
-
+		
 		// Swap buffers.
 		const temp = this.textureOld;
 		this.textureOld = this.textureComp;

@@ -93,6 +93,7 @@ window.loadObjs = [
     {loaded:false, group:null, url:"chicken-1.glb", name:"chicken-0", model:null, vis:0},
     {loaded:false, group:null, url:"chicken-2.glb", name:"chicken-1", model:null, vis:0},
     {loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
+    {loaded:false, group:null, url:"dust2.glb", name:"dust", model:null, vis:0},
 
     {loaded:false, group:null, url:"walk-3.glb", name:"walk", model:null, vis:1},
 
@@ -100,6 +101,7 @@ window.loadObjs = [
     {loaded:false, group:null, url:"flower-center.glb", name:"flower-center", model:null, vis:2},
     {loaded:false, group:null, url:"flower-ring.glb", name:"flower-ring", model:null, vis:2},
     {loaded:false, group:null, url:"flower-stem.glb", name:"flower-stem", model:null, vis:2},
+    {loaded:false, group:null, url:"butterfly.glb", name:"butterfly", model:null, vis:2},
 ]
 
 const visSelect = document.getElementById("visual-drop-down-input");
@@ -148,6 +150,7 @@ $("#init-btn, #init-overlay").click(async function(){
         await Tone.start();
 
         if(!initedTone && master != null ){
+
             initedTone = true;
             //master.initPlayback();
             if(window.isLive){
@@ -165,6 +168,10 @@ $("#play-btn, #stop-btn").click(function(){
     if(window.isLive){
         togglePlayMidi();
     }else{
+        console.log(master.loadedAll)
+        if(!master.loadedAll)
+            return
+
         if(master.playing){
             master.pause();
             $("#play-btn").show();
@@ -223,11 +230,22 @@ async function bounceFile(){
 document.addEventListener("keydown",onKeyDown);
 
 function onKeyDown(e){
-    //console.log(e.keyCode)
     switch(e.keyCode){
         case 32:
-            window.fadeTime = 0;
+            if(window.isLive){
+                togglePlayMidi();
+            }
             break;
+        case 77:
+            if(master != null && master.effects != null){
+                master.effects.fadeDistortion({dest:0, time:window.fadeTime})        
+                master.effects.fadeCrusher({dest:0, time:window.fadeTime})
+                master.effects.fadeFilter({dest:0, time:window.fadeTime})
+                master.effects.fadePhaser({dest:0, time:window.fadeTime})
+                master.effects.fadeFeedback({dest:0, time:window.fadeTime})
+            }
+            break;
+
         case 49:
             window.fadeTime = 0;
             break;
@@ -257,7 +275,7 @@ function onKeyDown(e){
             break;
         case 90://z
             if(master != null && master.effects != null){
-                if(master.effects.distortion.wet.value>.5){
+                if(master.effects.distortion.wet.value>.0){
                     master.effects.fadeDistortion({dest:0, time:window.fadeTime})        
                 }else{
                     master.effects.fadeDistortion({dest:1, time:window.fadeTime})
@@ -266,7 +284,7 @@ function onKeyDown(e){
             break;
         case 88://x
             if(master != null && master.effects != null){
-                if(master.effects.crusher.wet.value>.5){   
+                if(master.effects.crusher.wet.value>.0){   
                     master.effects.fadeCrusher({dest:0, time:window.fadeTime})
                 }else{
                     master.effects.fadeCrusher({dest:1, time:window.fadeTime})
@@ -275,7 +293,7 @@ function onKeyDown(e){
             break;
         case 67://c
             if(master != null && master.effects != null){
-                if(master.effects.filter.wet.value>.5){   
+                if(master.effects.filter.wet.value>.0){   
                     master.effects.fadeFilter({dest:0, time:window.fadeTime})
                 }else{
                     master.effects.fadeFilter({dest:1, time:window.fadeTime})
@@ -284,7 +302,7 @@ function onKeyDown(e){
             break;
         case 86://v
             if(master != null && master.effects != null){
-                if(master.effects.phaser.wet.value >.5){
+                if(master.effects.phaser.wet.value >.0){
                     console.log("hii")   
                     master.effects.fadePhaser({dest:0, time:window.fadeTime})
                 }else{
@@ -294,7 +312,7 @@ function onKeyDown(e){
             break;
         case 66://b
             if(master != null && master.effects != null){
-                if(master.effects.feedbackDelay.wet.value > .5){   
+                if(master.effects.feedbackDelay.wet.value > .0){   
                     master.effects.fadeFeedback({dest:0, time:window.fadeTime})
                 }else{
                     master.effects.fadeFeedback({dest:1, time:window.fadeTime})
@@ -762,9 +780,9 @@ function onWindowResize() {
         window.camera.aspect = window.innerWidth / window.innerHeight;
         window.camera.updateProjectionMatrix();
         window.renderer.setSize( window.innerWidth, window.innerHeight );
-        //if(master!=null){
-            //master.visual.vis.composer.setSize()
-        //}
+        if(master!=null){
+            master.visual.vis.composer.setSize(window.innerWidth, window.innerHeight)
+        }
     }
 }
 

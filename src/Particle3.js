@@ -19,10 +19,10 @@ import { SplineAnimation } from './SplineAnimation.js';
 import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
 
-const bassGeo = new IcosahedronGeometry( .1, 1 );
+const bassGeo = new IcosahedronGeometry( .05, 1 );
 const bassMat = new MeshStandardMaterial({color:0xff0000});
 const bassMesh = new Mesh(bassGeo, bassMat);
-const snairGeo = new IcosahedronGeometry( .1, 1);
+const snairGeo = new IcosahedronGeometry( .05, 1);
 const snairMat = new MeshStandardMaterial();
 const snairMesh = new Mesh(snairGeo, snairMat);
 const toneGeo = new BoxGeometry( .05, .5, .05 );
@@ -31,13 +31,13 @@ const toneMesh = new Mesh(toneGeo, toneMat);
 const percGeo = new BoxGeometry( .1, .23, .1 );
 const percMat = new MeshStandardMaterial();
 const percMesh = new Mesh(percGeo, percMat);
-const metalGeo = new IcosahedronGeometry( .1, 1 );
+const metalGeo = new IcosahedronGeometry( .05, 1 );
 const metalMat = new MeshStandardMaterial();
 const metalMesh = new Mesh(metalGeo, metalMat);
 const chordGeo = new BoxGeometry( .4, .2, .2 );
 const chordMat = new MeshStandardMaterial();
 const chordMesh = new Mesh(chordGeo, chordMat);
-
+import { CustomMaterial } from "./CustomMaterial.js"
 
 class ParticleBass{
 
@@ -638,3 +638,154 @@ class ParticlePerc{
 
 export { ParticlePerc };
 
+
+
+class ButterflyParticle{
+
+	constructor(OBJ, SPECIAL){
+		
+        const self = this;
+		this.scene = OBJ.scene;
+		const modelToClone = window.getLoadedObjectByName("butterfly");
+        
+        this.mesh = clone( modelToClone.model );
+		this.mixer = new AnimationMixer(this.mesh);
+		const ani = modelToClone.group.animations[0];
+		this.clip = this.mixer.clipAction(ani);  
+		this.clip.play();
+		this.mat = new CustomMaterial();
+
+		this.mesh.traverse(function(obj){
+			if(obj.isMesh){
+				//const mat = obj.material.clone();
+				
+                const params1 = {
+                    twistAmt:  0.0,//.15+Math.random()*.1,//(-1+Math.random()*2)*.3,
+                    noiseSize: 2.015,//.2+Math.random()*.8,
+                    twistSize: .01,//.4+Math.random()*.8,
+                    noiseAmt: 0.0,
+                    rainbowAmt: .5,//.2+Math.random()*.8,
+                    gradientSize: .003,
+                    gradientAngle: Math.PI,
+                    gradientAdd: 2, 
+                    rainbowGradientSize:0.1,
+                    gradientOffset:0,
+                    topColor:new Color().setHSL(1,2,.3 ),
+                    bottomColor:new Color().setHSL(.7,2,.3),
+                    deformSpeed: 4,
+                    colorSpeed: 4,
+                    shouldLoopGradient:1,
+                }
+
+                const matClone = obj.material.clone();
+                matClone.map = null;
+                matClone.normalMap = null;
+                matClone.emissiveMap = null;
+                matClone.color = new Color(0x888888)
+                matClone.roughness = 1;
+                matClone.emissive = new Color().setHSL(0,0,0);
+                const mat = self.mat.getCustomMaterial(matClone, params1)
+                obj.material = mat;
+
+
+                //mat.emissiveMap = mat.map;
+                //mat.map = null;
+                //mat.normalMap = null;
+                // mat.metalic = 1;
+                // obj.material = mat;
+                //mat.color
+			}
+		})
+		
+		// this.mesh = window.flowers[Math.floor(Math.random()*window.flowers.length)].clone();
+		// this.mesh.traverse(function(obj){
+		// 	if(obj.isMesh){
+		// 		const mat = obj.material.clone();
+		// 		obj.material = mat;//obj.material.emissive = col;
+		// 	}
+		// })
+        // const clone = this.mesh.material.clone();   
+        // this.mesh.material = clone;
+
+		this.scene.add(this.mesh);
+        
+		this.killed = false;
+	    
+        this.inc = 0;
+		
+		self.init(OBJ, SPECIAL);
+        
+	}	
+
+	init(OBJ, SPECIAL){
+        
+        //const h = (SPECIAL.instanceRandom + (SPECIAL.index*.05)) % 1.0;
+        //const h = .6 + Math.sin( (SPECIAL.instanceRandom*2)+(SPECIAL.index*.3) ) * .2 ;
+        const rndStart = SPECIAL.instanceRandom*(Math.PI*2);
+        const rndRad = 2 + (SPECIAL.instanceRandom * 4);
+      
+        this.clip.stop();
+        this.clip.play();
+
+        this.mesh.visible = true;
+	
+        const self = this;
+		const p = {inc:0};
+		
+		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
+		.to({ inc:1}, (window.clock16Time)*1000 ) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
+		.onUpdate(() => {
+			self.inc = p.inc;
+            const theta = rndStart + ( p.inc * (Math.PI*2.4) ) ;
+            const x = Math.sin(theta)*rndRad;
+            const z = Math.cos(theta)*rndRad;
+			//const pos = new Vector3().lerpVectors(startPos, toPos, p.inc)
+            //self.mesh.position.copy(pos);
+
+            self.mesh.position.set(x,5,z);
+            self.mesh.rotation.y = theta-(Math.PI/2);
+
+            //const s = Math.sin();
+            const s = (.5 + Math.cos( ( p.inc * Math.PI ) ) * .5) * 2;
+			
+            self.mesh.scale.set(s,s,s);
+            
+            self.mesh.traverse(function(obj){
+                if(obj.isMesh){
+                    obj.material.userData.shader.uniforms.noiseAmt.value = p.inc*10000;
+                    obj.material.userData.shader.uniforms.twistAmt.value = p.inc*1.3;
+                }
+            })
+
+
+		})
+		.start()
+		.onComplete(()=>{
+			self.hide();
+		});
+	}
+
+	update(OBJ){
+		const self = this;
+        this.mixer.update(OBJ.delta*1.4)
+        this.mat.update(OBJ);
+	}
+
+	kill(){
+
+		this.killed = true;
+		this.mesh.geometry.dispose();
+		this.mesh.material.dispose();
+		this.scene.remove(this.mesh);
+	}
+
+	hide(){
+		this.mesh.visible = false;
+		if(this.tween)this.tween.stop();
+		
+	}
+}
+
+
+export { ButterflyParticle };

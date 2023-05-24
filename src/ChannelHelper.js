@@ -32,7 +32,7 @@ class Master{
         this.toneMeter;
         
         this.midiMeasureLength = OBJ.samplesArr.midiMeasureLength || 0;
-        console.log(this.midiMeasureLength);
+        //console.log(this.midiMeasureLength);
 
 		this.toneMeter = new Tone.Meter({ channels: 2 });
 		Tone.Destination.chain(this.toneMeter);
@@ -46,6 +46,7 @@ class Master{
         this.playing = false;
 
         this.activeArr = [];
+        this.loadedAll = false;
         //this.aStream;// = this.dest.stream;
 
         this.visual = new Visuals({class:OBJ.samplesArr.visual});
@@ -53,12 +54,16 @@ class Master{
     }
 
     play(){
-        this.playing = true;
-        Tone.Transport.start();
+        //if(this.loadedAll){
+            this.playing = true;
+            Tone.Transport.start();
+        //}
     }
     pause(){
-        this.playing = false;
-        Tone.Transport.pause();
+        //if(this.loadedAll){
+            this.playing = false;
+            Tone.Transport.pause();
+        //}
     }
 
     autoFadeDistortion(OBJ){
@@ -81,7 +86,7 @@ class Master{
     
     updateChill(val){
         if(this.effects){
-            console.log("phaser")
+            //console.log("phaser")
             //this.effects.phaser.wet.value = val;
             this.postVisualEffects();
         }
@@ -179,7 +184,7 @@ class Master{
         const blob = new Blob(this.recordedChunks, {
           type: "video/webm"
         });
-        console.log("download")
+        //console.log("download")
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         document.body.appendChild(a);
@@ -249,6 +254,11 @@ doFilter:function(val){},
         this.effects = new ChannelEffects(  
             {
                 parent:document.getElementById("master-fx"),
+                filterName:"filter [C]",
+                crusherName:"crusher [X]",
+                phaserName:"phaser [V]",
+                feedbackName:"feedback [B]",
+                distortionName:"distortion [Z]",
                 doFilter:function(val){ self.updateFilter(val) },
                 doCrusher:function(val){ self.updateCrush(val) },
                 doPhaser:function(val){ self.updateChill(val) },
@@ -274,7 +284,6 @@ doFilter:function(val){},
     playMidi(time){
          //const now = Tone.now();
          //let lastNote;
-         console.log("midi playback")
          const self = this;
          let index = 0;
          this.midi.tracks.forEach((track) => {
@@ -302,7 +311,7 @@ doFilter:function(val){},
                     //console.log(time)
                    // console.log(self.channels[i])
                    //console.log()
-                    if( !self.channels[i].channel.muted && self.channels[i].channel.volume.value > -25 && !self.activeArr[i]){           
+                    if( !self.channels[i].channel.muted && self.channels[i].channel.volume.value > -25 && !self.activeArr[i] && self.playing){           
 
                         //console.log()
                         const command = 144+(i%6);
@@ -323,8 +332,6 @@ doFilter:function(val){},
                         //}
 
                       
-                        
-                        
 
                     }
                       
@@ -341,7 +348,7 @@ doFilter:function(val){},
     playSong(){
         
         const self = this;
-
+        this.loadedAll = true;
         this.playing = true;
         $("#play-btn").hide();
         $("#stop-btn").show();
@@ -942,22 +949,30 @@ class ChannelEffects{
     constructor(OBJ){
         const self = this;
         
-        this.filter = new Tone.AutoFilter(.01).start();
+        this.filter = new Tone.AutoFilter(.001).start();
         this.filter.wet.value = 0;
         this.distortion = new Tone.Distortion(.5);
         this.distortion.wet.value = 0;
         this.crusher = new Tone.BitCrusher(4);
         this.crusher.wet.value = 0;
-        this.phaser = new Tone.Phaser(0.1);
+        // this.phaser = new Tone.Phaser({
+        //     "frequency" : 2,
+        //     "octaves" : 3,
+        //     "baseFrequency" : 1300
+        // });
+        this.phaser = new Tone.AutoWah(100, 5, -20);
+        //this.phaser.dampening.value = 1000;
+        //this.phaser = new Tone.Vibrato (1, .95);
+
         this.phaser.wet.value = 0;
-        this.feedbackDelay = new Tone.FeedbackDelay("8n", 0.5);
+        this.feedbackDelay = new Tone.FeedbackDelay("8n", 0.35);
         this.feedbackDelay.wet.value = 0;
 
-        this.filterObj = self.setUpSliderDom({param:this.filter, title:"filter", parent:OBJ.parent, do:OBJ.doFilter});//document.createElement("div");
-        this.crusherObj = self.setUpSliderDom({param:this.crusher, title:"crusher", parent:OBJ.parent, do:OBJ.doCrusher});//document.createElement("div");
-        this.phaserObj = self.setUpSliderDom({param:this.phaser, title:"phaser", parent:OBJ.parent, do:OBJ.doPhaser});//document.createElement("div");
-        this.feedbackObj = self.setUpSliderDom({param:this.feedbackDelay, title:"feedback", parent:OBJ.parent, do:OBJ.doFeedback});//document.createElement("div");
-        this.distortionObj = self.setUpSliderDom({param:this.distortion, title:"distortion", parent:OBJ.parent, do:OBJ.doDistortion});//document.createElement("div");
+        this.distortionObj = self.setUpSliderDom({param:this.distortion, title: OBJ.distortionName == null ? "distortion" : OBJ.distortionName, parent:OBJ.parent, do:OBJ.doDistortion});//document.createElement("div");
+        this.crusherObj = self.setUpSliderDom({param:this.crusher, title:OBJ.crusherName == null ? "crusher" : OBJ.crusherName, parent:OBJ.parent, do:OBJ.doCrusher});//document.createElement("div");
+        this.filterObj = self.setUpSliderDom({param:this.filter, title: OBJ.filterName == null ? "filter" : OBJ.filterName, parent:OBJ.parent, do:OBJ.doFilter});//document.createElement("div");
+        this.phaserObj = self.setUpSliderDom({param:this.phaser, title: OBJ.crusherName == null ? "phaser" : OBJ.phaserName, parent:OBJ.parent, do:OBJ.doPhaser});//document.createElement("div");
+        this.feedbackObj = self.setUpSliderDom({param:this.feedbackDelay, title: OBJ.feedbackName == null ? "feedback" : OBJ.feedbackName, parent:OBJ.parent, do:OBJ.doFeedback});//document.createElement("div");
        
         setTimeout(function(){//
             self.reInitWetVals();
@@ -1078,7 +1093,7 @@ class ChannelEffects{
     }
 
     fadePhaser(OBJ){
-        console.log("phaser")
+        //console.log("phaser")
         const self = this;
         const o = OBJ == null? {dest:1, time:1} : OBJ;
         if(this.phaser.tween!=null)
@@ -1091,7 +1106,7 @@ class ChannelEffects{
 		.onUpdate(() => {
             self.phaser.wet.value = p.wet;
             if(self.phaserObj != null){
-                console.log("hiii")
+                //console.log("hiii")
                 self.phaserObj.do(p.wet);
                 self.phaserObj.slider.value = p.wet;
             }
@@ -1103,8 +1118,8 @@ class ChannelEffects{
     }
 
     fadeFilter(OBJ){
-        console.log("fade filter")
-        console.log(OBJ)
+        //console.log("fade filter")
+        //console.log(OBJ)
         const self = this;
         const o = OBJ == null? {dest:1, time:1} : OBJ;
 

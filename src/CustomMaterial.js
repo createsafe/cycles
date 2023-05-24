@@ -140,7 +140,6 @@ class CustomMaterial {
                     'vec4 diffuseColor = vec4( diffuse, opacity );',
                     `
                     
-					
                     vec4 ogColor = vec4(col.xyz,1.);//texture2D( map, vUv );
                     
                     vec3 color = vec3(1., 1., 1.);

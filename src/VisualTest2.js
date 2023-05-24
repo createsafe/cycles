@@ -219,9 +219,9 @@ class VisualTest2{
         this.hue = new ShaderPass( HueSaturationShader );
         this.composer.addPass(this.hue)
 
-        this.hue.uniforms[ 'saturation' ].value = 0;// parseFloat(event.target.value);
-        this.brtCont.uniforms[ 'contrast' ].value = .1;
-        this.brtCont.uniforms[ 'brightness' ].value = .1;
+        this.hue.uniforms[ 'saturation' ].value = .14;// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .15;
+        this.brtCont.uniforms[ 'brightness' ].value = .09;
 
         
 
@@ -361,7 +361,8 @@ class VisualTest2{
         
         const noiseMult = -5+Math.random()*10;
 
-        window.camera.fov = 9+Math.random()*25;
+        window.camera.fov = 12+Math.random()*10;
+        //window.camera.fov = 9;//
         window.camera.updateProjectionMatrix();
         
 		this.cameraNoiseSpeed = .2+Math.random()*.5;
@@ -372,7 +373,8 @@ class VisualTest2{
         let rndRotAmt = 1+Math.random()*3;
         if(Math.random()>.5)rndRotAmt *=-1;
 
-        const rndRad = 12+Math.random()*20;
+        const rndRad = 19+Math.random()*10;
+
         
         this.cameraTween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, ((window.clock16Time)*(.5+Math.random()*2))*1000) // Move to (300, 200) in 1 second.
@@ -394,13 +396,23 @@ class VisualTest2{
 		});
     }
     
+    
     postVisualEffects(OBJ){
 
         this.afterimagePass.uniforms[ 'damp' ].value = OBJ.feedback;
         
-        this.hue.uniforms[ 'saturation' ].value = 0-OBJ.filter;// parseFloat(event.target.value);
-        this.brtCont.uniforms[ 'contrast' ].value = .1+((OBJ.filter)*.6);
-        this.brtCont.uniforms[ 'brightness' ].value = .1+((OBJ.filter)*.1);
+
+        /*
+         this.hue.uniforms[ 'saturation' ].value = .14;// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .15;
+        this.brtCont.uniforms[ 'brightness' ].value = .09;
+
+        */
+
+
+        this.hue.uniforms[ 'saturation' ].value = .14-(OBJ.filter*1.2);// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .15+((OBJ.filter)*.6);
+        this.brtCont.uniforms[ 'brightness' ].value = .09+((OBJ.filter)*.1);
 
         this.glitchPass.glitchAmt = OBJ.crush;
         
@@ -455,7 +467,13 @@ class VisualTest2{
         const self = this;  
         
         const mesh = this.meshArray [ Math.floor( Math.random() * this.meshArray.length ) ]; 
-        mesh.mesh.material.visible = false;
+        
+        if(mesh.mesh.material.visible){
+            mesh.mesh.material.visible = false;
+            setTimeout(function(){
+                mesh.mesh.material.visible = true;
+            }, 100+Math.random()*500)
+        }
         // if(Math.random()>.5){
         //     mesh.material.transparent = true;
         //     mesh.material.opacity = .7;//Math.random();
@@ -465,9 +483,7 @@ class VisualTest2{
 
         // mesh.material.color = new Color().setHSL(Math.random(), 1, .4);
 
-        setTimeout(function(){
-            mesh.mesh.material.visible = true;
-        }, 300+Math.random()*500)
+        
     }
 
     midiIn(OBJ){

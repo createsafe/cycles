@@ -41,7 +41,7 @@ import {
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
 import { GenerativeSplines } from "./GenerativeSplines.js";
 import { ParticleEmitter } from "./ParticleEmitter.js";
-import { ParticleBass } from "./Particle3.js";
+import { ButterflyParticle, ParticleBass } from "./Particle3.js";
 import { ParticleSnair } from "./Particle3.js";
 import { ParticleMetal } from "./Particle3.js";
 import { ParticleTone } from "./Particle3.js";
@@ -486,7 +486,9 @@ class VisualTest3{
         //     this.emitter[i].obj = {scene:this.parent}; 
         // }
         
-        
+        this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.08});
+        this.butterflyEmitter.obj = {scene:this.scene}; 
+
         this.tonePerlin = new NoiseVector({scale:.3, speed:.3});
         this.cameraPerlin = new NoiseVector({scale:.3, speed:.3});
         
@@ -614,6 +616,7 @@ class VisualTest3{
         if(window.fft != null)
             window.fft.smoothing = 0.7;
         
+        this.butterflyEmitter.update(OBJ);
         //console.log();
         this.mats.update(OBJ);
 
@@ -632,8 +635,6 @@ class VisualTest3{
         this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
         //const tp = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z).multiplyScalar(.2);
 
-      
-
         this.composer.render();
         this.inc += OBJ.delta*20.1;
         
@@ -645,7 +646,7 @@ class VisualTest3{
         const self = this;
         const p = {inc:0}
         
-        const noiseMult = -5+Math.random()*10;
+        const noiseMult = -8+Math.random()*16;
 
         window.camera.fov = 15+Math.random()*20;
         window.camera.updateProjectionMatrix();
@@ -653,12 +654,12 @@ class VisualTest3{
 		this.cameraNoiseSpeed = .2+Math.random()*.5;
         
         const rotRnd = (Math.PI*2)*Math.random();
-        const rndY = 7+Math.random()*7;
+        const rndY = 12+Math.random()*7;
         
         let rndRotAmt = 1+Math.random()*3;
         if(Math.random()>.5)rndRotAmt *=-1;
 
-        const rndRad = 22+Math.random()*20;
+        const rndRad = 30+Math.random()*20;
         
         this.cameraTween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, ((window.clock16Time)*(.5+Math.random()*2))*1000) // Move to (300, 200) in 1 second.
@@ -683,10 +684,17 @@ class VisualTest3{
     postVisualEffects(OBJ){
 
         this.afterimagePass.uniforms[ 'damp' ].value = OBJ.feedback;
-        
-        this.hue.uniforms[ 'saturation' ].value = 0-OBJ.filter;// parseFloat(event.target.value);
-        this.brtCont.uniforms[ 'contrast' ].value = .1+((OBJ.filter)*.6);
-        this.brtCont.uniforms[ 'brightness' ].value = .1+((OBJ.filter)*.1);
+        /*
+
+          this.hue.uniforms[ 'saturation' ].value = .3;// parseFloat(event.target.value);
+        //this.hue.uniforms[ 'hue' ].value = 20.1;// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .12;
+        this.brtCont.uniforms[ 'brightness' ].value = .08;
+
+        */
+        this.hue.uniforms[ 'saturation' ].value = .3 - (OBJ.filter*1.3);// parseFloat(event.target.value);
+        this.brtCont.uniforms[ 'contrast' ].value = .12+((OBJ.filter)*.6);
+        this.brtCont.uniforms[ 'brightness' ].value = .08+((OBJ.filter)*.1);
 
         this.glitchPass.glitchAmt = OBJ.crush;
         
@@ -753,11 +761,14 @@ class VisualTest3{
 
                     break;
                 case 148://track 5 on
+                    
                     if(OBJ.velocity > 0){
                         OBJ.instanceRandom = Math.random();
-                        OBJ.globalInc = this.inc;
-                        //this.pedals[2].trig(OBJ);
+                        self.butterflyEmitter.toggleEmit(true, OBJ);
+                    }else{
+                        self.butterflyEmitter.toggleEmit(false);
                     }
+
                     break;
                 case 149://track 6 on
                 
@@ -777,6 +788,9 @@ class VisualTest3{
                 case 131://track 4 off
                     break;
                 case 132://track 5 off
+                    
+                    self.butterflyEmitter.toggleEmit(false);
+                    
                     break;
                 case 133://track 6 off
                     break;
