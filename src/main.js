@@ -89,19 +89,34 @@ const clock = new THREE.Clock();
 
 window.playingTime = 60/134/24;
 window.loadObjs = [
-
+    {loaded:false, group:null, url:"bug-rave-ani.glb", name:"bug-rave", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/ant-1.glb", name:"ant-1", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/beatle-1.glb", name:"beatle-1", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/ladybug.glb", name:"ladybug", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/ant-2.glb", name:"ant-2", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/beatle-2.glb", name:"beatle-2", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/beatle-3.glb", name:"beatle-3", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/grasshopper.glb", name:"grasshopper", model:null, vis:0},
+    {loaded:false, group:null, url:"bugs/mantis.glb", name:"mantis", model:null, vis:0},
+    {loaded:false, group:null, url:"liz-1.glb", name:"liz-1", model:null, vis:0},
+    {loaded:false, group:null, url:"liz-2.glb", name:"liz-2", model:null, vis:0},
+    {loaded:false, group:null, url:"frog.glb", name:"frog", model:null, vis:0},
+    
+    
+    /*
     {loaded:false, group:null, url:"chicken-1.glb", name:"chicken-0", model:null, vis:0},
     {loaded:false, group:null, url:"chicken-2.glb", name:"chicken-1", model:null, vis:0},
-    {loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
-    {loaded:false, group:null, url:"dust2.glb", name:"dust", model:null, vis:0},
-
+    {loaded:false, group:null, url:"duck.glb", name:"duck", model:null, vis:0},
+    {loaded:false, group:null, url:"ping.glb", name:"ping", model:null, vis:0},
+    {loaded:false, group:null, url:"turtle.glb", name:"turtle", model:null, vis:0},
+    {loaded:false, group:null, url:"frog.glb", name:"frog", model:null, vis:0},
+    //{loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
+    */
     {loaded:false, group:null, url:"walk-3.glb", name:"walk", model:null, vis:1},
 
     {loaded:false, group:null, url:"flower-pedal.glb", name:"flower-pedal", model:null, vis:2},
-    {loaded:false, group:null, url:"flower-center.glb", name:"flower-center", model:null, vis:2},
-    {loaded:false, group:null, url:"flower-ring.glb", name:"flower-ring", model:null, vis:2},
     {loaded:false, group:null, url:"flower-stem.glb", name:"flower-stem", model:null, vis:2},
-    {loaded:false, group:null, url:"butterfly.glb", name:"butterfly", model:null, vis:2},
+    {loaded:false, group:null, url:"butterfly-small.glb", name:"butterfly", model:null, vis:2},
 ]
 
 const visSelect = document.getElementById("visual-drop-down-input");
@@ -250,19 +265,19 @@ function onKeyDown(e){
             window.fadeTime = 0;
             break;
         case 50:
-            window.fadeTime = .5;
+            window.fadeTime = .25;
             break;
         case 51:
-            window.fadeTime = 1;
+            window.fadeTime = .75;
             break;
         case 52:
-            window.fadeTime = 1.5;
+            window.fadeTime = 1;
             break;
         case 53:
-            window.fadeTime = 2;
+            window.fadeTime = 1.5;
             break;
         case 54:
-            window.fadeTime = 2.5;
+            window.fadeTime = 2;
             break;
         case 55:
             window.fadeTime = 3.0;
@@ -328,13 +343,13 @@ $( "#volume" ).bind( "input", function(event, ui) {
     Tone.getDestination().volume.value = vol;
 });
 
-$( "#compressor-threshold" ).bind( "input", function(event, ui) {
-    master.compressor.threshold.value = parseFloat(event.target.value);
-});
+// $( "#compressor-threshold" ).bind( "input", function(event, ui) {
+//     master.compressor.threshold.value = parseFloat(event.target.value);
+// });
 
-$( "#compressor-ratio" ).bind( "input", function(event, ui) {
-    master.compressor.ratio.value = parseFloat(event.target.value);
-});
+// $( "#compressor-ratio" ).bind( "input", function(event, ui) {
+//     master.compressor.ratio.value = parseFloat(event.target.value);
+// });
 
 // $( "#distortion" ).bind( "input", function(event, ui) { 
 //     master.updateDistortion(parseFloat(event.target.value));   
@@ -601,6 +616,8 @@ function init() {
     window.renderer.toneMappingExposure = .6;
     window.renderer.shadowMap.enabled = true;
 	window.renderer.shadowMap.type = THREE.PCFShadowMap;
+//    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
     
     document.body.appendChild( window.renderer.domElement );
     

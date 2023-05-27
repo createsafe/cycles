@@ -18,11 +18,15 @@ import {
 import { SplineAnimation } from './SplineAnimation.js';
 import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
 //import { TWEEN } from './scripts/jsm/libs/tween.module.min.js';
+import { CustomMaterial } from "./CustomMaterial.js"
+import { GenerativeSplines } from "./GenerativeSplines.js";
 
-const bassGeo = new IcosahedronGeometry( .05, 1 );
+//const bassGeo = new IcosahedronGeometry( .05, 1 );
+const bassGeo = new BoxGeometry( .05, .1, .05 );
+
 const bassMat = new MeshStandardMaterial({color:0xff0000});
 const bassMesh = new Mesh(bassGeo, bassMat);
-const snairGeo = new IcosahedronGeometry( .05, 1);
+const snairGeo = new IcosahedronGeometry( .5, 1);
 const snairMat = new MeshStandardMaterial();
 const snairMesh = new Mesh(snairGeo, snairMat);
 const toneGeo = new BoxGeometry( .05, .5, .05 );
@@ -37,7 +41,10 @@ const metalMesh = new Mesh(metalGeo, metalMat);
 const chordGeo = new BoxGeometry( .4, .2, .2 );
 const chordMat = new MeshStandardMaterial();
 const chordMesh = new Mesh(chordGeo, chordMat);
-import { CustomMaterial } from "./CustomMaterial.js"
+
+
+// const splineGenerator = new GenerativeSplines();
+// const snairSpline = splineGenerator.getFlowerSpiral();
 
 class ParticleBass{
 
@@ -72,25 +79,25 @@ class ParticleBass{
         matrix.multiply(instance); 
 
         const startPos = new Vector3().setFromMatrixPosition(matrix);
-        const toPos = new Vector3().copy(startPos).add( new Vector3(0,1,0) );
+        const toPos = new Vector3().copy(startPos).add( new Vector3((-.5+Math.random())*.2,3,(-.5+Math.random())*.2) );
 
         //const startPos = new Vector3().lerpVectors(startPos1, toPos1, Math.random());
         //const toPos = new Vector3().addVectors(startPos, new Vector3(Math.random()*4,0,0));
 
         this.mesh.visible = true;
 		this.mesh.position.copy(startPos);
-		this.mesh.rotation.set(
-			-Math.PI+Math.random()*(Math.PI*2),
-			-Math.PI+Math.random()*(Math.PI*2),
-			-Math.PI+Math.random()*(Math.PI*2), 
-		)
+		// this.mesh.rotation.set(
+		// 	-Math.PI+Math.random()*(Math.PI*2),
+		// 	-Math.PI+Math.random()*(Math.PI*2),
+		// 	-Math.PI+Math.random()*(Math.PI*2), 
+		// )
 
-		this.mesh.material.color = new Color(0,0,0);
+		//this.mesh.material.color = new Color(0,0,0);
 
 		const p = {inc:0};
-		
+		const rndHue = .7+Math.random()*.3;
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, (window.clock4Time*2)*1000) // Move to (300, 200) in 1 second.
+		.to({ inc:1 }, (window.clock4Time*4)*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Cubic.Out) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			
@@ -99,12 +106,12 @@ class ParticleBass{
 			const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
 			self.mesh.position.copy(fnlPos);
 			
-			const col1 = new Color().setHSL(.65, 1, .3 );
-			const col2 = new Color().setHSL(Math.random(), 2, .3 );
-			const colFnl = new Color().lerpColors(col1, col2, p.inc*.8);
+			const col1 = new Color().setHSL(rndHue, 1, .4 );
+			const col2 = new Color().setHSL(.2+Math.random()*.6, 2, .4 );
+			const colFnl = new Color().lerpColors(col2, col1, p.inc);
 			this.mesh.material.color = this.mesh.material.emissive = colFnl;
 			
-			self.mesh.lookAt(toPos);
+			//self.mesh.lookAt(toPos);
 
 			// const s2 = (.5+Math.sin(p.inc * Math.PI)*.5)*3;
 			 const s = ( 1 - p.inc );
@@ -147,6 +154,8 @@ class ParticleSnair{
 
 		const self = this;
 		this.scene = OBJ.scene;
+
+		this.spline = OBJ.spline;
 		
 		this.mesh = snairMesh.clone();
         const clone = this.mesh.material.clone();   
@@ -168,36 +177,21 @@ class ParticleSnair{
 		const self = this;
 
 		this.mesh.scale.set(0,0,0);
+        this.mesh.visible = true;
 		
-        const matrix = new Matrix4();
-        const rot = new Matrix4().copy(SPECIAL.parent.rot.matrixWorld);
-        const instance = new Matrix4().copy(SPECIAL.parent.sp.getMatrix());
-        matrix.multiply(rot);
-        matrix.multiply(instance); 
-
-        const startPos = new Vector3().setFromMatrixPosition(matrix);
-        const toPos = new Vector3().copy(startPos).add( new Vector3(-1+Math.random()*2,-1+Math.random()*2,-1+Math.random()*2 ).multiplyScalar(Math.random()*2) );//( new Vector3(0,1,0) );
-
-		this.mesh.visible = true;
-		this.mesh.position.copy(startPos);
-		this.spIndex = Math.floor(Math.random()*200);
-
 		const p = {inc:0};
 		
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, (window.clock4Time*2)*1000) // Move to (300, 200) in 1 second.
-		.easing(TWEEN.Easing.Cubic.Out) // Use an easing function to make the animation smooth.
+		.to({ inc:1 }, (window.clock16Time)*1000) // Move to (300, 200) in 1 second.
+		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			self.inc = p.inc;
-            
-            // const matrix = new Matrix4();
-            // const rot = new Matrix4().copy(parent.rot.matrixWorld);
-            // const instance = new Matrix4().copy(parent.sp.getMatrixWithIndex(this.spIndex));
-            // matrix.multiply(rot);
-            // matrix.multiply(instance); 
-            
-            const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
-			self.mesh.position.copy(fnlPos);
+          
+			const trans = self.spline.getTransforms({inc:self.inc, noiseAmt:2});
+
+            //const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
+			self.mesh.position.copy(trans.pos);
+            self.mesh.quaternion.copy(trans.quat);
             
 			const col1 = new Color().setHSL(.0, 1, .3 );
 			const col2 = new Color().setHSL(.67, 1, .3 );
@@ -208,7 +202,7 @@ class ParticleSnair{
 			//self.mesh.material.needsUpdate = true;
 			
 			//const s = .5+Math.sin(p.inc * Math.PI)*.5;
-			const s = (1-p.inc);
+			const s = ((1-p.inc)+.4)*.2;
 			self.mesh.scale.set(s,s,s);
 		})
 		.start()
@@ -654,37 +648,61 @@ class ButterflyParticle{
 		this.clip = this.mixer.clipAction(ani);  
 		this.clip.play();
 		this.mat = new CustomMaterial();
-
+		
 		this.mesh.traverse(function(obj){
 			if(obj.isMesh){
 				//const mat = obj.material.clone();
 				
-                const params1 = {
-                    twistAmt:  0.0,//.15+Math.random()*.1,//(-1+Math.random()*2)*.3,
-                    noiseSize: 2.015,//.2+Math.random()*.8,
-                    twistSize: .01,//.4+Math.random()*.8,
-                    noiseAmt: 0.0,
-                    rainbowAmt: .5,//.2+Math.random()*.8,
-                    gradientSize: .003,
-                    gradientAngle: Math.PI,
-                    gradientAdd: 2, 
-                    rainbowGradientSize:0.1,
-                    gradientOffset:0,
-                    topColor:new Color().setHSL(1,2,.3 ),
-                    bottomColor:new Color().setHSL(.7,2,.3),
-                    deformSpeed: 4,
-                    colorSpeed: 4,
-                    shouldLoopGradient:1,
-                }
+                // const params1 = {
+                //     twistAmt:  0.0,//.15+Math.random()*.1,//(-1+Math.random()*2)*.3,
+                //     noiseSize: 3.015,//.2+Math.random()*.8,
+                //     twistSize: .01,//.4+Math.random()*.8,
+                //     noiseAmt: 0.0,
+                //     rainbowAmt: .1,//.2+Math.random()*.8,
+                //     gradientSize: 1.003,
+                //     gradientAngle: Math.PI,
+                //     gradientAdd: .2, 
+                //     rainbowGradientSize:1.1,
+                //     gradientOffset:0,
+                //     topColor:new Color().setHSL(1,2,.3 ),
+                //     bottomColor:new Color().setHSL(.7,2,.3),
+                //     deformSpeed: 4,
+                //     colorSpeed: 4,
+                //     shouldLoopGradient:1,
+                // }
+
+				// obj.material.color.set(0x555555);
+				obj.material.roughness = .8;
+				//obj.material.vertexColors = false;
+				const params1 = {
+					twistAmt:0,//(-1+Math.random()*2)*.3,
+					noiseSize:3,
+					twistSize:.8,//.4+Math.random()*.8,
+					noiseAmt:0,
+					rainbowAmt:.5,//0.5+Math.random()*.4,
+					gradientSize: .01,//(.2+Math.random())*.1,
+					gradientAngle: Math.PI,
+					gradientAdd: 0.3,//1.9+Math.random()*.8, 
+					rainbowGradientSize:0.01,//(.2+Math.random()),
+					gradientOffset:0,//-100+Math.random()*200,
+					topColor:new Color().setHSL(.2, .8, .2 ),
+					bottomColor:new Color().setHSL(.4, .8, .2),
+					deformSpeed:4,
+					colorSpeed:2,
+					shouldLoopGradient:1,
+				}
 
                 const matClone = obj.material.clone();
-                matClone.map = null;
+				//const matClone = new MeshBasicMaterial();
+              //  matClone.map = null;
                 matClone.normalMap = null;
                 matClone.emissiveMap = null;
-                matClone.color = new Color(0x888888)
-                matClone.roughness = 1;
-                matClone.emissive = new Color().setHSL(0,0,0);
-                const mat = self.mat.getCustomMaterial(matClone, params1)
+                matClone.color = new Color(0x999999)
+                matClone.roughness = .1;
+				//matClone.transparent = true;
+              //	matClone.emissive = new Color().setHSL(0,0,0);
+
+                const mat = self.mat.getButterflyMat(matClone, params1)
                 obj.material = mat;
 
 
@@ -722,7 +740,8 @@ class ButterflyParticle{
         //const h = (SPECIAL.instanceRandom + (SPECIAL.index*.05)) % 1.0;
         //const h = .6 + Math.sin( (SPECIAL.instanceRandom*2)+(SPECIAL.index*.3) ) * .2 ;
         const rndStart = SPECIAL.instanceRandom*(Math.PI*2);
-        const rndRad = 2 + (SPECIAL.instanceRandom * 4);
+        const rndRad = 1 + (SPECIAL.instanceRandom * 2);
+		const yPos = 4+ (SPECIAL.instanceRandom * 4);
       
         this.clip.stop();
         this.clip.play();
@@ -743,18 +762,18 @@ class ButterflyParticle{
 			//const pos = new Vector3().lerpVectors(startPos, toPos, p.inc)
             //self.mesh.position.copy(pos);
 
-            self.mesh.position.set(x,5,z);
+            self.mesh.position.set(x,yPos,z);
             self.mesh.rotation.y = theta-(Math.PI/2);
 
             //const s = Math.sin();
-            const s = (.5 + Math.cos( ( p.inc * Math.PI ) ) * .5) * 2;
+            const s = (.5 + Math.cos( ( p.inc * Math.PI ) ) * .5) *2;
 			
             self.mesh.scale.set(s,s,s);
             
             self.mesh.traverse(function(obj){
                 if(obj.isMesh){
-                    obj.material.userData.shader.uniforms.noiseAmt.value = p.inc*10000;
-                    obj.material.userData.shader.uniforms.twistAmt.value = p.inc*1.3;
+                    // obj.material.userData.shader.uniforms.noiseAmt.value = (p.inc)*2;
+                    // obj.material.userData.shader.uniforms.twistAmt.value = p.inc*2.3;
                 }
             })
 

@@ -35,6 +35,7 @@ import {
     MultiplyBlending ,
     EquirectangularReflectionMapping,
     AdditiveBlending,
+    CameraHelper
 
 } from './build/three.module.js';
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
@@ -162,14 +163,15 @@ void main() {
 
   float rainbowSin = sin((vUv.y*2.)+(inc*0.3))*2.1;
   float m = .01;//rainbowSin*.01;
-  float sm = .4+(damp*4.);//4.1;
+  //float sm = .4+(damp*4.);//4.1;
+  float sm = 4.1;
   
   vec3 rainbow = vec3( .5 + sin( ( (inc*sm) + ((vUv.x * m) * uvXMult) ) )*.5, .5 + sin( ( ( (inc*sm) + ( (vUv.x*m) * uvXMult) ) ) + ( 3.14 / 2.) ) *.5, .5 + sin( ( ( (inc*sm) - ( (vUv.x*m) * uvXMult) ) ) + (3.14) )*.5 ) * (rainbowFinalMult*0.1);
   //vec3 rainbow = vec3( .5 + sin( ( inc + (vUv.x*50.2) ) * m )*.5, .5+sin( (( inc + (vUv.x * 50.2) ) * m) + ( 3.14 / 2.) ) *.5, .5 + sin( ( (inc - (vUv.y * 200.2) ) * 20. )+( 3.14) )*.5 ) * 4.4;
   
-  float scSin = sin( (vUv.y * (feedbackFreq * 200.) ) +( feedbackInc*100.1 ) ) * .1;
+  float scSin = sin( (vUv.y * (feedbackFreq * 20.) ) +( feedbackInc*100.1 ) ) * .1;
   
-  float scl = 1.0+(0.0111*scSin);
+  float scl = (1.0-(0.0111*scSin))*1.0081;//*((-.5+damp)*.1);
   float off = (1.0 -  scl ) * .5;
         
   // float snY = sin( (vUv.y*.1)+(inc*.1) ) * 0.005;
@@ -207,7 +209,7 @@ void main() {
 `;
 
 
-class Chicken{
+class Animal{
   constructor(OBJ){
     //this.mesh = 
     this.mesh = OBJ.mesh;//window.getLoadedObjectByName("boy").model;
@@ -220,14 +222,14 @@ class Chicken{
     })
     this.mesh.position.copy(OBJ.pos);
 
-    let s = .6+Math.random()*.3;
+    let s = .8+Math.random()*.3;
     this.mesh.scale.set(s,s,s);
     
     this.mixer = new AnimationMixer(this.mesh);
     const ani = OBJ.group.animations[0];
     this.idle = this.mixer.clipAction(ani);  
     this.idle.play();
-    this.mesh.rotation.y+=Math.random()*(Math.PI*2)
+    this.mesh.rotation.copy(OBJ.rot);//.y+=Math.random()*(Math.PI*2)
     
     OBJ.scene.add(this.mesh)
         
@@ -367,17 +369,18 @@ class VisualTest1{
           new PlaneGeometry(2000,2000),
           new MeshPhysicalMaterial({color:0x888888, side:DoubleSide})
       )
+      wall.position.y = 1000-2.5;
       wall.position.z = -.1;//Math.PI/2;
-      const tex = new TextureLoader().load( './extras/b-site.png' );
-      const sticker = new Mesh( 
-        new PlaneGeometry(3,3),
-        new MeshBasicMaterial({color:0xdd6666, transparent:true, map:tex, blending:AdditiveBlending , opacity:0.8})
-      )
-      sticker.position.x-=(3+Math.random());
-      sticker.position.y+=(Math.random());
+      // const tex = new TextureLoader(),.load( './extras/b-site.png' );
+      // const sticker = new Mesh( 
+      //   new PlaneGeometry(3,3),
+      //   new MeshBasicMaterial({color:0xdd6666, transparent:true, map:tex, blending:AdditiveBlending , opacity:0.8})
+      // )
+      // sticker.position.x-=(3+Math.random());
+      // sticker.position.y+=(Math.random());
 
-      sticker.rotation.z+=Math.random()*(Math.PI*.2)
-      sticker.position.z = -.04;//Math.PI/2;
+      // sticker.rotation.z+=Math.random()*(Math.PI*.2)
+      // sticker.position.z = -.04;//Math.PI/2;
 
       const ground = new Mesh(
           new PlaneGeometry(2000,2000),
@@ -393,60 +396,48 @@ class VisualTest1{
         //window.scene.add(this.parent);
         this.bufferImage.scene.add(this.parent);
 
-        this.chickens = [];
-        for(let i = 0; i<20; i++){
-          const chick = "chicken-" + Math.floor( Math.random()*2 );
-          const mesh = clone( window.getLoadedObjectByName(chick).model );
-          const group = window.getLoadedObjectByName(chick).group ;
-          const pos = new Vector3( -5+Math.random()*10, -2.5, -2+Math.random()*10 );
-          this.chickens.push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
+        this.anims = [];
+        for(let i = 0; i<40; i++){
+          // const names = [
+          //   "chicken-0",
+          //   "chicken-1",
+          //   "duck",
+          //   "ping",
+          //   "liz-1",
+          //   "liz-2",
+          //   "turtle",
+          //   "frog",
+          // ]
+          
+          const names = [
+            "ant-1",
+            "ant-2",
+            "beatle-1",
+            "beatle-2",
+            "beatle-3",
+            "grasshopper",
+            "ladybug",
+            "mantis", 
+            "liz-1",
+            "liz-2",
+            "frog",
+          ]
+          const anim = names[Math.floor( Math.random()*names.length )];
+          const mesh = clone( window.getLoadedObjectByName(anim).model );
+          const group = window.getLoadedObjectByName("bug-rave").group;
+          
+          const wall = Math.random()>.5;
+          const x = Math.random()>.5?1:-1;
+          const pos = !wall ? new Vector3( -5+Math.random()*10, -2.5, Math.random()*5 ) : new Vector3( (2.2+Math.random()*3)*x, -1+Math.random()*5, -.1 );
+          const rot = !wall ? new Euler(0,Math.random()*(Math.PI*2),0) : new Euler(Math.PI/2,Math.random()*(Math.PI*2),0);
+    
+          this.anims.push( new Animal({mesh:mesh, rot:rot, group:group, pos:pos, scene:this.bufferImage.scene}))
         }
-        // this.boy = window.getLoadedObjectByName("boy").model;
-        // this.boyAni = window.getLoadedObjectByName("boy").group;
-        // ///this.boy.castShadow = true; 
-        // this.boy.traverse(function(obj){
-        //     if(obj.isMesh){
-        //         obj.castShadow = true;
-        //     }
-        // })
-        // this.boy.position.y = -2.5;
-        // this.boy.position.x = 1.8;
-        // this.boy.position.z = 1.2;
-        // this.boy.rotation.y=-Math.PI/1.5;
-        // let s = .1;
-        // this.boy.scale.set(s,s,s);
-        // this.mixer = new AnimationMixer(this.boy);
-        // const ani = this.boyAni.animations[0];
-        // this.clip = this.mixer.clipAction(ani);  
-        // this.clip.play();
-        const dust = window.getLoadedObjectByName("dust").model;
-        dust.traverse(function(obj){
-          if(obj.isMesh){
-              obj.receiveShadow = true;
-              // if(obj.material.map!=null)
-              //   obj.material.map.colorSpace = SRGBColorSpace;
-
-          }
-      })
-        // let s = .2;
-        // dust.scale.set(s,s,s);
         
-        this.bench = window.getLoadedObjectByName("bench").model;
-        this.bench.position.z = 2;
-        this.bench.position.y = -2.5;
-        let s = .2;
-        this.bench.scale.set(s,s,s);
-        this.bench.traverse(function(obj){
-            if(obj.isMesh){
-                obj.castShadow = true;
-            }
-        })
-        
-        //console.log(clip)
 
-        //this.bufferImage.scene.add(wall, ground, this.bench, sticker);
+        this.bufferImage.scene.add(wall, ground);
         //this.scene.add(dust);
-        this.bufferImage.scene.add(   dust);
+        //this.bufferImage.scene.add(   dust);
         //this.bufferImage.scene.add(wall, ground);
 
         this.emitter = [];
@@ -471,16 +462,21 @@ class VisualTest1{
         window.camera.position.y = .2;
         
         const dirLight1 = new DirectionalLight( 0xffffff, 2.2 );
-        dirLight1.position.set( 1.2, 1.3, 1 );
+        dirLight1.position.set( .7, 5.2, 4 );
         
         dirLight1.castShadow = true;
         dirLight1.shadow.camera.near = 0;
-        dirLight1.shadow.camera.far = 5;
-        dirLight1.shadow.bias = 0.0001;
-        dirLight1.shadow.mapSize.width = 512;
-        dirLight1.shadow.mapSize.height = 512;
-        
+        dirLight1.shadow.camera.far = 10;
+        dirLight1.shadow.bias = 0.01;
+        dirLight1.shadow.mapSize.width = 1024;
+        dirLight1.shadow.mapSize.height = 1024;
+        dirLight1.shadow.camera.top = 6;
+        dirLight1.shadow.camera.bottom = -6;
+        dirLight1.shadow.camera.left = 6;
+        dirLight1.shadow.camera.right = -6;
+              
         this.bufferImage.scene.add( dirLight1 );
+        //this.bufferImage.scene.add( new CameraHelper( dirLight1.shadow.camera ) );
 
         const dirLight2 = new DirectionalLight( 0xffffff, 0.2 );
         dirLight2.position.set( - 1,  1,  1 );
@@ -494,44 +490,7 @@ class VisualTest1{
         this.bufferImage.scene.add(this.lightsParent)
         this.lightsParent.position.z = 1.5;
         
-        // this.lightsArr=[];
-        // for(let i = 0; i<12; i++){
-        //     const pl = new PointLight(new Color().setHSL( .3 + Math.random(), .3+Math.random(), .6) ,.2,Math.random()*10);
-        //     this.lightsArr.push({light:pl, name:"point", fftIndex: Math.floor(Math.random()*1000)});
-        //     const pos = new Vector3( -.5+Math.random(), -.5+Math.random(),-.5+Math.random() ).multiplyScalar(6);
-        //     //console.log(pos)
-        //     this.lightsParent.add(pl);
-        //     pl.position.copy(pos); 
-        // }
-        
-
-
-
-        /*
-        this.controls = new OrbitControls( window.camera, window.renderer.domElement );
-        this.controls.listenToKeyEvents( window ); // optional
-
-        //controls.addEventListener( 'change', render ); // call this only in static scenes (i.e., if there is no animation loop)
-        this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        this.controls.dampingFactor = .008;
-        //controls.target.set(0,1,0);
-        this.controls.update();
-        this.controls.enablePan = false;
-        	// How far you can zoom in and out ( OrthographicCamera only )
-		this.controls.minZoom = 1;
-		this.controls.maxZoom = 5;
-
-		// How far you can orbit vertically, upper and lower limits.
-		// Range is 0 to Math.PI radians.
-		this.controls.minPolarAngle = 0.2; // radians
-		this.controls.maxPolarAngle = Math.PI*.5; // radians
-
-		// How far you can orbit horizontally, upper and lower limits.
-		// If set, the interval [ min, max ] must be a sub-interval of [ - 2 PI, 2 PI ], with ( max - min < 2 PI )
-		this.controls.minAzimuthAngle = -.5; // radians
-		this.controls.maxAzimuthAngle = .5; // radians
-        */
-
+     
         this.composer = new EffectComposer( window.renderer );
         this.composer.addPass( new RenderPass( this.bufferImage.scene, window.camera ) );
 
@@ -575,13 +534,13 @@ class VisualTest1{
         this.cameraNoiseSpeed = .2+Math.random()*.5;
         self.initCam();
 
-        new RGBELoader()
-        .setPath( './extras/' )
-        .load( 'quarry_01_1k.hdr', function ( texture ) {
-						texture.mapping = EquirectangularReflectionMapping;
-						self.bufferImage.scene.background = texture;
-						self.bufferImage.scene.environment = texture;
-        });
+        // new RGBELoader()
+        // .setPath( './extras/' )
+        // .load( 'quarry_01_1k.hdr', function ( texture ) {
+				// 		texture.mapping = EquirectangularReflectionMapping;
+				// 		self.bufferImage.scene.background = texture;
+				// 		self.bufferImage.scene.environment = texture;
+        // });
         
 
         // const params = {
@@ -613,8 +572,8 @@ class VisualTest1{
     update(OBJ){
 
       
-      for(let i = 0; i<this.chickens.length; i++){
-        this.chickens[i].update(OBJ);//push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
+      for(let i = 0; i<this.anims.length; i++){
+        this.anims[i].update(OBJ);//push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
       }
       //console.log();
       
@@ -679,9 +638,9 @@ zvxc
 
       const self = this;
       const p = {inc:0}
-      const xFrom = -10+Math.random()*20;
-      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 7, 6 + Math.random() * 5);
-      let xTo = Math.random()*10;
+      const xFrom = -16+Math.random()*32;
+      const fromPos = new Vector3().set(xFrom, -1+Math.random() * 6, 9 + Math.random() * 12);
+      let xTo = Math.random()*16;
       if(xFrom>0)
           xTo *=-1;
       
@@ -691,7 +650,7 @@ zvxc
       const noiseMult = -3+Math.random()*6;
 
       window.camera.position.copy(fromPos);
-      window.camera.fov = 35+Math.random()*20;
+      window.camera.fov = 15+Math.random()*30;
       window.camera.updateProjectionMatrix();
         
       this.cameraNoiseSpeed = .2+Math.random()*.5;

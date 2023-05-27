@@ -63,7 +63,7 @@ import { HueSaturationShader } from './scripts/jsm/shaders/HueSaturationShader.j
 import { FilmShader } from './scripts/jsm/shaders/FilmShader.js';
 import { GlitchPass } from './scripts/jsm/postprocessing/GlitchPass.js';
 import { RenderPixelatedPass }from './scripts/jsm/postprocessing/RenderPixelatedPass.js';
-
+import {TrackAni} from './SplineAnimation.js';
 
 class Pedal{
     constructor(OBJ){
@@ -88,6 +88,12 @@ class Pedal{
 
         this.glowColor = new Color(Math.random(), 1, .4);
         this.pedalMesh;
+
+        const defSpeed = .8 + Math.random()*.4;
+        const twistAmt = .15+Math.random()*.1;
+        const noiseSize = .2+Math.random()*.8;
+        const noiseAmt = (-1+Math.random()*2)*.3;
+
         this.pedal.traverse(function(obj){
 
             if(obj.isMesh && !self.initedSp && obj.name=="pedal"){
@@ -102,55 +108,78 @@ class Pedal{
                         self.pedalMesh = obj;
                         obj.material.color.set(0x555555);
                         obj.material.roughness = .8;
-
+                        //obj.material.vertexColors = false;
                         const params1 = {
-                            twistAmt: .15+Math.random()*.1,//(-1+Math.random()*2)*.3,
-                            noiseSize:.2+Math.random()*.8,
+                            twistAmt:twistAmt,//(-1+Math.random()*2)*.3,
+                            noiseSize:noiseSize,
                             twistSize:.6,//.4+Math.random()*.8,
-                            noiseAmt:(-1+Math.random()*2)*.3,
-                            rainbowAmt:.2+Math.random()*.4,
-                            gradientSize: (.2+Math.random())*.1,
-                            gradientAngle: (Math.PI-.1)+Math.random()*.2,
-                            gradientAdd: Math.random()*.8, 
-                            rainbowGradientSize:(.2+Math.random())*8.36,
-                            gradientOffset:-100+Math.random()*200,
-                            topColor:new Color().setHSL(   .6+(Math.random()*.1), .8+Math.random()*.2, (.3+Math.random()*.1) ),
-                            bottomColor:new Color().setHSL(.5+(Math.random()*.1), .8+Math.random()*.2, (.3+Math.random()*.1)),
-                            deformSpeed:1.2 + Math.random()*.4,
+                            noiseAmt:noiseAmt,
+                            rainbowAmt:.2,//0.5+Math.random()*.4,
+                            gradientSize: .1,//(.2+Math.random())*.1,
+                            gradientAngle: (Math.PI),//-.6)+Math.random()*1.2,
+                            gradientAdd: 1,//1.9+Math.random()*.8, 
+                            rainbowGradientSize:.2,//(.2+Math.random()),
+                            gradientOffset:0,//-100+Math.random()*200,
+                            topColor:new Color().setHSL(   .2,  .7, .1 ),
+                            bottomColor:new Color().setHSL( .4, .7, .1),
+                            deformSpeed:defSpeed,
                             colorSpeed:(-1+Math.random()*2) * 2,
                             shouldLoopGradient:1,
                         }
                         const matClone1 = obj.material.clone();
-                        const mat1 = self.mats.getCustomMaterial(matClone1, params1)
+                        const mat1 = self.mats.getFlowerMat(matClone1, params1)
                         obj.material = mat1;
 
                         break;
                     case "pedal-lower":
-
-                        obj.material.color.set(0x555555);
+                        
+                        obj.material.color.set(0xffffff);
                         obj.material.roughness = .8;
 
                         const params2 = {
-                            twistAmt:(-1+Math.random()*2)*0,
-                            noiseSize:100+(-1+Math.random()*2)*1500.,
-                            twistSize:100+(Math.random()*1000),
-                            noiseAmt:(-1+Math.random()*2)*.02,
-                            rainbowAmt:.1+Math.random()*.4,
-                            gradientSize: (.2+Math.random())*.1,
-                            gradientAngle: (Math.PI-.1)+Math.random()*.2,
-                            gradientAdd: Math.random()*.8, 
+                            twistAmt:twistAmt,//(-1+Math.random()*2)*.3,
+                            noiseSize:noiseSize,
+                            twistSize:.6,//.4+Math.random()*.8,
+                            noiseAmt:noiseAmt,
+                            rainbowAmt:0,//.1+Math.random()*.4,
+                            gradientSize: 0,//(.2+Math.random())*.1,
+                            gradientAngle: 0,//(Math.PI-.1)+Math.random()*.2,
+                            gradientAdd: 1,//Math.random()*.8, 
                             rainbowGradientSize:(.2+Math.random())*.6,
                             gradientOffset:-100+Math.random()*200,
-                            topColor:new Color().setHSL(   .3+(Math.random()*.2), .8+Math.random()*.2, (.3+Math.random()*.1) ),
-                            bottomColor:new Color().setHSL(.3+(Math.random()*.2), .8+Math.random()*.2, (.3+Math.random()*.1)),
-                            deformSpeed:(-1+Math.random()*2) * 5,
+                            topColor:new Color().setHSL(   .6,.7, 0.1 ),
+                            bottomColor:new Color().setHSL(.6,.7, 0.1),
+                            deformSpeed:defSpeed,
                             colorSpeed:(-1+Math.random()*2) * 2,
                             shouldLoopGradient:1,
                         }
+                        
                         const matClone2 = obj.material.clone();
-                        const mat2 = self.mats.getCustomMaterial(matClone2, params2)
+                        const mat2 = self.mats.getFlowerMat(matClone2, params2)
                         obj.material = mat2;
+                        
+                        if(OBJ.index==0){
+                            for(let i = 0; i<10;i++){
+                                const ms = obj.clone();
 
+                                const rad = .2;
+                                const angle = i*1.8;
+                                ms.rotation.y = angle+Math.PI;
+
+
+                                const x = Math.sin( (angle) )*rad;
+                                const z = Math.cos( (angle) )*rad;
+                        
+                                ms.position.y = -3 + (-i *.9);
+                                ms.position.x = x;
+                                ms.position.z = z;
+                                
+                                let s = (1 - Math.random()*.3)-(i*.1);
+                                if(s < .3)s=.4;
+                                ms.scale.set(s,s,s);
+                                OBJ.scene.add(ms);
+                            }    
+                        }
                         break;
                 }
                 
@@ -162,12 +191,12 @@ class Pedal{
         this.emitter.obj = {scene:this.scene}; 
 
         const amt = 6;
-        const rad = .42;
+        const rad = .3;
 
         const x = Math.sin( (OBJ.index/amt)*(Math.PI*2) )*rad;
         const z = Math.cos( (OBJ.index/amt)*(Math.PI*2) )*rad;
 
-        this.parent.position.set(x, -0.3, z);
+        this.parent.position.set(x, -1., z);
         this.parent.rotation.y =  ((OBJ.index/amt)*(Math.PI*2)) + Math.PI;
         
         
@@ -219,9 +248,8 @@ class Pedal{
     
     trig(OBJ){
         
-        for(let i = 0; i<80; i++){
+        for(let i = 0; i<50; i++){
 
-           
                 OBJ.parent = this;
                 OBJ.index = i;
                 this.emitter.emit(OBJ);
@@ -238,7 +266,7 @@ class Pedal{
 		.easing(TWEEN.Easing.Back.In) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
             this.rot.rotation.x = p.inc;
-            this.pedalMesh.material.emissive = new Color().lerpColors( new Color().setHSL(0,0,0), new Color().setHSL(0,1,.5), p.col*2) //userData.shader.uniforms.noiseAmt.value = val*this.meshArray[i].mult;
+            this.pedalMesh.material.emissive = new Color().lerpColors( new Color().setHSL(0,0,0), new Color().setHSL(0,1,.5), p.col*3) //userData.shader.uniforms.noiseAmt.value = val*this.meshArray[i].mult;
             
 		})
 		.start()
@@ -250,7 +278,7 @@ class Pedal{
             .easing(TWEEN.Easing.Back.Out) // Use an easing function to make the animation smooth.
             .onUpdate(() => {
                 this.rot.rotation.x = p.inc;
-                this.pedalMesh.material.emissive = new Color().lerpColors(new Color().setHSL(0,0,0), new Color().setHSL(0,1,.5), p.col*2)
+                this.pedalMesh.material.emissive = new Color().lerpColors(new Color().setHSL(0,0,0), new Color().setHSL(0,1,.5), p.col*3)
             })
             .start();
 
@@ -380,15 +408,22 @@ class SurfaceParticle2{
         this._position = new Vector3();
         this.dummy = new Object3D();
 
-        const icoGeo = new IcosahedronGeometry(.05, 1);
+        const icoGeo = new IcosahedronGeometry(.07, 1);
         const icoMat = new MeshStandardMaterial({color:0x70dae6});
+        icoGeo.scale(.8,.2,.8);
+        
+        icoGeo.translate(0,1,0);
+        icoGeo.rotateX(-Math.PI/2);
         this.ico = new InstancedMesh( icoGeo, icoMat, this.count );
         
-        const cylGeo = new CylinderGeometry( .02, .01, 1, 8 ); 
+        const cylGeo = new CylinderGeometry( .01, .01, 1, 4 ); 
         cylGeo.translate(0,.5,0);
+        cylGeo.rotateX(-Math.PI/2);
         const cylMat = new MeshStandardMaterial({color:0x269e70});
         this.cyl = new InstancedMesh( cylGeo, cylMat, this.count );
-
+        
+        //this.parent = new Object3D();
+        //this.parent.add(this.cyl, this.ico)
 
         //const vertexCount = OBJ.surface.geometry.getAttribute( 'position' ).count;
         this.sampler = new MeshSurfaceSampler( OBJ.surface ).build();
@@ -406,8 +441,12 @@ class SurfaceParticle2{
             const obj = {pos:new Vector3().copy(this._position), nrml:new Vector3().copy(this._normal) };
             this.transforms.push(obj);
 
-            this.fftArr.push( Math.floor(Math.random()*1024) );
-            this.dists.push( (this._position.distanceTo( new Vector3() ) + (Math.random () *.02))*.4 )
+            const fr = Math.floor( ( new Vector3().set(this._position.x, 0, this._position.z).distanceTo( new Vector3(0,0,0) )) *  900 ) ;
+            this.fftArr.push( fr);//Math.floor(Math.random()*1024) );
+           // console.log( new Vector3().set(this._position.x, 0, this._position.z).distanceTo( new Vector3(0,0,0) ) );
+            //this.dists.push(  (.8 - new Vector3().set(this._position.x, 0, this._position.z).distanceTo( new Vector3(0,0,0) ))*1.2 );//.2+Math.random () * .5  )
+            this.dists.push(  1-(new Vector3().set(this._position.x, 0, this._position.z).distanceTo( new Vector3(0,0,0) )) * .8 );//.2+Math.random () * .5  )
+            
             self.resampleParticle( i, obj, 0);
 
         }
@@ -420,19 +459,24 @@ class SurfaceParticle2{
     }
 
     resampleParticle( i, trns, fft ) {
-        
+        let scl = (-.5 + this.dists[i]+fft);
+        if(scl<.1)scl=.1;
         this.dummy.position.copy( trns.pos ) ;
-        this.dummy.position.add(new Vector3(0, this.dists[i] + (fft), 0));//trns.nrml.multiplyScalar( .014 * 2 ));
-        this.dummy.scale.set(1,1,1);
+        //this.dummy.position.add(new Vector3(0, this.dists[i] + (fft), 0));//trns.nrml.multiplyScalar( .014 * 2 ));
+        this.dummy.scale.set(1, 1, scl );
+        this.dummy.lookAt( new Vector3() );
+        //this.dummy.scale.set(1,1,1);
         this.dummy.updateMatrix();
         
         this.ico.setMatrixAt( i, this.dummy.matrix );
         this.ico.instanceMatrix.needsUpdate = true;
-
+        
+        this.dummy.lookAt( new Vector3() );
+        
         //this.ico.setColorAt(i, new Color().lerpColors( new Color(0x0f8a79), new Color().setHSL(0, 1, .3), 1 ) )
         //this.ico.material.emissive = new Color().lerpColors( new Color(0x0f8a79), new Color().setHSL(0, 1, .6), fft*1.3 );
         this.dummy.position.copy( trns.pos );
-        this.dummy.scale.set(1, this.dists[i] + fft , 1);
+        this.dummy.scale.set(1, 1, scl );
         this.dummy.updateMatrix();
 
         this.cyl.setMatrixAt( i, this.dummy.matrix );
@@ -486,7 +530,8 @@ class VisualTest3{
         //     this.emitter[i].obj = {scene:this.parent}; 
         // }
         
-        this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.08});
+        //this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.05});
+        this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.05});
         this.butterflyEmitter.obj = {scene:this.scene}; 
 
         this.tonePerlin = new NoiseVector({scale:.3, speed:.3});
@@ -552,10 +597,10 @@ class VisualTest3{
         this.hue = new ShaderPass( HueSaturationShader );
         this.composer.addPass(this.hue)
 
-        this.hue.uniforms[ 'saturation' ].value = .3;// parseFloat(event.target.value);
+        this.hue.uniforms[ 'saturation' ].value = .4;// parseFloat(event.target.value);
         //this.hue.uniforms[ 'hue' ].value = 20.1;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .12;
-        this.brtCont.uniforms[ 'brightness' ].value = .08;
+        this.brtCont.uniforms[ 'brightness' ].value = .1;
 
         this.cameraTween;
         this.cameraNoiseSpeed = .2+Math.random()*.5;
@@ -568,38 +613,98 @@ class VisualTest3{
         this.stem = window.getLoadedObjectByName("flower-stem").model;
         this.flowerParent.add(this.stem);
 
-        this.ring = window.getLoadedObjectByName("flower-ring").model;
-        //this.flowerParent.add(this.ring);
-        this.ring.traverse(function(obj){
-            if(obj.isMesh){
-                new SurfaceParticle({surface:obj, count:120, scene:self.flowerParent, scl:.09, yOff:.045, color:0x8e50e6})
-                //self.surfaceParticles.push(sp);
-            }
-        });
+        // this.ring = window.getLoadedObjectByName("flower-ring").model;
+        // //this.flowerParent.add(this.ring);
+        // this.ring.traverse(function(obj){
+        //     if(obj.isMesh){
+        //         new SurfaceParticle({surface:obj, count:120, scene:self.flowerParent, scl:.09, yOff:.045, color:0x8e50e6})
+        //         //self.surfaceParticles.push(sp);
+        //     }
+        // });
         
-        this.center = window.getLoadedObjectByName("flower-center").model;
+        // this.center = window.getLoadedObjectByName("flower-center").model;
+        // //this.flowerParent.add(this.center);
+        // this.center.traverse(function(obj){
+        //     if(obj.isMesh){
+        //         const sp = new SurfaceParticle({surface:obj, count:400, scene:self.flowerParent, scl:.03, yOff:.015, color:0x70dae6})
+        //         const sp2 = new SurfaceParticle2({surface:obj, count:60, scene:self.flowerParent})
+        //         self.surfaceParticles.push(sp2)
+        //     }
+        // });
+
+        //this.center = window.getLoadedObjectByName("flower-center").model;
         //this.flowerParent.add(this.center);
-        this.center.traverse(function(obj){
+        this.stem.traverse(function(obj){
+            
             if(obj.isMesh){
-                const sp = new SurfaceParticle({surface:obj, count:400, scene:self.flowerParent, scl:.03, yOff:.015, color:0x70dae6})
-                const sp2 = new SurfaceParticle2({surface:obj, count:60, scene:self.flowerParent})
-                self.surfaceParticles.push(sp2)
+                if(obj.name=="Sphere011_1"){
+                    console.log(obj.name)
+                    //const sp = new SurfaceParticle({surface:obj, count:600, scene:self.flowerParent, scl:.03, yOff:.015, color:0x70dae6})
+                    const sp2 = new SurfaceParticle2({surface:obj, count:500, scene:self.flowerParent})
+                    self.surfaceParticles.push(sp2)
+                }
+
+                obj.material.color.set(0xffffff);
+                obj.material.roughness = .8;
+                const params2 = {
+                    twistAmt:0,//(-1+Math.random()*2)*.3,
+                    noiseSize:0,
+                    twistSize:0,//.4+Math.random()*.8,
+                    noiseAmt:0,
+                    rainbowAmt:0,//.1+Math.random()*.4,
+                    gradientSize: 0,//(.2+Math.random())*.1,
+                    gradientAngle: 0,//(Math.PI-.1)+Math.random()*.2,
+                    gradientAdd: 1,//Math.random()*.8, 
+                    rainbowGradientSize:.6,
+                    gradientOffset:0,
+                    topColor:new Color().setHSL(   .6,.7, 0.1 ),
+                    bottomColor:new Color().setHSL(.6,.7, 0.1),
+                    deformSpeed:0,
+                    colorSpeed:.3,//(-1+Math.random()*2) * 2,
+                    shouldLoopGradient:1,
+                }
+                const matClone2 = obj.material.clone();
+                const mat2 = self.mats.getFlowerMat(matClone2, params2)
+                obj.material = mat2;
             }
+
         });
         
         this.pedals = [];
+        // const partArr =[
+        //     ParticleBass,
+        //     ParticleMetal,
+        //     ParticleBass,
+        //     ParticleSnair,
+        //     ParticleMetal,
+        //     ParticleSnair
+        // ]
+
         const partArr =[
             ParticleBass,
-            ParticleMetal,
             ParticleBass,
-            ParticleSnair,
-            ParticleMetal,
-            ParticleSnair
+            ParticleBass,
+            ParticleBass,
+            ParticleBass,
+            ParticleBass
         ]
+
         for(let i = 0; i<6; i++){
             this.pedals.push(new Pedal({scene:this.flowerParent, index:i, particleClass:partArr[i]}));
         }
-        
+
+        const splineGenerator = new GenerativeSplines();
+        //const snairSpline = splineGenerator.getFlowerSpiral();
+
+        //this.snairEmitter = new ParticleEmitter({max:400, particleClass:ParticleSnair});
+        this.splineAnis = [];
+        for(let i = 0;i<10; i++){
+            const emitter = new ParticleEmitter({max:100, particleClass:ParticleSnair});
+            const track = new TrackAni({scene:this.scene, emitter:emitter,  spline:splineGenerator.getFlowerSpiral()})
+            this.splineAnis.push({emitter:emitter, track:track})
+        }
+        //this.snairEmitter.obj = {scene:this.scene}; 
+
         
     }
 
@@ -613,8 +718,12 @@ class VisualTest3{
     }
     
     update(OBJ){
-        if(window.fft != null)
+        if(window.fft != null){
             window.fft.smoothing = 0.7;
+        }
+        for(let i=0;i<this.splineAnis.length;i++){
+            this.splineAnis[i].track.update(OBJ);
+        }
         
         this.butterflyEmitter.update(OBJ);
         //console.log();
@@ -631,7 +740,7 @@ class VisualTest3{
             this.pedals[i].update(OBJ); 
         }
         
-        this.tonePerlin.update({delta:OBJ.delta*4});
+        //this.tonePerlin.update({delta:OBJ.delta*4});
         this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
         //const tp = new Vector3().set(this.tonePerlin.vector.x, this.tonePerlin.vector.y, this.tonePerlin.vector.z).multiplyScalar(.2);
 
@@ -669,6 +778,9 @@ class VisualTest3{
             //fnlPos.
             const x = Math.sin( rotRnd + (p.inc * rndRotAmt) )*rndRad;
             const z = Math.cos( rotRnd + (p.inc * rndRotAmt) )*rndRad;
+
+            // const x = Math.sin( rotRnd + (0 * rndRotAmt) )*rndRad;
+            // const z = Math.cos( rotRnd + (0 * rndRotAmt) )*rndRad;
             
             const fnlPos = new Vector3().set(x,rndY,z);
             window.camera.position.copy(fnlPos).add(self.cameraPerlin.vector.multiplyScalar(noiseMult));
@@ -735,9 +847,18 @@ class VisualTest3{
 
                 case 145://track 2 on
                     if(OBJ.velocity > 0){
-                        OBJ.instanceRandom = Math.random();
-                        OBJ.globalInc = this.inc;
-                        this.pedals[Math.floor(Math.random()*this.pedals.length)].trig(OBJ);
+                        // OBJ.instanceRandom = Math.random();
+                        // OBJ.globalInc = this.inc;
+                        // this.pedals[Math.floor(Math.random()*this.pedals.length)].trig(OBJ);
+                        const e = self.splineAnis[ Math.floor(Math.random()*self.splineAnis.length) ].emitter;
+                        for(let i = 0; i<20; i++){
+                            setTimeout(function(){
+                                OBJ.instanceRandom = Math.random();
+                                OBJ.globalInc = this.inc;
+                                e.emit(OBJ);
+                            
+                            }, i*15);
+                        }
                     }
                     break;
                 case 146: // track 3 on
@@ -756,7 +877,6 @@ class VisualTest3{
                             OBJ.globalInc = this.inc;
                             //this.pedals[3].trig(OBJ);
                         }
-                       
                     }
 
                     break;
@@ -772,10 +892,12 @@ class VisualTest3{
                     break;
                 case 149://track 6 on
                 
+                      
                     if(OBJ.velocity > 0){
                         OBJ.instanceRandom = Math.random();
-                        OBJ.globalInc = this.inc;
-                        //this.pedals[5].trig(OBJ);
+                        self.butterflyEmitter.toggleEmit(true, OBJ);
+                    }else{
+                        self.butterflyEmitter.toggleEmit(false);
                     }
                     break;
                 case 128://track 1 off
@@ -793,6 +915,8 @@ class VisualTest3{
                     
                     break;
                 case 133://track 6 off
+                 
+                    self.butterflyEmitter.toggleEmit(false);
                     break;
             }
 
