@@ -531,7 +531,7 @@ class VisualTest3{
         // }
         
         //this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.05});
-        this.butterflyEmitter = new ParticleEmitter({max:40, particleClass:ButterflyParticle, freq:.05});
+        this.butterflyEmitter = new ParticleEmitter({max:20, particleClass:ButterflyParticle, freq:.08});
         this.butterflyEmitter.obj = {scene:this.scene}; 
 
         this.tonePerlin = new NoiseVector({scale:.3, speed:.3});
@@ -697,15 +697,37 @@ class VisualTest3{
         //const snairSpline = splineGenerator.getFlowerSpiral();
 
         //this.snairEmitter = new ParticleEmitter({max:400, particleClass:ParticleSnair});
+
+        
         this.splineAnis = [];
         for(let i = 0;i<10; i++){
             const emitter = new ParticleEmitter({max:100, particleClass:ParticleSnair});
             const track = new TrackAni({scene:this.scene, emitter:emitter,  spline:splineGenerator.getFlowerSpiral()})
-            this.splineAnis.push({emitter:emitter, track:track})
+            this.splineAnis.push({emitter:emitter, track:track, name:"snair"})
+        }
+        for(let i = 0;i<10; i++){
+            const emitter = new ParticleEmitter({max:100, particleClass:ParticleMetal})
+            const track = new TrackAni({scene:this.scene, emitter:emitter,  spline:splineGenerator.getFlowerSpiral()})
+            this.splineAnis.push({emitter:emitter, track:track, name:"metal"})
+        }
+        for(let i = 0;i<10; i++){
+            const emitter = new ParticleEmitter({max:100, particleClass:ParticleTone})
+            const track = new TrackAni({scene:this.scene, emitter:emitter,  spline:splineGenerator.getRndSuperEllipse({rad:1+Math.random()*4, verticalSize:0, rndStart : -5+Math.random()*6})})
+            this.splineAnis.push({emitter:emitter, track:track, name:"tone"})
         }
         //this.snairEmitter.obj = {scene:this.scene}; 
 
         
+    }
+
+    getTrackAniByName(name){
+        const arr = [];
+        for(let i = 0; i<this.splineAnis.length; i++){
+            if(this.splineAnis[i].name == name){
+                arr.push(this.splineAnis[i]);
+            }
+        }
+        return arr;
     }
 
     clamp(input, min, max) {
@@ -839,43 +861,66 @@ class VisualTest3{
             switch( OBJ.command ){
                 case 144://track 1 on
                     if(OBJ.velocity > 0){
-                        OBJ.instanceRandom = Math.random();
-                        OBJ.globalInc = this.inc;
-                        this.pedals[ Math.floor(Math.random()*this.pedals.length) ].trig(OBJ);
+                        const len = Math.floor(1+Math.random()*4);
+                        for(let i = 0; i<len; i++){
+                            OBJ.instanceRandom = Math.random();
+                            OBJ.globalInc = this.inc;
+                            this.pedals[ Math.floor(Math.random()*this.pedals.length) ].trig(OBJ);
+                        }
                     }
                     break;
 
                 case 145://track 2 on
                     if(OBJ.velocity > 0){
-                        // OBJ.instanceRandom = Math.random();
-                        // OBJ.globalInc = this.inc;
-                        // this.pedals[Math.floor(Math.random()*this.pedals.length)].trig(OBJ);
-                        const e = self.splineAnis[ Math.floor(Math.random()*self.splineAnis.length) ].emitter;
-                        for(let i = 0; i<20; i++){
+                        
+                        const arr = self.getTrackAniByName("snair");
+                        const e = arr[Math.floor( Math.random() * arr.length ) ].emitter;
+                                
+                        OBJ.instanceRandom = Math.random();
+
+                        for(let i = 0; i<40; i++){
                             setTimeout(function(){
-                                OBJ.instanceRandom = Math.random();
                                 OBJ.globalInc = this.inc;
+                                OBJ.index = i/20;
                                 e.emit(OBJ);
                             
-                            }, i*15);
+                            }, i*10);
                         }
                     }
                     break;
                 case 146: // track 3 on
                     if(OBJ.velocity > 0){
-                        if(OBJ.velocity > 0){
-                            OBJ.instanceRandom = Math.random();
-                            OBJ.globalInc = this.inc;
-                            this.pedals[Math.floor(Math.random()*this.pedals.length)].trig(OBJ);
+                        
+                                
+                        for(let i = 0; i<20; i++){
+                            setTimeout(function(){
+                                const arr = self.getTrackAniByName("metal");
+                                const e = arr[Math.floor( Math.random() * arr.length ) ].emitter;
+                                OBJ.instanceRandom = Math.random();
+                                
+                                OBJ.globalInc = this.inc;
+                                OBJ.index = i/20;
+                                e.emit(OBJ);
+                            
+                            }, i*0);
                         }
                     }
                     break;
                 case 147://track 4 on 
                     if(OBJ.velocity > 0){
                         if(OBJ.velocity > 0){
-                            OBJ.instanceRandom = Math.random();
-                            OBJ.globalInc = this.inc;
-                            //this.pedals[3].trig(OBJ);
+                            const arr = self.getTrackAniByName("tone");
+                            const e = arr[Math.floor( Math.random() * arr.length ) ].emitter;
+                                    
+                            for(let i = 0; i<10; i++){
+                                setTimeout(function(){
+                                    OBJ.instanceRandom = Math.random();
+                                    OBJ.globalInc = this.inc;
+                                    OBJ.index = i/20;
+                                    e.emit(OBJ);
+                                
+                                }, i*20);
+                            }
                         }
                     }
 

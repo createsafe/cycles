@@ -34,6 +34,7 @@ class GenerativeSplines{
         const incRnd1 = Math.random();
         const incRnd2 = Math.random();
         const dir = Math.random();
+        
         for(let i = 0; i<len; i++){
     
             const angle = (i/len)*(Math.PI*curvAmt);
@@ -55,7 +56,7 @@ class GenerativeSplines{
 
     getFlowerSpiral(){
         const self = this;
-        const len = 3;
+        const len = 4;
         const arr = [];
 
         let radX = .2+Math.random()*.2;
@@ -65,6 +66,9 @@ class GenerativeSplines{
         const curvAmt = 1.8 + Math.random()*3.3;
         const incRnd0 = .5+Math.random()*.5;
         const incRnd1 = .5+Math.random()*.5;
+        const incRnd2 = .4+Math.random()*.875;
+        const rndStartX = (-1+Math.random()*2)*2;
+        const rndStartY = (-1+Math.random()*2)*2;
         
         const dir = Math.random();
 
@@ -73,16 +77,16 @@ class GenerativeSplines{
             const angle = (i/len)*(Math.PI*curvAmt);
             const na = 2/n;
             if(dir>0){
-                radX += (i*(incRnd0*.2))
-                radY += (i*(incRnd1*.2))
+                radX += (i*(incRnd0*.4))
+                radY += (i*(incRnd1*.4))
             }else{
-                radX -= (i*(incRnd0*.2))
-                radY -= (i*(incRnd1*.2))
+                radX -= (i*(incRnd0*.4))
+                radY -= (i*(incRnd1*.4))
             }
-            const x = Math.pow( Math.abs( Math.cos(angle) ), na ) * radX * self.sgn( Math.cos(angle) );
-            const y = Math.pow( Math.abs( Math.sin(angle) ), na ) * radY * self.sgn( Math.sin(angle) );
+            const x = rndStartX + Math.pow( Math.abs( Math.cos(angle) ), na ) * radX * self.sgn( Math.cos(angle) );
+            const y = rndStartY + Math.pow( Math.abs( Math.sin(angle) ), na ) * radY * self.sgn( Math.sin(angle) );
             
-            arr.push(new Vector3(x, 2.5+(i*.3) ,y));
+            arr.push(new Vector3(x, 2+(i*incRnd2) ,y));
         }
         return arr;
     }

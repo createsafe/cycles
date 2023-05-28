@@ -12,7 +12,8 @@ import {
 	AnimationMixer,
 	MeshBasicMaterial,
     IcosahedronGeometry,
-    Matrix4
+    Matrix4,
+	CylinderGeometry
 	
 } from './build/three.module.js';
 import { SplineAnimation } from './SplineAnimation.js';
@@ -26,16 +27,21 @@ const bassGeo = new BoxGeometry( .05, .1, .05 );
 
 const bassMat = new MeshStandardMaterial({color:0xff0000});
 const bassMesh = new Mesh(bassGeo, bassMat);
-const snairGeo = new IcosahedronGeometry( .5, 1);
+//const snairGeo = new IcosahedronGeometry( .05, 1);
+const snairGeo = new BoxGeometry( .5, .1, .1);
+
 const snairMat = new MeshStandardMaterial();
 const snairMesh = new Mesh(snairGeo, snairMat);
-const toneGeo = new BoxGeometry( .05, .5, .05 );
+const toneGeo = new BoxGeometry( .05, .5, .5 );
+toneGeo.rotateX(Math.PI/2);
 const toneMat = new MeshStandardMaterial();
 const toneMesh = new Mesh(toneGeo, toneMat);
 const percGeo = new BoxGeometry( .1, .23, .1 );
 const percMat = new MeshStandardMaterial();
 const percMesh = new Mesh(percGeo, percMat);
-const metalGeo = new IcosahedronGeometry( .05, 1 );
+const metalGeo = new CylinderGeometry( .03, .03, .3, 4 ); 
+metalGeo.rotateX(Math.PI/2);
+///const metalGeo = new IcosahedronGeometry( .05, 1 );
 const metalMat = new MeshStandardMaterial();
 const metalMesh = new Mesh(metalGeo, metalMat);
 const chordGeo = new BoxGeometry( .4, .2, .2 );
@@ -180,21 +186,22 @@ class ParticleSnair{
         this.mesh.visible = true;
 		
 		const p = {inc:0};
-		
+		const noiseMult = (SPECIAL.instanceRandom-.5)*4.4;
+		const hue = (SPECIAL.instanceRandom) + (SPECIAL.index * (SPECIAL.instanceRandom*.2))%1;
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, (window.clock16Time)*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			self.inc = p.inc;
           
-			const trans = self.spline.getTransforms({inc:self.inc, noiseAmt:2});
+			const trans = self.spline.getTransforms({inc:self.inc, noiseAmt:noiseMult});
 
             //const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
 			self.mesh.position.copy(trans.pos);
             self.mesh.quaternion.copy(trans.quat);
             
-			const col1 = new Color().setHSL(.0, 1, .3 );
-			const col2 = new Color().setHSL(.67, 1, .3 );
+			const col1 = new Color().setHSL( (hue%1), 1, .6 );
+			const col2 = new Color().setHSL( (.67+hue)%1, 1, .3 );
 			const colFnl = new Color().lerpColors(col1, col2, p.inc);
 			
 			this.mesh.material.color = colFnl;// = this.mesh.material.emissive = col;
@@ -202,8 +209,8 @@ class ParticleSnair{
 			//self.mesh.material.needsUpdate = true;
 			
 			//const s = .5+Math.sin(p.inc * Math.PI)*.5;
-			const s = ((1-p.inc)+.4)*.2;
-			self.mesh.scale.set(s,s,s);
+			const s = ((1-p.inc)+.04);
+			self.mesh.scale.set(s,s,s)*.4;
 		})
 		.start()
 		.onComplete(()=>{
@@ -236,72 +243,63 @@ class ParticleSnair{
 export { ParticleSnair };
 
 
-
 class ParticleMetal{
 
 	constructor(OBJ, SPECIAL){
+
 		const self = this;
 		this.scene = OBJ.scene;
+
+		this.spline = OBJ.spline;
 		
 		this.mesh = metalMesh.clone();
         const clone = this.mesh.material.clone();   
         this.mesh.material = clone;
 		//this.mesh.material.color = new Color().setHSL(Math.random(),1,.5);
-	    //this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
 		this.killed = false;
 	    
         this.inc = 0;
 		this.fftIndex = Math.floor(Math.random()*1000);
-		//this.parent = new Object3D();
-		this.scene.add(this.mesh);
-		//this.parent.add(this.mesh)
+		this.spIndex = Math.floor( Math.random()*200 );
 		self.init(OBJ, SPECIAL);    
 		
 	}	
 
 	init(OBJ, SPECIAL){
+
 		const self = this;
 
 		this.mesh.scale.set(0,0,0);
         this.mesh.visible = true;
-		this.mesh.material.color = new Color().setHSL(.6+Math.random()*.1, 0.8, .4);
-        
-        const matrix = new Matrix4();
-        const rot = new Matrix4().copy(SPECIAL.parent.rot.matrixWorld);
-        const instance = new Matrix4().copy(SPECIAL.parent.sp.getMatrix());
-        matrix.multiply(rot);
-        matrix.multiply(instance); 
-
-        const startPos = new Vector3().setFromMatrixPosition(matrix);
-        let rndX = (1+Math.random()*2)*.3;
-        if(Math.random()>.5)
-            rndX*=-1;
-        const toPos = new Vector3().copy(startPos).add( new Vector3(0,rndX,0).multiplyScalar(1+Math.random()*2) );//( new Vector3(0,1,0) );
-     
-		const p = {inc:0};
-
-        const rotSpeed = new Vector3(-.5+Math.random(),-.5+Math.random(),-.5+Math.random());
 		
+		const p = {inc:0};
+		const noiseMult = ((SPECIAL.instanceRandom-.5) * 8.4);
+		const hue = .3 + (SPECIAL.index * (SPECIAL.instanceRandom*.6))%1;
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, (window.clock4Time)*1000) // Move to (300, 200) in 1 second.
+		.to({ inc:1 }, (window.clock16Time)*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
-			
-			const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
-			self.mesh.position.copy(fnlPos);
+			self.inc = p.inc;
+          
+			const trans = self.spline.getTransforms({inc:self.inc, noiseAmt:noiseMult*p.inc});
 
+            //const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
+			self.mesh.position.copy(trans.pos);
+            self.mesh.quaternion.copy(trans.quat);
+            
+			const col1 = new Color().setHSL( .2, 1, .6 );
+			const col2 = new Color().setHSL( (.67+hue)%1, 1, .3 );
+			const colFnl = new Color().lerpColors(col1, col2, p.inc);
+			
+			this.mesh.material.color = colFnl;// = this.mesh.material.emissive = col;
 			//self.mesh.material.color = col;
-			self.mesh.rotation.x+=rotSpeed.x*.2;
-			self.mesh.rotation.y+=rotSpeed.y*.2;
-			self.mesh.rotation.z+=rotSpeed.z*.2;
 			//self.mesh.material.needsUpdate = true;
 			
-			const s = (.5+Math.sin( (-Math.PI/2) + (p.inc * (Math.PI*2)) )*.5)*1.3;
-			//const s = 1-p.inc;
-            
-			self.mesh.scale.set(s,s,s);
-
+			//const s = .5+Math.sin(p.inc * Math.PI)*.5;
+			const s = ((1-p.inc)+.04);
+			self.mesh.scale.set(s,s,s)*2;
 		})
 		.start()
 		.onComplete(()=>{
@@ -318,9 +316,7 @@ class ParticleMetal{
 	}
 
 	kill(){
-
 		this.killed = true;
-		//this.scene.remove(this.parent);
 		this.mesh.geometry.dispose();
 		this.mesh.material.dispose();
 		this.scene.remove(this.mesh);
@@ -338,60 +334,65 @@ export { ParticleMetal };
 
 
 
+
 class ParticleTone{
 
 	constructor(OBJ, SPECIAL){
+
 		const self = this;
 		this.scene = OBJ.scene;
+
+		this.spline = OBJ.spline;
 		
 		this.mesh = toneMesh.clone();
         const clone = this.mesh.material.clone();   
         this.mesh.material = clone;
 		//this.mesh.material.color = new Color().setHSL(Math.random(),1,.5);
-	    //this.scene.add(this.mesh);
+	    this.scene.add(this.mesh);
         
 		this.killed = false;
 	    
         this.inc = 0;
 		this.fftIndex = Math.floor(Math.random()*1000);
-		//this.parent = new Object3D();
-		this.scene.add(this.mesh);
-        
-        this.from = SPECIAL.from;
-		
-        //this.parent.add(this.mesh)
-        self.init(OBJ, SPECIAL);    
+		this.spIndex = Math.floor( Math.random()*200 );
+		self.init(OBJ, SPECIAL);    
 		
 	}	
 
 	init(OBJ, SPECIAL){
 
 		const self = this;
-		this.mesh.material.color.setHSL(0,1,.2);
-		this.mesh.scale.set(1,1,1);
-		
-		const startPos = new Vector3().copy(this.from);
-		const toPos = new Vector3().copy(startPos).add( new Vector3( 3, 0, 0) );
-		
-		this.mesh.visible = true;
-		this.mesh.position.copy(startPos);
-		const hue = ((-60 + SPECIAL.note)*.2)%1.0;
-		this.mesh.material.color = new Color().setHSL( hue, 1, .3 )
-		this.mesh.scale.set(.5+Math.random(), .5+Math.random(),.5+Math.random()).multiplyScalar(.5+Math.random()*2)
 
+		this.mesh.scale.set(0,0,0);
+        this.mesh.visible = true;
+		const startPos = new Vector3(0,-10  + Math.random()*3,0);
 		const p = {inc:0};
-		
+		const noiseMult = ((SPECIAL.instanceRandom-.5) * 8.4);
+		const rndStart = SPECIAL.instanceRandom
+		const hue = .3 + (SPECIAL.index * (SPECIAL.instanceRandom*.6))%1;
 		this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
-		.to({ inc:1 }, (window.clock4Time)*1000) // Move to (300, 200) in 1 second.
+		.to({ inc:1 }, (window.clock4Time*2)*1000) // Move to (300, 200) in 1 second.
 		.easing(TWEEN.Easing.Linear.None) // Use an easing function to make the animation smooth.
 		.onUpdate(() => {
 			self.inc = p.inc;
-			//const col = new Color().setHSL(0, 1,.2 );
-			const fnlPos = new Vector3().lerpVectors(startPos, toPos, p.inc);
-			self.mesh.position.copy(fnlPos);
-			const s = ((1-p.inc)+.3)*2.;
-			self.mesh.scale.set(s,s,s);
+          
+			const trans = self.spline.getTransforms({inc: (rndStart+(self.inc*.3))%1, noiseAmt:noiseMult*p.inc});
 
+            //const fnlPos = new Vector3().lerpVectors(startPos, trans.pos, p.inc*1.5);
+			self.mesh.position.copy(trans.pos);
+            self.mesh.quaternion.copy(trans.quat);
+            
+			const col1 = new Color().setHSL( (hue%1), .8, .4 );
+			const col2 = new Color().setHSL( (.2+hue)%1, 1, .3 );
+			const colFnl = new Color().lerpColors(col1, col2, p.inc);
+			
+			this.mesh.material.color = colFnl;// = this.mesh.material.emissive = col;
+			//self.mesh.material.color = col;
+			//self.mesh.material.needsUpdate = true;
+			
+			//const s = .5+Math.sin(p.inc * Math.PI)*.5;
+			const s = ((1-p.inc)+.04);
+			self.mesh.scale.set(s,s,s);
 		})
 		.start()
 		.onComplete(()=>{
@@ -408,9 +409,7 @@ class ParticleTone{
 	}
 
 	kill(){
-
 		this.killed = true;
-		//this.scene.remove(this.parent);
 		this.mesh.geometry.dispose();
 		this.mesh.material.dispose();
 		this.scene.remove(this.mesh);
@@ -421,6 +420,7 @@ class ParticleTone{
 		if(this.tween)this.tween.stop();
 	}
 }
+
 
 export { ParticleTone };
 
@@ -766,7 +766,7 @@ class ButterflyParticle{
             self.mesh.rotation.y = theta-(Math.PI/2);
 
             //const s = Math.sin();
-            const s = (.5 + Math.cos( ( p.inc * Math.PI ) ) * .5) *2;
+            const s = (.5 + Math.cos( ( p.inc * Math.PI ) ) * .5) *1.5;
 			
             self.mesh.scale.set(s,s,s);
             

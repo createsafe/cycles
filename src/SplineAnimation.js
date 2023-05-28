@@ -32,7 +32,7 @@ class TrackAni{
 
         //this.ani = new SplineAnimation( { scene:this.parent, spline:this.spline, emitter:OBJ.emitter} );
         const spline = new CatmullRomCurve3(OBJ.spline);//splineGenerator.getRndSuperEllipse());
-        const splineAni = new SplineAnimation({spline:spline});
+        const splineAni = new SplineAnimation({spline:spline, scene:OBJ.scene});
         
         this.emitter = OBJ.emitter;
         this.emitter.obj = {scene:this.parent, spline:splineAni, hue:Math.random()*.1}
@@ -153,7 +153,7 @@ class SplineAnimation {
         this.tubeGeometry = new TubeGeometry( OBJ.spline, 100, .001, 8, false );
 
         
-        //OBJ.scene.add(mesh);
+        //OBJ.scene.add(new Mesh(this.tubeGeometry, new MeshBasicMaterial()));
 
         this.direction = new Vector3();
         this.binormal = new Vector3();
