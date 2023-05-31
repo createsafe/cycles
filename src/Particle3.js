@@ -23,7 +23,7 @@ import { CustomMaterial } from "./CustomMaterial.js"
 import { GenerativeSplines } from "./GenerativeSplines.js";
 
 //const bassGeo = new IcosahedronGeometry( .05, 1 );
-const bassGeo = new BoxGeometry( .05, .1, .05 );
+const bassGeo = new BoxGeometry( .07, .12, .07 );
 
 const bassMat = new MeshStandardMaterial({color:0xff0000});
 const bassMesh = new Mesh(bassGeo, bassMat);

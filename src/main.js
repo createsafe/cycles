@@ -29,6 +29,7 @@ import {Master} from './ChannelHelper.js';
 import { VisualTest1 } from './VisualTest1.js';
 import { VisualTest2 } from './VisualTest2.js';
 import { VisualTest3 } from './VisualTest3.js';
+import { VisualTest4 } from './VisualTest4.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
@@ -102,22 +103,31 @@ window.loadObjs = [
     {loaded:false, group:null, url:"liz-2.glb", name:"liz-2", model:null, vis:0},
     {loaded:false, group:null, url:"frog.glb", name:"frog", model:null, vis:0},
     
-    
-    /*
-    {loaded:false, group:null, url:"chicken-1.glb", name:"chicken-0", model:null, vis:0},
-    {loaded:false, group:null, url:"chicken-2.glb", name:"chicken-1", model:null, vis:0},
-    {loaded:false, group:null, url:"duck.glb", name:"duck", model:null, vis:0},
-    {loaded:false, group:null, url:"ping.glb", name:"ping", model:null, vis:0},
-    {loaded:false, group:null, url:"turtle.glb", name:"turtle", model:null, vis:0},
-    {loaded:false, group:null, url:"frog.glb", name:"frog", model:null, vis:0},
-    //{loaded:false, group:null, url:"bench.glb", name:"bench", model:null, vis:0},
-    */
     {loaded:false, group:null, url:"walk-3.glb", name:"walk", model:null, vis:1},
 
     {loaded:false, group:null, url:"flower-pedal.glb", name:"flower-pedal", model:null, vis:2},
     {loaded:false, group:null, url:"flower-stem.glb", name:"flower-stem", model:null, vis:2},
     {loaded:false, group:null, url:"butterfly-small.glb", name:"butterfly", model:null, vis:2},
+
+    {loaded:false, group:null, url:"face/mask.glb", name:"mask", model:null, vis:3},
+    {loaded:false, group:null, url:"face/facecap.glb", name:"facecap", model:null, vis:3},
+    
 ]
+
+window.faceExtras = [
+    {name:"bugs", len:10},
+    {name:"cactus", len:7},
+    {name:"flowers", len:12},
+    {name:"greens", len:7},
+    {name:"rocks", len:8},
+    {name:"shrooms", len:12},
+]
+
+for(let i = 0; i<window.faceExtras.length; i++){
+    for(let k = 0; k < window.faceExtras[i].len; k++){
+        window.loadObjs.push({loaded:false, group:null, url:"face/"+window.faceExtras[i].name+"/"+k+".glb", name:window.faceExtras[i].name+"-"+k, model:null, vis:3})
+    }
+}
 
 const visSelect = document.getElementById("visual-drop-down-input");
 const trackSelect = document.getElementById("audio-drop-down-input");
@@ -371,9 +381,6 @@ $( "#volume" ).bind( "input", function(event, ui) {
 //     //master.effects.filter.wet.value = parseFloat(event.target.value);
 // });
 
-
-
-
 $("#recorded-download-btn").bind( "click", function() {
     if(recordedFile){
         const url = URL.createObjectURL(recordedFile);
@@ -615,10 +622,9 @@ function init() {
     window.renderer.toneMapping = THREE.CineonToneMapping;
     window.renderer.toneMappingExposure = .6;
     window.renderer.shadowMap.enabled = true;
-	window.renderer.shadowMap.type = THREE.PCFShadowMap;
-//    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	//window.renderer.shadowMap.type = THREE.PCFShadowMap;
+    window.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    
     document.body.appendChild( window.renderer.domElement );
     
     const pmremGenerator = new THREE.PMREMGenerator( window.renderer );
@@ -649,6 +655,7 @@ function init() {
             loadHelper(window.loadObjs[i]);
         }else{
             window.loadObjs[i].loaded = true;
+            allLoadedCheck();
         }
             
     }
@@ -662,7 +669,8 @@ function initMaster(){
     const visuals = [
         VisualTest1,
         VisualTest2, 
-        VisualTest3
+        VisualTest3,
+        VisualTest4
     ]
 
     if( urlQuery.live ){
@@ -767,21 +775,29 @@ window.getLoadedObjectByName = function(name){
 
 function loadHelper(OBJ){
     loader.load( OBJ.url, function ( gltf ) {
-        
-           
         OBJ.loaded = true;
         OBJ.model = gltf.scene;
         OBJ.group = gltf;
         //console.log(isAllLoaded())
-        if(isAllLoaded()){
-            loadingComplete = true;
-            $("#loading").show();
-            $("#init-btn").show();
-            initMaster();
-            animate();
+        allLoadedCheck();
+    });
+}
+
+function allLoadedCheck(){
+    if(isAllLoaded() && !loadingComplete){
+        loadingComplete = true;
+        $("#loading").show();
+        $("#init-btn").show();
+        for(let i= 0;i<window.faceExtras.length; i++){
+            for(let k= 0;k<window.faceExtras[i].len; k++){
+                const model = window.getLoadedObjectByName(window.faceExtras[i].name+"-"+k).model;
+                parseModel(model);
+            }
         }
         
-    });
+        initMaster();
+        animate();
+    }
 }
 
 function isAllLoaded(){
@@ -790,6 +806,26 @@ function isAllLoaded(){
             return false;
     }
     return true;
+}
+
+function parseModel(scene){
+    if(scene==null)return;
+    scene.traverse( function ( child ) {
+        if ( child.isMesh ) {
+            child.castShadow = true;
+        
+            child.geometry.rotateX(-Math.PI/2);
+            child.geometry.computeBoundingBox();
+        }
+    });
+
+    var bbox = new THREE.Box3().setFromObject(scene);
+    scene.traverse( function ( child ) {
+        if ( child.isMesh ) {
+            child.position.z = bbox.min.z;
+            
+        }
+    });
 }
 
 function onWindowResize() {

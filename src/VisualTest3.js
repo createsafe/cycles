@@ -174,8 +174,8 @@ class Pedal{
                                 ms.position.x = x;
                                 ms.position.z = z;
                                 
-                                let s = (1 - Math.random()*.3)-(i*.1);
-                                if(s < .3)s=.4;
+                                let s = ( Math.random()*.3)+(i*.1);
+                                if(s < .4)s=.4;
                                 ms.scale.set(s,s,s);
                                 OBJ.scene.add(ms);
                             }    
@@ -187,7 +187,7 @@ class Pedal{
             }
         });
 
-        this.emitter = new ParticleEmitter({max:400, particleClass:OBJ.particleClass});
+        this.emitter = new ParticleEmitter({max:200, particleClass:OBJ.particleClass});
         this.emitter.obj = {scene:this.scene}; 
 
         const amt = 6;
@@ -248,7 +248,7 @@ class Pedal{
     
     trig(OBJ){
         
-        for(let i = 0; i<50; i++){
+        for(let i = 0; i<40; i++){
 
                 OBJ.parent = this;
                 OBJ.index = i;
@@ -787,7 +787,7 @@ class VisualTest3{
         const rotRnd = (Math.PI*2)*Math.random();
         const rndY = 12+Math.random()*7;
         
-        let rndRotAmt = 1+Math.random()*3;
+        let rndRotAmt = 1+Math.random()*2;
         if(Math.random()>.5)rndRotAmt *=-1;
 
         const rndRad = 30+Math.random()*20;
@@ -817,18 +817,18 @@ class VisualTest3{
     
     postVisualEffects(OBJ){
 
-        this.afterimagePass.uniforms[ 'damp' ].value = OBJ.feedback;
+        this.afterimagePass.uniforms[ 'damp' ].value = (OBJ.feedback);
         /*
 
-          this.hue.uniforms[ 'saturation' ].value = .3;// parseFloat(event.target.value);
+         this.hue.uniforms[ 'saturation' ].value = .4;// parseFloat(event.target.value);
         //this.hue.uniforms[ 'hue' ].value = 20.1;// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .12;
-        this.brtCont.uniforms[ 'brightness' ].value = .08;
+        this.brtCont.uniforms[ 'brightness' ].value = .1;
 
         */
-        this.hue.uniforms[ 'saturation' ].value = .3 - (OBJ.filter*1.3);// parseFloat(event.target.value);
+        this.hue.uniforms[ 'saturation' ].value = .4 - (OBJ.filter*1.3);// parseFloat(event.target.value);
         this.brtCont.uniforms[ 'contrast' ].value = .12+((OBJ.filter)*.6);
-        this.brtCont.uniforms[ 'brightness' ].value = .08+((OBJ.filter)*.1);
+        this.brtCont.uniforms[ 'brightness' ].value = .1+((OBJ.filter)*.1);
 
         this.glitchPass.glitchAmt = OBJ.crush;
         
