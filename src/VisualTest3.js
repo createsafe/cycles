@@ -777,12 +777,12 @@ class VisualTest3{
         const self = this;
         const p = {inc:0}
         
-        const noiseMult = -8+Math.random()*16;
+        const noiseMult = -20+Math.random()*40;
 
         window.camera.fov = 15+Math.random()*20;
         window.camera.updateProjectionMatrix();
         
-		this.cameraNoiseSpeed = .2+Math.random()*.5;
+		this.cameraNoiseSpeed = (.2+Math.random()*.5)*1.5;
         
         const rotRnd = (Math.PI*2)*Math.random();
         const rndY = 12+Math.random()*7;

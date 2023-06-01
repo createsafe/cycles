@@ -70,7 +70,7 @@ import { GUI } from './scripts/jsm/libs/lil-gui.module.min.js';
 import { MeshSurfaceSampler } from './scripts/jsm/math/MeshSurfaceSampler.js';
 
 // Mediapipe
-import vision from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0';
+import vision from './scripts/tasks-vision@0.10.0.js';
 const { FaceLandmarker, FilesetResolver } = vision;
 
 
@@ -315,7 +315,7 @@ class VisualTest4{
         const texture = new VideoTexture( this.video );
         texture.colorSpace = SRGBColorSpace;
 
-        const geo = new PlaneGeometry( 6, 4 );
+        const geo = new PlaneGeometry( 6, 4);
 
         const mat = new MeshBasicMaterial( { map: texture, depthWrite: false } );
         const plane = new Mesh( geo, mat );

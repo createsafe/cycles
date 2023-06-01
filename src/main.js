@@ -30,6 +30,7 @@ import { VisualTest1 } from './VisualTest1.js';
 import { VisualTest2 } from './VisualTest2.js';
 import { VisualTest3 } from './VisualTest3.js';
 import { VisualTest4 } from './VisualTest4.js';
+import { VisualTest5 } from './VisualTest5.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
@@ -59,7 +60,7 @@ let tempo = 60 / bpm / 24;
 window.clock16Time = ((60 / bpm) * 4)*2;//;// 134 = 3.58208955224
 window.clock4Time = ((60 / bpm) * 4);
 
-let ktx2Loader, controls, loader, mainModel, audioContext;
+let ktx2Loader, loader;
 let initedTone = false;
 
 let recordedFile;
@@ -111,6 +112,8 @@ window.loadObjs = [
 
     {loaded:false, group:null, url:"face/mask.glb", name:"mask", model:null, vis:3},
     {loaded:false, group:null, url:"face/facecap.glb", name:"facecap", model:null, vis:3},
+
+    {loaded:false, group:null, url:"cycles.glb", name:"cycles", model:null, vis:4},
     
 ]
 
@@ -128,6 +131,8 @@ for(let i = 0; i<window.faceExtras.length; i++){
         window.loadObjs.push({loaded:false, group:null, url:"face/"+window.faceExtras[i].name+"/"+k+".glb", name:window.faceExtras[i].name+"-"+k, model:null, vis:3})
     }
 }
+
+
 
 const visSelect = document.getElementById("visual-drop-down-input");
 const trackSelect = document.getElementById("audio-drop-down-input");
@@ -670,7 +675,9 @@ function initMaster(){
         VisualTest1,
         VisualTest2, 
         VisualTest3,
-        VisualTest4
+        VisualTest4,
+        VisualTest5,
+        
     ]
 
     if( urlQuery.live ){
