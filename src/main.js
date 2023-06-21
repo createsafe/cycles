@@ -31,6 +31,8 @@ import { VisualTest2 } from './VisualTest2.js';
 import { VisualTest3 } from './VisualTest3.js';
 import { VisualTest4 } from './VisualTest4.js';
 import { VisualTest5 } from './VisualTest5.js';
+import { VisualTest6 } from './VisualTest6.js';
+import { VisualTest7 } from './VisualTest7.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
@@ -83,11 +85,10 @@ const sourceElement = document.createElement("source");
 recordedAudioElement.appendChild(sourceElement);
 const audioElementSource = sourceElement;
 let midiOuts;
-let isPlaying = false;
+window.isPlaying = false;
 //let anis = [];
 
 const clock = new THREE.Clock();
-
 
 window.playingTime = 60/134/24;
 window.loadObjs = [
@@ -113,7 +114,14 @@ window.loadObjs = [
     {loaded:false, group:null, url:"face/mask.glb", name:"mask", model:null, vis:3},
     {loaded:false, group:null, url:"face/facecap.glb", name:"facecap", model:null, vis:3},
 
-    {loaded:false, group:null, url:"cycles.glb", name:"cycles", model:null, vis:4},
+    {loaded:false, group:null, url:"cycles-2.glb", name:"cycles", model:null, vis:4},
+    {loaded:false, group:null, url:"arms-3.glb", name:"arms", model:null, vis:4},
+    
+    {loaded:false, group:null, url:"hand.glb", name:"hand", model:null, vis:5},
+
+    {loaded:false, group:null, url:"face/mask.glb", name:"mask-2", model:null, vis:6},
+    {loaded:false, group:null, url:"facecap-og/facecap-2.glb", name:"facecap-2", model:null, vis:6},
+
     
 ]
 
@@ -126,17 +134,36 @@ window.faceExtras = [
     {name:"shrooms", len:12},
 ]
 
+const visuals = [
+    VisualTest1,
+    VisualTest2, 
+    VisualTest3,
+    VisualTest4,
+    VisualTest5,
+    VisualTest6,
+    VisualTest7,
+    
+]
+
 for(let i = 0; i<window.faceExtras.length; i++){
     for(let k = 0; k < window.faceExtras[i].len; k++){
         window.loadObjs.push({loaded:false, group:null, url:"face/"+window.faceExtras[i].name+"/"+k+".glb", name:window.faceExtras[i].name+"-"+k, model:null, vis:3})
     }
 }
 
-
-
 const visSelect = document.getElementById("visual-drop-down-input");
 const trackSelect = document.getElementById("audio-drop-down-input");
 let master;
+
+
+window.getLoadedObjectByName = function(name){
+    for(let i = 0; i<window.loadObjs.length; i++){
+        if(window.loadObjs[i].name == name){
+            return window.loadObjs[i];
+        }
+    }
+    return false;
+}
 
 init();
 
@@ -198,7 +225,7 @@ $("#play-btn, #stop-btn").click(function(){
     if(window.isLive){
         togglePlayMidi();
     }else{
-        console.log(master.loadedAll)
+        //console.log(master.loadedAll)
         if(!master.loadedAll)
             return
 
@@ -260,6 +287,7 @@ async function bounceFile(){
 document.addEventListener("keydown",onKeyDown);
 
 function onKeyDown(e){
+    //console.log(e.keyCode)
     switch(e.keyCode){
         case 32:
             if(window.isLive){
@@ -273,6 +301,15 @@ function onKeyDown(e){
                 master.effects.fadeFilter({dest:0, time:window.fadeTime})
                 master.effects.fadePhaser({dest:0, time:window.fadeTime})
                 master.effects.fadeFeedback({dest:0, time:window.fadeTime})
+            }
+            break;
+        case 78:
+            if(master != null && master.effects != null){
+                master.effects.fadeDistortion({dest:Math.random(), time:window.fadeTime})        
+                master.effects.fadeCrusher({dest:Math.random(), time:window.fadeTime})
+                master.effects.fadeFilter({dest:Math.random(), time:window.fadeTime})
+                master.effects.fadePhaser({dest:Math.random(), time:window.fadeTime})
+                master.effects.fadeFeedback({dest:Math.random(), time:window.fadeTime})
             }
             break;
 
@@ -333,7 +370,7 @@ function onKeyDown(e){
         case 86://v
             if(master != null && master.effects != null){
                 if(master.effects.phaser.wet.value >.0){
-                    console.log("hii")   
+                    //console.log("hii")   
                     master.effects.fadePhaser({dest:0, time:window.fadeTime})
                 }else{
                     master.effects.fadePhaser({dest:1, time:window.fadeTime})
@@ -433,11 +470,11 @@ function changeInput(){
 
 function togglePlayMidi(){
    
-    if(!isPlaying){
-        isPlaying = true;
+    if(!window.isPlaying){
+        window.isPlaying = true;
         initPlaying();
     }else{
-        isPlaying = false;
+        window.isPlaying = false;
         killPlaying();
         if(master.recording){
             master.toggleRecording(false);   
@@ -487,22 +524,44 @@ function midiMessageLive(event){
 }
 
 window.midiOnMIDImessage = function(event) {
-    //console.log('midiOnMIDImessage', event);
+    
     if(event.data[0]!=null){
-
+        
         const command = event.data[0];
         const note = event.data[1];
         const velocity = event.data[2];
 
         //console.log(command)
         if(command!=248){
-            if(master)
-                master.midiIn({command:command, velocity:velocity, note:note});
+            //console.log("hiii")
+           // console.log('midiOnMIDImessage', event);
+            
+            if(master){
+                let cmd = command;
+                
+                if(cmd==152)cmd = 144 // track 9 down
+                if(cmd==136)cmd = 128//track 9 up
+                
+                if(cmd==153)cmd = 145 //track 10 down
+                if(cmd==137)cmd = 129 //track 10 up
 
+                if(cmd==155)cmd = 146 //track 12 down
+                if(cmd==139)cmd = 130 //track 12 up
+
+                if(cmd==154)cmd = 147 //track 11 down
+                if(cmd==138)cmd = 131 //track 11 up
+
+                if(cmd==151)cmd = 147 //track 8 down
+                if(cmd==135)cmd = 131 //track 8 up
+                
+                //console.log(cmd)
+                
+                master.midiIn({command:cmd, velocity:velocity, note:note});
+            }
             switch(command){
                 case 252://stop
                     if(window.isLive){
-                        isPlaying = false;
+                        window.isPlaying = false;
                         $("#play-btn").show();
                         $("#stop-btn").hide();
                     }
@@ -511,7 +570,7 @@ window.midiOnMIDImessage = function(event) {
                 case 251://play
                 case 250:
                     if(window.isLive){
-                        isPlaying = true;
+                        window.isPlaying = true;
                         $("#play-btn").hide();
                         $("#stop-btn").show();
                     }
@@ -585,9 +644,39 @@ function handleMidiClock(){
         
         didClock = false;
         midiClock.stop();
-     
+
 
     }
+    const offset = 0;
+    const duration = .5;
+    //console.log(Tone.context)
+    if(Tone.context==null) return;
+
+    const perfNow = window.performance.now()
+    const audioNow = Tone.context.currentTime;
+    const audioContextOffsetSec = ( perfNow / 1000.0 ) - audioNow;
+   // console.log( `beep audioNow=${ audioNow } performanceNow=${ perfNow } offset=${ audioContextOffsetSec }`);
+
+    // const startSeconds = audioNow + offset;
+    // const endSeconds = startSeconds + duration;
+
+    // Play a web audio note 
+    //const oscillator = Tone.context.createOscillator();
+    //const gain = audioContext.createGain();
+
+    //oscillator.type = 'triangle';
+    //oscillator.frequency.setValueAtTime( audioFreq, audioContext.currentTime );
+    //gain.gain.value = 0.5;
+
+    //oscillator.connect( gain );
+    //gain.connect( audioContext.destination );
+
+    //oscillator.start( startSeconds );
+    //oscillator.stop( endSeconds );
+
+    // const startMidi = startSeconds * 1000;
+    // const endMidi= endSeconds * 1000;
+
 }
 
 
@@ -605,7 +694,9 @@ function requestMIDIAccessSuccess(midi) {
         midiOuts.send([0xFC]);
   
     var inputs = midi.inputs.values();
+    console.log(inputs)
     for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+        console.log(input)
         input.value.onmidimessage = midiMessageLive;
     }
     midi.onstatechange = midiOnStateChange;
@@ -644,7 +735,7 @@ function init() {
         urlQuery.t = Math.floor(Math.random()*2);
     }
     if(urlQuery.v == null){
-        urlQuery.v = Math.floor(Math.random()*2);
+        urlQuery.v = Math.floor(Math.random()*visuals.length);
     }
 
     currVis=urlQuery.v;
@@ -671,14 +762,7 @@ function init() {
 
 function initMaster(){
     
-    const visuals = [
-        VisualTest1,
-        VisualTest2, 
-        VisualTest3,
-        VisualTest4,
-        VisualTest5,
-        
-    ]
+   
 
     if( urlQuery.live ){
       
@@ -770,14 +854,6 @@ function initMaster(){
 }
 
 
-window.getLoadedObjectByName = function(name){
-    for(let i = 0; i<window.loadObjs.length; i++){
-        if(window.loadObjs[i].name == name){
-            return window.loadObjs[i];
-        }
-    }
-    return false;
-}
 
 
 function loadHelper(OBJ){
@@ -795,6 +871,7 @@ function allLoadedCheck(){
         loadingComplete = true;
         $("#loading").show();
         $("#init-btn").show();
+
         for(let i= 0;i<window.faceExtras.length; i++){
             for(let k= 0;k<window.faceExtras[i].len; k++){
                 const model = window.getLoadedObjectByName(window.faceExtras[i].name+"-"+k).model;

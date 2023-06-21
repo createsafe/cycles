@@ -59,8 +59,6 @@ import { GlitchPass } from './scripts/jsm/postprocessing/GlitchPass.js';
 import { RenderPixelatedPass }from './scripts/jsm/postprocessing/RenderPixelatedPass.js';
 
 
-
-
 class VisualTest2{
     constructor(){
         const self = this;

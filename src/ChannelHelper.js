@@ -121,7 +121,11 @@ class Master{
     }
 
     initLive(){
+
         this.input = new Tone.UserMedia();
+        
+        //console.log(this.input.channels)
+
         Tone.UserMedia.enumerateDevices().then(window.gotInputSources);
         
         this.input.open();

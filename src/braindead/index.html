@@ -1,0 +1,507 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<title>bd</title>
+		<meta charset="utf-8">
+		<style type="text/css">
+
+			body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			a {
+				color: #00AA80;
+			}
+
+			#top {
+				position: absolute;
+				top: 0px;
+				width: 100%;
+				padding: 10px;
+				text-align: center;
+			}
+
+			#info {
+
+				background-color: rgba(0,0,0,0.15);
+				border-radius: 5px;
+				padding: 5px;
+				color: #ffffff;
+				font-family: Monospace;
+				font-size:13px;
+				font-weight: bold;
+				text-shadow: rgba(0,0,0,0.75) 1px 1px 0px;
+			}
+			.canvas{
+				position: fixed;
+				z-index: 20px;
+				width: 1280px;
+				height: 720px;
+	
+			}
+
+
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript" src="js/dat.js"></script>
+		<script type="text/javascript" src="js/three.min.js"></script>
+		
+		<video id="video" autoplay style="display:none"></video>
+		<canvas id="canvas" class="canvas"style="display:none"></canvas>
+		<canvas id="diffCanvas" class="canvas"style="display:none"></canvas>
+		<canvas id="motionCanvas" class="canvas"style="display:none"></canvas>
+		<canvas id="finalCanvas" class="canvas"style="display:none"></canvas>
+		<div id="container"></div>
+		
+<script id="vs" type="x-shader/x-vertex">
+
+uniform sampler2D map;
+uniform sampler2D diff;
+uniform float time;
+varying vec2 vUv;
+uniform float rippleSize;
+uniform float rippleIntensity;
+uniform float rippleSpec;
+uniform float complexity;
+uniform float contrast;
+uniform float diffAmt;
+
+
+void main() {
+
+	vUv = ( uv  );
+	
+	vec4 color = texture2D( map, vUv );
+	float dist = ( color.r + color.g + color.b ) / 300.0;
+
+	vec4 pos = vec4( position , 1.0 );
+
+	gl_Position = projectionMatrix * modelViewMatrix * pos;
+
+}
+
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+
+float hash12(vec2 p)
+{
+	vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash22(vec2 p)
+{
+	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx+19.19);
+    return fract((p3.xx+p3.yz)*p3.zy);
+
+}
+
+uniform sampler2D map;
+uniform sampler2D diff;
+varying vec2 vUv;
+uniform float time;
+uniform float rippleSize;
+uniform float rippleIntensity;
+uniform float rippleSpec;
+uniform float complexity;
+uniform float contrast;
+uniform float diffAmt;
+
+
+void main (){
+	
+    
+    float resolution = rippleSize * exp2( 1.0 );
+	vec2 uv = vUv / 1.0 * resolution;
+    vec2 p0 = floor(uv);
+
+    vec3 diffT = texture2D(diff, uv/resolution).rgb;
+    vec2 circles = vec2(0.0);
+    for (int j = -2; j <= 2; ++j)
+    {
+        for (int i = -2; i <= 2; ++i)
+        {
+			vec2 pi = p0 + vec2(i, j);
+			vec2 hsh = hash22(pi);
+            
+            vec2 p = pi + hash22(hsh);
+
+            float t = fract(0.3*time + hash12(hsh));
+            vec2 v = p - uv;
+            float d = length(v) - (float(2.0) + 1.)*t;
+
+            float h = 1e-3;
+            float d1 = d - h;
+            float d2 = d + h;
+            float p1 = sin(complexity*d1) * smoothstep(-0.6, -0.3, d1) * smoothstep(0., -0.3, d1);
+            float p2 = sin(complexity*d2) * smoothstep(-0.6, -0.3, d2) * smoothstep(0., -0.3, d2);
+            circles += 0.5 * normalize(v) * ((p2 - p1) / (2. * h) * (contrast - t) * (contrast - t));
+        }
+    }
+    
+    circles /= float((2.0*2.0+1.0)*(2.0*2.0+1.0));
+
+    float intensity = 0.15 * rippleIntensity +  (diffT.r * diffAmt);
+    vec3 n = vec3(circles, sqrt(1. - dot(circles, circles)))*(rippleSpec  );
+    vec3 color = texture2D(map, uv/resolution - intensity*n.xy).rgb + 5.0*pow(clamp(dot(n, normalize(vec3(1., 0.7, .5))), 0., 1.), 6.);
+	gl_FragColor = vec4(color, 1.0);
+}
+
+</script>
+
+		<script type="text/javascript">
+
+			var container, stats, canvas, ctx, diffCanvas, diffCtx, motionCanvas, motionCtx, finalCanvas,finalCtx;
+			var camera, scene, renderer, texture;
+
+			var isReadyToDiff = false;
+
+			
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			var mesh, material, video;
+
+			var time = 0.0;
+			var rippleSize = 0.1;
+			var rippleSpeed = 0.001;
+			var rippleIntensity = 1.0;
+			var rippleSpec = .612;
+			var rippleComplexity = 100;
+			var rippleContrast = 1;
+			
+			var motionCuttoff = 100;
+			var motionTrailOpacity = 0.1;
+			var diffAmt = 1.0;
+			
+			var panel;
+			var motionTexture;
+
+
+
+			var hidingGUI = false;
+
+			init();
+			animate();
+
+			function init() {
+
+				canvas = document.getElementById("canvas");
+				diffCanvas = document.getElementById("diffCanvas");
+				motionCanvas = document.getElementById("motionCanvas");
+				finalCanvas = document.getElementById("finalCanvas");
+				canvas.width = motionCanvas.width = diffCanvas.width = finalCanvas.width = 1280/4;
+				canvas.height = motionCanvas.height = diffCanvas.height = finalCanvas.height = 720/4;
+				ctx = canvas.getContext("2d");
+				diffCtx = diffCanvas.getContext("2d");
+				motionCtx = motionCanvas.getContext("2d");
+				finalCtx = finalCanvas.getContext("2d");
+				
+				finalCtx.globalCompositeOperation = 'source-over';
+				//ctx.fillStyle = "#FF0000";
+				//ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				panel = new dat.GUI( { width: 310 } );
+				var folder1 = panel.addFolder( 'Settings' );
+				var settings = {
+					
+					'plane width': 1.0,
+					'plane height': 1.0,
+					'ripple size': rippleSize,
+					'ripple speed': rippleSpeed,
+					'ripple intensity' : rippleIntensity,
+					'ripple specular' :rippleSpec,
+					'ripple complexity' :rippleComplexity,
+					'ripple contrast' :rippleContrast,
+					'motion cutoff' :motionCuttoff,
+					'motion trail opacity' :motionTrailOpacity,
+					'frame difference effect amount' :diffAmt,
+
+				};
+				
+				folder1.add( settings, 'plane width', 0.0,2.0,0.01).listen().onChange( function ( sizeX ) {
+					mesh.scale.x = sizeX;
+				});
+				folder1.add( settings, 'plane height', 0.0,2.0,0.01).listen().onChange( function ( sizeY ) {
+					mesh.scale.y = sizeY;
+				});
+				folder1.add( settings, 'ripple size', 0.1,30.0,0.01).listen().onChange( function ( rs ) {
+					rippleSize = rs;
+				});
+				folder1.add( settings, 'ripple speed', 0.001,0.09,0.001).listen().onChange( function ( rs ) {
+					rippleSpeed = rs;
+				});
+				folder1.add( settings, 'ripple intensity', 0.0001,10.0,0.001).listen().onChange( function ( ri ) {
+					rippleIntensity = ri;
+				});
+				folder1.add( settings, 'ripple specular', 0.4,2.0,0.001).listen().onChange( function ( rs ) {
+					rippleSpec = rs;
+				});
+				folder1.add( settings, 'ripple complexity',1,100,0.1).listen().onChange( function ( rs ) {
+					rippleComplexity = rs;
+				});
+				folder1.add( settings, 'ripple contrast',.5,1.5,0.01).listen().onChange( function ( rs ) {
+					rippleContrast = rs;
+				});
+				folder1.add( settings, 'motion cutoff',1,200,0.5).listen().onChange( function ( rs ) {
+					motionCuttoff = rs;
+				});
+				folder1.add( settings, 'motion trail opacity',0.0,1.0,0.001).listen().onChange( function ( rs ) {
+					motionTrailOpacity = rs;
+				});
+				folder1.add( settings, 'frame difference effect amount',0.001,2.0,0.001).listen().onChange( function ( rs ) {
+					diffAmt = rs;
+				});
+				folder1.open();
+				
+				container = document.getElementById( 'container' );
+
+				//camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
+
+				camera.position.z = 400;
+
+				scene = new THREE.Scene();
+
+				video = document.getElementById( 'video' );
+
+				motionTexture = new THREE.Texture(finalCanvas);
+
+				material = new THREE.ShaderMaterial( {
+
+					uniforms: {
+
+						"map": {  value: new THREE.VideoTexture(video) },
+						"diff": {  value:  motionTexture},
+						"offset_x": { value: 0.0 },
+						"offset_y": { value: 0.0 },
+						"time": { value: 0.0 },
+						"rippleSize":{value:rippleSize},
+						"rippleIntensity":{value:rippleIntensity},
+						"rippleSpec":{value:rippleSpec},
+						"complexity":{value:rippleComplexity},
+						"contrast":{value:rippleContrast},
+						"diffAmt":{value:diffAmt},
+
+					},
+					vertexShader: document.getElementById( 'vs' ).textContent,
+					fragmentShader: document.getElementById( 'fs' ).textContent
+
+				} );
+				
+				var cameraZ = camera.position.z;
+				var planeZ = 0;
+				var distance = cameraZ - planeZ;
+				var aspect = window.innerWidth / window.innerHeight;
+				
+				var vFov = camera.fov * Math.PI / 180;
+				
+				var planeHeight = 2 * Math.tan(vFov / 2) * distance;
+				var planeWidth = planeHeight * aspect;
+				
+				mesh = new THREE.Mesh(
+					new THREE.PlaneBufferGeometry(window.innerWidth, window.innerHeight, 100, 100), 
+					//new THREE.PlaneGeometry(planeWidth, planeHeight, 100, 100), 
+					material
+				);
+				
+				scene.add(mesh);
+
+				document.addEventListener( 'keydown', onDocumentKeyDown, false );
+				window.addEventListener( 'resize', onWindowResize, false );
+
+				if ( navigator.mediaDevices && navigator.mediaDevices.getUserMedia ) {
+
+					var constraints = { video: { width: 1280, height: 720, facingMode: 'user' } };
+
+					navigator.mediaDevices.getUserMedia( constraints ).then( function ( stream ) {
+
+						video.srcObject = stream;
+						video.play();
+
+					} ).catch( function ( error ) {
+
+						console.error( 'Unable to access the camera/webcam.', error );
+
+					} );
+
+				} else {
+
+					console.error( 'MediaDevices interface not available.' );
+
+				}
+
+				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+				
+
+			}
+
+			function onDocumentKeyDown(e){
+				if(e.keyCode == 13){
+					if(!hidingGUI){
+						console.log(panel.domElement);
+						panel.domElement.style.display='none';
+						hidingGUI = true;
+					}else{
+						hidingGUI = false;
+						panel.domElement.style.display='block';
+					}
+
+				}
+			}
+
+			
+
+			function onWindowResize( event ) {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+			
+			function render() {
+				
+				if(video){
+					
+					ctx.drawImage(video,0,0,canvas.width, canvas.height);
+					var captureImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+					
+					diffCtx.globalCompositeOperation = 'difference';
+					diffCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+					
+					var diffImageData = diffCtx.getImageData(0, 0, canvas.width, canvas.height);
+					
+					if(isReadyToDiff){
+
+						processDiff(diffImageData);
+						var img = ctx.createImageData(diffImageData);
+						motionCtx.putImageData(diffImageData, 0, 0);
+						finalCtx.fillStyle = "rgba(0,0,0,"+motionTrailOpacity+")";
+						finalCtx.fillRect(0,0,canvas.width, canvas.height);
+						finalCtx.drawImage(motionCanvas,0,0,canvas.width,canvas.height);
+
+						//console.log(diff.score);
+						// if (diff.motionBox) {
+						// 	motionCtx.strokeStyle = '#fff';
+						// 	motionCtx.strokeRect(
+						// 		diff.motionBox.x.min + 0.5,
+						// 		diff.motionBox.y.min + 0.5,
+						// 		diff.motionBox.x.max - diff.motionBox.x.min,
+						// 		diff.motionBox.y.max - diff.motionBox.y.min
+						// 	);
+						// }
+
+					}
+
+					diffCtx.globalCompositeOperation = 'source-over';
+					diffCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+					isReadyToDiff = true;
+					motionTexture.needsUpdate = true;
+					
+				}
+
+				time+=rippleSpeed;
+
+				material.uniforms.time.value = time;
+				material.uniforms.rippleSize.value = rippleSize;
+				material.uniforms.rippleIntensity.value = rippleIntensity;
+				material.uniforms.rippleSpec.value = rippleSpec;
+				material.uniforms.complexity.value = rippleComplexity;
+				material.uniforms.contrast.value = rippleContrast;
+				material.uniforms.diffAmt.value = diffAmt;
+				renderer.render( scene, camera );
+
+			}
+
+			function showModel( visibility ) {
+				model.visible = visibility;
+			}
+
+			function processDiff(diffImageData) {
+				
+				var rgba = diffImageData.data;
+				
+				for (var i = 0; i < rgba.length; i += 4) {
+					var pixelDiff = rgba[i] + rgba[i + 1]  + rgba[i + 2] ;
+					//var normalized = Math.min(255, pixelDiff * (255 / pixelDiffThreshold));
+					if(pixelDiff>motionCuttoff){
+						rgba[i    ] = 255;
+						rgba[i + 1] = 255;
+						rgba[i + 2] = 255;
+						rgba[i + 3] = 255;
+					}else{
+						rgba[i    ] = 0;
+						rgba[i + 1] = 0;
+						rgba[i + 2] = 0;
+						rgba[i + 3] = 0;
+					}
+					
+					//rgba[i + 4] = normalized;
+
+					//if (pixelDiff >= pixelDiffThreshold) {
+						//score++;
+						//coords = calculateCoordinates(i / 4);
+
+						//motionBox = calculateMotionBox(motionBox, coords.x, coords.y);
+					
+						//motionPixels = calculateMotionPixels(motionPixels, coords.x, coords.y, pixelDiff);
+						
+					//}
+				}
+
+				//return {
+					//score: score,
+					//motionBox: score > scoreThreshold ? motionBox : undefined,
+					//motionPixels: motionPixels
+				//};
+			}
+			function calculateCoordinates(pixelIndex) {
+				return {
+					x: pixelIndex % canvas.width,
+					y: Math.floor(pixelIndex / canvas.width)
+				};
+			}
+			function calculateMotionBox(currentMotionBox, x, y) {
+				// init motion box on demand
+				var motionBox = currentMotionBox || {
+					x: { min: coords.x, max: x },
+					y: { min: coords.y, max: y }
+				};
+
+				motionBox.x.min = Math.min(motionBox.x.min, x);
+				motionBox.x.max = Math.max(motionBox.x.max, x);
+				motionBox.y.min = Math.min(motionBox.y.min, y);
+				motionBox.y.max = Math.max(motionBox.y.max, y);
+
+				return motionBox;
+			}
+			function calculateMotionPixels(motionPixels, x, y, pixelDiff) {
+				//motionPixels[x] = motionPixels[x] || [];
+				//motionPixels[x][y] = true;
+
+				return motionPixels;
+			}
+
+		</script>
+	</body>
+</html>

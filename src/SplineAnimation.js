@@ -26,7 +26,8 @@ class TrackAni{
         
         this.parent = new Object3D();
         // this.parent.rotation.x = -Math.PI+Math.random()*(Math.PI*2);
-         this.parent.rotation.y = -Math.PI+Math.random()*(Math.PI*2);
+        if(OBJ.name != "norotate")
+            this.parent.rotation.y = -Math.PI+Math.random()*(Math.PI*2);
         
         OBJ.scene.add(this.parent)
 
@@ -42,7 +43,7 @@ class TrackAni{
         this.inc = 0;
         this.emitInc = 0;
         this.rotSpeed = new Vector3(-.5+Math.random(), -.5+Math.random(),-.5+Math.random())
-        if(OBJ.name=="butterfly")this.rotSpeed = new Vector3();
+        if( OBJ.name == "butterfly" || OBJ.name=="norotate" )this.rotSpeed = new Vector3();
         this.limitInc=0;
         this.limit = 4;
         this.canLimitEmit = false;
@@ -116,7 +117,7 @@ class TrackAni{
     update(OBJ){
 
         //this.parent.rotation.x+=OBJ.delta*this.rotSpeed.x;
-        this.parent.rotation.y+=OBJ.delta*(this.rotSpeed.y)*2;
+        this.parent.rotation.y += OBJ.delta * (this.rotSpeed.y)*2;
         this.inc += OBJ.delta;
         this.emitInc += OBJ.delta;
         this.limitInc += OBJ.delta;
@@ -150,9 +151,8 @@ class SplineAnimation {
 
     constructor(OBJ){
         const self = this;
-        this.tubeGeometry = new TubeGeometry( OBJ.spline, 100, .001, 8, false );
+        this.tubeGeometry = new TubeGeometry( OBJ.spline, 100, .01, 8, false );
 
-        
         //OBJ.scene.add(new Mesh(this.tubeGeometry, new MeshBasicMaterial()));
 
         this.direction = new Vector3();
@@ -168,37 +168,6 @@ class SplineAnimation {
         this.ignoreRotation = false;
         this.sMult = .1;//(.8+Math.random()*.4)*.2;
         this.addedToScene = false;
-
-        // this.emitter = OBJ.emitter;
-        // this.emitter.obj = {spline:this, scene:OBJ.scene};
-
-        // if(OBJ.mesh.name == "butterfly"){
-        //     this.ignoreRotation = true;
-        //     this.sMult *= .2;
-        // }
-         
-        // const len = 40;
-        // for( let i = 0; i<len; i++){
-        //     //const m = new Mesh( geometry, material );
-        //     //console.log(OBJ.mesh)
-        //     let m = OBJ.mesh.clone();
-        //    // if(!OBJ.mesh.animated){
-        //         //m = OBJ.mesh.model.clone();
-        //     // }else{
-        //     //     m = clone( OBJ.mesh.model );
-        //     //     const mixer = new AnimationMixer(m);
-        //     //     const ani = OBJ.mesh.group.animations[0];
-        //     //     const clip = mixer.clipAction(ani);  
-        //     //     clip.play();
-        //     //     this.mixers.push({ mixer:mixer, speed: (.5+Math.random()*.5)*3 } );
-        //     // }
-            
-        //     //m.scale.set(s,s,s);
-        //     this.meshes.push(m);
-        //     OBJ.scene.add( m );
-        // }
-
-        //this.speed = (.1+Math.random()*.2)*.1;
 
         this.inc = 0.0;
         this.rndVec = new Vector3(-100+Math.random()*200, -100+Math.random()*200, -100+Math.random()*200);
@@ -254,29 +223,17 @@ class SplineAnimation {
 
         this.normal.copy( this.binormal ).cross( this.direction );
 
-        // we move on a offset on its binormal
-
         //this.position.add( this.normal.clone().multiplyScalar( offset ) );
-        this.position.add( this.normal.clone().multiplyScalar( this.perlin*OBJ.noiseAmt ) );
-
-        //this.meshes[i].position.copy( this.position );
-        //cameraEye.position.copy( position );
-
-        // using arclength for stablization in look ahead
+        this.position.add( this.normal.clone().multiplyScalar( this.perlin * OBJ.noiseAmt ) );
 
         this.tubeGeometry.parameters.path.getPointAt( ( t + 30 / this.tubeGeometry.parameters.path.getLength() ) % 1, this.lookAt );
         this.lookAt.multiplyScalar( 1 );
-
-        // camera orientation 2 - up orientation via normal
 
         this.lookAt.copy( this.position ).add( this.direction );
         
         this.holder.matrix.lookAt( this.position, this.lookAt, this.normal );
         this.holder.quaternion.setFromRotationMatrix( this.holder.matrix );//.setFromAxisAngle(new Vector3(0,1,0),rotAngle );
         
-        //if(!this.ignoreRotation){
-            //this.meshes[i].rotation.x=rotAngle;
-        //}
         let s = (.5 + Math.sin( -Math.PI/2 + ( t * (Math.PI*2)) ) * .5) * (this.sMult);
         if(s>this.sMult)s=this.sMult;
         return {pos:this.position, rot:rotAngle, scl:s, quat:this.holder.quaternion};
