@@ -39,7 +39,8 @@ import {
     BufferGeometry,
     Float32BufferAttribute ,
     PointsMaterial ,
-    Points
+    Points,
+
 
 } from './build/three.module.js';
 import { OrbitControls } from './scripts/jsm/controls/OrbitControls.js';
@@ -70,10 +71,12 @@ import { RenderPixelatedPass }from './scripts/jsm/postprocessing/RenderPixelated
 const VERTEX_SHADER = `
     varying vec2 vUv;
     void main() {
-      vUv = uv;
+     // vUv = vec2( .5+ (position.x*.25), .5+(position.y*.25));
   
       vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-      
+      vUv = vec2( .5+ ((modelPosition.x)*.25), .5+((modelPosition.y)*.25));
+  
+     
       vec4 viewPosition = viewMatrix * modelPosition;
       vec4 projectedPosition = projectionMatrix * viewPosition;
     
@@ -181,8 +184,8 @@ void main() {
   // float snY = sin( (vUv.y*.1)+(inc*.1) ) * 0.005;
   // float snX = cos( (vUv.x*.1)+(inc*.1) ) * 0.005;
 
-  float snY = sin( (vUv.y*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*2.;
-  float snX = cos( (vUv.x*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*2.;
+  float snY = sin( (vUv.y*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*0.1;
+  float snX = cos( (vUv.x*feedbackFreq)+(feedbackInc*.1) ) * feedbackAmount*0.1;
 
   // float snY1 = sin( (vUv.y*10.1)+(inc*.1) ) * 0.04;
   // float snX1 = cos( (vUv.x*10.1)+(inc*.1) ) * 0.04;
@@ -213,41 +216,8 @@ void main() {
 `;
 
 
-class Animal{
-  constructor(OBJ){
-    //this.mesh = 
-    this.mesh = OBJ.mesh;//window.getLoadedObjectByName("boy").model;
-    this.ani = OBJ.group;
-    ///this.boy.castShadow = true; 
-    this.mesh.traverse(function(obj){
-        if(obj.isMesh){
-            obj.castShadow = true;
-        }
-    })
-    this.mesh.position.copy(OBJ.pos);
 
-    let s = .8+Math.random()*.3;
-    this.mesh.scale.set(s,s,s);
-    
-    this.mixer = new AnimationMixer(this.mesh);
-    const ani = OBJ.group.animations[0];
-    this.idle = this.mixer.clipAction(ani);  
-    this.idle.play();
-    this.mesh.rotation.copy(OBJ.rot);//.y+=Math.random()*(Math.PI*2)
-    
-    OBJ.scene.add(this.mesh)
-        
-  }
-
-  update(OBJ){
-    this.mixer.update(OBJ.delta);
-  }
-
-}
-
-
-
-class VisualTest1{
+class VisualTest8{
     constructor(){
         const self = this;
 
@@ -256,7 +226,7 @@ class VisualTest1{
         this.scene = window.scene;
         
         this.mousePosition = new Vector4();
-        this.orthoCamera = new OrthographicCamera(-2, 2, 2, -2, -2, 2);
+        this.orthoCamera = new OrthographicCamera(-2, 2, 2, -2, -20, 20);
         
         this.orthoCamera.position.z = 0;
 
@@ -396,76 +366,45 @@ class VisualTest1{
       ground.receiveShadow = true;
       wall.receiveShadow = true;
 
-        this.parent = new Object3D();
-        //window.scene.add(this.parent);
-        this.bufferImage.scene.add(this.parent);
+      this.parent = new Object3D();
+      //window.scene.add(this.parent);
+      this.bufferImage.scene.add(this.parent);
 
-        this.anims = [];
-        for(let i = 0; i<40; i++){
-          // const names = [
-          //   "chicken-0",
-          //   "chicken-1",
-          //   "duck",
-          //   "ping",
-          //   "liz-1",
-          //   "liz-2",
-          //   "turtle",
-          //   "frog",
-          // ]
-          
-          const names = [
-            "ant-1",
-            "ant-2",
-            "beatle-1",
-            "beatle-2",
-            "beatle-3",
-            "grasshopper",
-            "ladybug",
-            "mantis", 
-            "liz-1",
-            "liz-2",
-            "frog",
-          ]
-          const anim = names[Math.floor( Math.random()*names.length )];
-          const mesh = clone( window.getLoadedObjectByName(anim).model );
-          const group = window.getLoadedObjectByName("bug-rave").group;
-          
-          const wall = Math.random()>.5;
-          const x = Math.random()>.5?1:-1;
-          const pos = !wall ? new Vector3( -5+Math.random()*10, -2.5, Math.random()*5 ) : new Vector3( (2.2+Math.random()*3)*x, -1+Math.random()*5, -.1 );
-          const rot = !wall ? new Euler(0,Math.random()*(Math.PI*2),0) : new Euler(Math.PI/2,Math.random()*(Math.PI*2),0);
-    
-          this.anims.push( new Animal({mesh:mesh, rot:rot, group:group, pos:pos, scene:this.bufferImage.scene}))
-        }
         
 
-        this.bufferImage.scene.add(wall, ground);
-        //this.scene.add(dust);
-        //this.bufferImage.scene.add(   dust);
-        //this.bufferImage.scene.add(wall, ground);
+      // this.bufferImage.scene.add(wall, ground);
+      //this.scene.add(dust);
+      //this.bufferImage.scene.add(   dust);
+      //this.bufferImage.scene.add(wall, ground);
 
-        const textureLoader = new TextureLoader();
-         
-        const assignSRGB = ( texture ) => {
-    
-            texture.colorSpace = SRGBColorSpace;
-    
-        };
-        const sprite = textureLoader.load( './extras/circle.png', assignSRGB );
-    
+      const textureLoader = new TextureLoader();
+        
+      const assignSRGB = ( texture ) => {
+  
+          texture.colorSpace = SRGBColorSpace;
+  
+      };
+      //const sprite = textureLoader.load( './extras/circle.png', assignSRGB );
+      //const tex = textureLoader.load( './extras/b-site.png', assignSRGB );
+      //this.canv = document.createElement
+
+  
         const mask = new Mesh(
             new PlaneGeometry(4,4),
-            new MeshPhysicalMaterial({side:DoubleSide, map:sprite, color:0xff0000, transparent:true, })
+            new MeshPhysicalMaterial({side:DoubleSide, color:0xff0000, transparent:true })
         ) 
-        mask.position.z = 2;
-        //this.bufferImage.scene.add(mask);
+
+        mask.position.z = 0;
+          // //this.bufferImage.scene.add(mask);
+        this.rts = [];
+        
+        for(let i = 0;i<3+Math.floor(Math.random()*10); i++){
+          this.rts.push( new RTTScene({ scene:this.bufferImage.scene })  ) 
+        }
 
         this.geometry = new BufferGeometry();
         this.vertices = [];
-    
-    
-   
-        
+  
         for ( let i = 0; i < 10000; i ++ ) {
     
             const x = Math.random() * 40 - 20;
@@ -479,34 +418,40 @@ class VisualTest1{
         this.geometry.setAttribute( 'position', new Float32BufferAttribute( this.vertices, 3 ) );
     
         this.parameters = [
-            [[ 1.0, 0.2, 0.5 ], sprite, .4 ],
-            [[ 0.95, 0.1, 0.5 ], sprite, .1 ],
-            [[ 0.90, 0.05, 0.5 ], sprite, .03 ],
-            [[ 0.85, 0, 0.5 ], sprite, .01 ],
-            [[ 0.80, 0, 0.5 ], sprite, .2 ]
+            [[ 1.0, 0.2, 0.5 ],  .4 ],
+            [[ 0.95, 0.1, 0.5 ],  .1 ],
+            [[ 0.90, 0.05, 0.5 ],  .03 ],
+            [[ 0.85, 0, 0.5 ], .01 ],
+            [[ 0.80, 0, 0.5 ], .2 ]
         ];
         this.materials = [];
         for ( let i = 0; i < this.parameters.length; i ++ ) {
     
             const color = this.parameters[ i ][ 0 ];
-            const sprite = this.parameters[ i ][ 1 ];
-            const size = this.parameters[ i ][ 2 ];
+            //const sprite = this.parameters[ i ][ 1 ];
+            const size = this.parameters[ i ][ 1 ];
     
-            this.materials[ i ] = new PointsMaterial( { size: size, map: sprite, /*blending: AdditiveBlending, depthTest: false,*/ transparent: true } );
+            this.materials[ i ] = new PointsMaterial( { size: size,  /*map: sprite,blending: AdditiveBlending, depthTest: false,*/ transparent: true } );
             //this.materials[ i ].color.setHSL( color[ 0 ], color[ 1 ], color[ 2 ], SRGBColorSpace );
             this.materials[ i ].color.setHSL( 0, 0, .2, SRGBColorSpace );
     
             const particles = new Points( this.geometry, this.materials[ i ] );
     
-            // this.particles.rotation.x = Math.random() * 6;
-            // this.particles.rotation.y = Math.random() * 6;
-            // this.particles.rotation.z = Math.random() * 6;
+            particles.rotation.x = Math.random() * 6;
+            particles.rotation.y = Math.random() * 6;
+            particles.rotation.z = Math.random() * 6;
     
             this.bufferImage.scene.add( particles );
     
         }
-
-
+        this.mousexX = 0; 
+        this.mouseY = 0;
+        document.body.addEventListener( 'pointermove', function(e){
+            if ( e.isPrimary === false ) return;
+            self.mouseX = (e.clientX - (window.innerWidth/2))*.005;
+            self.mouseY = (e.clientY - (window.innerHeight/2))*.005;
+        } );
+        
 
 
 
@@ -547,7 +492,7 @@ class VisualTest1{
         
         window.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, .1, 200 );
    
-        window.camera.position.z = 18;
+        window.camera.position.z = 8;
         window.camera.position.y = .2;
         
         const dirLight1 = new DirectionalLight( 0xffffff, 2.2 );
@@ -618,10 +563,9 @@ class VisualTest1{
         this.brtCont.uniforms[ 'contrast' ].value = .1;
         this.brtCont.uniforms[ 'brightness' ].value = .1;
 
-
         this.cameraTween;
         this.cameraNoiseSpeed = .2+Math.random()*.5;
-        self.initCam();
+        //self.initCam();
 
         // new RGBELoader()
         // .setPath( './extras/' )
@@ -661,9 +605,9 @@ class VisualTest1{
     update(OBJ){
 
       
-      for(let i = 0; i<this.anims.length; i++){
-        this.anims[i].update(OBJ);//push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
-      }
+    //   for(let i = 0; i<this.anims.length; i++){
+    //     this.anims[i].update(OBJ);//push( new Chicken({mesh:mesh, group:group, pos:pos, scene:this.bufferImage.scene}))
+    //   }
       //console.log();
       
       //const aniSpeed = this.map(window.clock4Time, .2, 2, 2, .2);// = this.map(window.clock4Time, );
@@ -671,6 +615,7 @@ class VisualTest1{
       //ani is one second 
       //this.clip.timeScale = aniSpeed; 
       //this.mixer.update(OBJ.delta);
+      
       this.filmShader.uniforms[ 'time' ].value += OBJ.delta*2%10;
 
       this.lightsParent.rotation.x+=OBJ.delta*2;
@@ -678,6 +623,9 @@ class VisualTest1{
       //this.parent.rotation.y+=OBJ.delta*.3;
       for(let i = 0; i<this.emitter.length; i++){
           this.emitter[i].update(OBJ); 
+      }
+      for(let i = 0; i<this.rts.length; i++){
+        this.rts[i].update({ delta:OBJ.delta, mouseX:this.mouseX, mouseY:this.mouseY }); 
       }
       this.tonePerlin.update({delta:OBJ.delta*4});
       this.cameraPerlin.update({delta:OBJ.delta*this.cameraNoiseSpeed});
@@ -718,11 +666,27 @@ class VisualTest1{
       this.bufferImage.uniforms['deformInc'].value = this.deformInc;
       this.bufferImage.uniforms['feedbackInc'].value = this.feedbackInc;
 
+      this.time += OBJ.delta*.001;  // this.time += OBJ.delta*.0001;
+      for ( let i = 0; i < this.bufferImage.scene.children.length; i ++ ) {
+
+        const object = this.bufferImage.scene.children[ i ];
+
+        if ( object instanceof Points ) {
+
+            object.rotation.y = this.time * ( i < 4 ? i + 1 : - ( i + 1 ) );
+
+        }
+
+    }
+    window.camera.position.x += ( this.mouseX - window.camera.position.x ) * 0.05;
+    window.camera.position.y += ( - this.mouseY - window.camera.position.y ) * 0.05;
+    window.camera.lookAt( this.scene.position );
+
 
       //this.controls.update();
       //this.emitter.update(OBJ);
     }
-zvxc
+
     initCam(){
 
       const self = this;
@@ -784,12 +748,6 @@ zvxc
 
         this.renderPixelatedPass.setPixelSize( 1+Math.floor(OBJ.phaser*8) );
 
-
-
-        
-
-
-        
         // this.visual.vis.postVisualEffects({
         //     crush:this.effects.crusher.wet.value,
         //     phaser:this.effects.phaser.wet.value,
@@ -944,13 +902,18 @@ class BufferShader {
         });
 
         this.scene = new Scene();
-        this.meshes = objs;
+        this.meshes = [];
 
-        // for(let i = 0; i < this.meshes.length; i++){
-        //     this.meshes[i].position.y = 0;// -.5+Math.random();
+        // for(let i = 0; i < 10+Math.floor(Math.random()*10); i++){
+        //     const mesh = new Mesh(new PlaneGeometry(1+Math.random()*1, 1+Math.random()*1), this.material); 
+        //     mesh.position.z = -Math.random()* 20;
+        //     mesh.position.x = -2+Math.random()*4;
+        //     mesh.position.y = -2+Math.random()*4;
+
+        //     this.meshes[i] = mesh;//.position.z = -Math.random()* 2;// -.5+Math.random();
         //     this.scene.add(this.meshes[i]);
         // }
-
+        
         const bgMesh = new Mesh(new PlaneGeometry(4, 4), this.material); 
         bgMesh.position.z=-.01;
 
@@ -970,7 +933,104 @@ class BufferShader {
     }
 
 }
+
+
+class RTTScene{
+  constructor(OBJ){
+
+    this.scene = new Scene();
+    this.geometry = new BufferGeometry();
+    this.time = Math.random()*100;
+
+    this.vertices = [];
+
+    this.rtTexture = new WebGLRenderTarget( window.innerWidth/2, window.innerHeight/2 );
+
+    for ( let i = 0; i < 1000; i ++ ) {
+
+        const x = Math.random() * 20 - 10;
+        const y = Math.random() * 20 - 10;
+        const z = Math.random() * 20 - 10;
+
+        this.vertices.push( x, y, z );
+
+    }
+
+    this.geometry.setAttribute( 'position', new Float32BufferAttribute( this.vertices, 3 ) );
+
+    this.parameters = [
+        [[ 1.0, 0.2, 0.5 ],  .4 ],
+        [[ 0.95, 0.1, 0.5 ],  .1 ],
+        [[ 0.90, 0.05, 0.5 ],  .03 ],
+        [[ 0.85, 0, 0.5 ], .01 ],
+        [[ 0.80, 0, 0.5 ], .2 ]
+    ];
+
+    this.materials = [];
+    
+    for ( let i = 0; i < this.parameters.length; i ++ ) {
+
+        const color = this.parameters[ i ][ 0 ];
+        //const sprite = this.parameters[ i ][ 1 ];
+        const size = this.parameters[ i ][ 1 ];
+
+        this.materials[ i ] = new PointsMaterial( { size: size,  /*map: sprite,blending: AdditiveBlending, depthTest: false,*/ transparent: true } );
+        //this.materials[ i ].color.setHSL( color[ 0 ], color[ 1 ], color[ 2 ], SRGBColorSpace );
+        this.materials[ i ].color.setHSL( 0, 0, .2, SRGBColorSpace );
+
+        const particles = new Points( this.geometry, this.materials[ i ] );
+
+        particles.rotation.x = Math.random() * 6;
+        particles.rotation.y = Math.random() * 6;
+        particles.rotation.z = Math.random() * 6;
+
+        this.scene.add( particles );
+
+    }
+
+    this.camera = new PerspectiveCamera(20, window.innerWidth / window.innerHeight, .1, 200 );
+   
+    this.camera.position.z = 8;
+
+    this.mesh = new Mesh(
+      new PlaneGeometry(Math.random()*2,Math.random()*2),
+      new MeshBasicMaterial({side:DoubleSide, map:this.rtTexture, color:0xffffff*Math.random() })
+    ) 
+
+    this.mesh.position.x = -10+Math.random()*20;
+    this.mesh.position.y = -10+Math.random()*20;
+    this.mesh.position.z = -10+Math.random()*20;
   
+    console.log(OBJ.scene)
+    console.log(this.mesh)
+    OBJ.scene.add(this.mesh);
+  }
+
+  update(OBJ){
+
+    // window.renderer.setRenderTarget( this.rtTexture );
+    // window.renderer.clear();
+    // window.renderer.render( this.scene, this.camera );
+    // this.time += OBJ.delta*.001;  // this.time += OBJ.delta*.0001;
+    
+    // this.camera.position.x += ( OBJ.mouseX -this.camera.position.x ) * 0.05;
+    // this.camera.position.y += ( - OBJ.mouseY - this.camera.position.y ) * 0.05;
+    
+    // this.camera.lookAt( this.scene.position );
+   
+    // for ( let i = 0; i < this.scene.children.length; i ++ ) {
+
+    //     const object = this.scene.children[ i ];
+
+    //     if ( object instanceof Points ) {
+
+    //         object.rotation.y = this.time * ( i < 4 ? i + 1 : - ( i + 1 ) );
+
+    //     }
+
+    // }
+  }
+}
 
 
 class BufferManager {
@@ -1017,4 +1077,4 @@ class BufferManager {
   }
   
 
-export {VisualTest1};
+export {VisualTest8};

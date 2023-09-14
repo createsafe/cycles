@@ -24,6 +24,7 @@ import { clone } from "./scripts/jsm/utils/SkeletonUtils.js";
 import { CustomMaterial } from "./CustomMaterial.js"
 import { GenerativeSplines } from "./GenerativeSplines.js";
 
+
 //const bassGeo = new IcosahedronGeometry( .05, 1 );
 const bassGeo = new BoxGeometry( .07, .12, .07 );
 
@@ -75,7 +76,7 @@ class ParticleBass{
         shape.lineTo( (-sze*.5)+Math.random()*sze, (-sze*.5)+Math.random()*sze );
         shape.lineTo( (-sze*.5)+Math.random()*sze, (-sze*.5)+Math.random()*sze );
 
-        shape.moveTo( 0, 0);
+        //shape.moveTo( 0, 0);
         // shape.lineTo( 0, width );
         // shape.lineTo( length, width );
         // shape.lineTo( length, 0 );

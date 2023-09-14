@@ -62,6 +62,7 @@ class Master{
     pause(){
         //if(this.loadedAll){
             this.playing = false;
+            window.isPlaying = false;
             Tone.Transport.pause();
         //}
     }
@@ -207,7 +208,7 @@ class Master{
     async initPlayback(){
         
         const self = this;
-        
+        document.getElementById("channel-fx").style.display = "none";
         this.midi = await Midi.fromUrl(this.obj.samplesArr.midi);
         
         this.midi.tracks.forEach((track) => {
@@ -290,6 +291,7 @@ doFilter:function(val){},
          //let lastNote;
          const self = this;
          let index = 0;
+
          this.midi.tracks.forEach((track) => {
 
             if(index>5)return;  
@@ -354,6 +356,7 @@ doFilter:function(val){},
         const self = this;
         this.loadedAll = true;
         this.playing = true;
+        window.isPlaying = true;
         $("#play-btn").hide();
         $("#stop-btn").show();
         
@@ -379,6 +382,7 @@ doFilter:function(val){},
         Tone.Transport.start();
         
         //this.allChannelVolume(-100);
+        
         this.muteAllChannels();
 
         // this.channels[4].fadeIn({time:5})
@@ -423,12 +427,34 @@ doFilter:function(val){},
         ]
         */
 
-        this.channels[0].fadeIn({time:5})
         self.channels[0].setFilter(1);//filter= 1;
         self.channels[0].setPhaser(1);//phaser = 1;//fadePhaser({time:3,dest:1});
         self.channels[0].setDistortion(.3);//distortion.wet.value = .3;//({time:3,dest:1});
         self.channels[0].setCrusher(1);//({time:3,dest:1});
+        this.channels[0].setFeedback(0);//distortion.wet.value = 1;
 
+        self.channels[0].fadeFilter({dest:0, time:5});
+        self.channels[0].fadePhaser({dest:0, time:5});
+        self.channels[0].fadeDistortion({dest:.2, time:5});
+        self.channels[0].fadeCrusher({dest:0, time:5});
+        this.channels[0].fadeIn({time:5})
+        
+        
+
+        // this.channels[1].setFilter(1);//filter.wet.value = 1;
+        // this.channels[1].setPhaser(1);//phaser.wet.value = 1;
+        // this.channels[1].setCrusher(1);//crusher.wet.value = 1;
+        // this.channels[1].setDistortion(1);//distortion.wet.value = 1;
+        // this.channels[1].setFeedback(0);//distortion.wet.value = 1;
+
+        // //self.channels[1].fadeFilter({time:2,dest:0})
+        // self.channels[1].fadeFilter({time:2,dest:0})
+        // self.channels[1].fadePhaser({time:2,dest:0})
+        // self.channels[1].fadeCrusher({time:4,dest:.2})
+        // self.channels[1].fadeDistortion({time:4,dest:.0})
+        
+        // this.channels[1].fadeIn({time:5})
+        
         //const obj=[]
         
         const obj = [
@@ -436,18 +462,13 @@ doFilter:function(val){},
             {
                 time:"3:0:0", 
                 do:function(){
-                    self.channels[0].fadeCrusher({dest:0, time:5});
-                    self.channels[0].fadeDistortion({dest:.4, time:5});
-        
-                    self.channels[1].setFilter(1);//filter.wet.value = 1;
-                    self.channels[1].setPhaser(1);//phaser.wet.value = 1;
-                    self.channels[1].setCrusher(1);//crusher.wet.value = 1;
-                    self.channels[1].setDistortion(1);//distortion.wet.value = 1;
-                    
-                    self.channels[1].fadeIn({time:7});
+               
+
+                    //self.channels[1].fadeIn({time:7});
                 },
                 message:"fade snair in"
             },
+            /*
             {
                 time:"4:0:0", 
                 do:function(){
@@ -638,6 +659,7 @@ doFilter:function(val){},
                 },
                 message:"fade all"
             },
+            */
             
         ]
         

@@ -79,6 +79,7 @@ import { MeshoptDecoder } from './scripts/jsm/libs/meshopt_decoder.module.js';
 import { GUI } from './scripts/jsm/libs/lil-gui.module.min.js';
 import { MeshSurfaceSampler } from './scripts/jsm/math/MeshSurfaceSampler.js';
 //import { GUI } from './scripts/jsm/libs/lil-gui.module.min.js';
+//import {faceSplineArr} from './FaceSplines.js';
 
 // Mediapipe
 import vision from './scripts/tasks-vision@0.10.0.js';
@@ -209,23 +210,34 @@ class CanvasDrawBass{
         this.pos1 = new Vector2();
         this.pos2 = new Vector2();
         this.type="bass";
+        this.rnd = false;
     }
 
     trig(OBJ){
         
         const self = this;
         
+        this.rnd = true;
+        if(Math.random()>.5)this.rnd = false;
         
         const y = OBJ.y;
+        
         //const x = Math.random() >.5 ? OBJ.x + (30+Math.random()*100) : OBJ.x-(30+Math.random()*100)
-        const x1 =  OBJ.x + (70);
+        const x1 =  OBJ.x+(70);
         const x2 = OBJ.x-(70)
          
-        const startPos1 = new Vector2(OBJ.x, y)
-        const endPos1 = new Vector2(x1, y)
-        const startPos2 = new Vector2(OBJ.x, y)
-        const endPos2 = new Vector2(x2, y)
+        let startPos1 = new Vector2(OBJ.x, y)
+        let endPos1 = new Vector2(x1, y)
+        let startPos2 = new Vector2(OBJ.x, y)
+        let endPos2 = new Vector2(x2, y)
         
+        if(this.rnd){
+            startPos1 = new Vector2(OBJ.x, OBJ.y-70);
+            endPos1 = new Vector2(OBJ.x, OBJ.y);
+            startPos2 = new Vector2(OBJ.x, OBJ.y+70);
+            endPos2 = new Vector2(OBJ.x, OBJ.y);
+        }
+
         const p = {inc:0}
         
         this.tween = new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
@@ -250,10 +262,20 @@ class CanvasDrawBass{
     }
     update(OBJ){
         if(this.draw){
+
             this.ctx.fillStyle="rgb(255,255,255)";
-                
-            this.ctx.fillRect(this.pos1.x,  this.pos1.y, this.sze*2, this.sze*15);
-            this.ctx.fillRect(this.pos2.x,  this.pos2.y, this.sze*2, this.sze*15);
+            
+            let multW = 2;
+            let multH = 25;
+            
+            if(this.rnd){
+                multW = 25;
+                multH = 2;
+            }
+
+            this.ctx.fillRect(this.pos1.x,  this.pos1.y, this.sze*multW, this.sze*multH);
+            this.ctx.fillRect(this.pos2.x,  this.pos2.y, this.sze*multW, this.sze*multH);
+            
         }
     }
 }
@@ -329,7 +351,7 @@ class CanvasDrawMetal{
     }
 
     trig(OBJ){
-        const offset = new Vector2(-100+Math.random()*200, -100+Math.random()*200);
+        const offset = new Vector2(-40+Math.random()*89, -40+Math.random()*80);
         for(let i = 0; i<20+Math.floor(Math.random()*20); i++){
             const obj = this.arr[Math.floor(Math.random()*this.arr.length)];
             obj.offset = new Vector2().copy(offset)
@@ -397,7 +419,7 @@ class CanvasDrawClap{
         
         const p = {inc:0}
         
-        obj.offset = new Vector2(-50+Math.random()*100, -50+Math.random()*100);
+        obj.offset = new Vector2(-20+Math.random()*40, -20+Math.random()*40);
 
         new window.TWEEN.Tween(p) // Create a new tween that modifies 'coords'.
 		.to({ inc:1 }, (window.clock4Time)*1000) // Move to (300, 200) in 1 second.
@@ -455,57 +477,74 @@ class Squigle{
         this.mesh = new Line( this.geometry, this.mat );
         */
 
-        const material = new MeshStandardMaterial( {color:0xffffff*Math.random()}  );
+        const material = new MeshStandardMaterial();
         this.mats = new CustomMaterial();
         // material.wire
        
         const hue = Math.random();
         const hue2 = (hue+(.2+Math.random()*.2))%1.0
         let rnbAmt = 0;
-        if(Math.random()>.9)rnbAmt = 1;
+        if(Math.random()>.75)rnbAmt = 1;
 
         const params = {
             twistAmt:(-1+Math.random()*2)*0,
-            noiseSize:(-1+Math.random()*2)*400.,
+            noiseSize:(-1+Math.random()*2)*70.,
             twistSize:100+(Math.random()*1000),
             noiseAmt:(-1+Math.random()*2)*.1,
             rainbowAmt:rnbAmt,
-            gradientSize: (1+Math.random()*4.0)*.2,
+            gradientSize: (1+Math.random()*4.0)*1.2,
             gradientAngle: Math.random()*Math.PI*2,
             gradientAdd:.5+Math.random()*1.5,
-            rainbowGradientSize:(.2+Math.random())*.5,
+            rainbowGradientSize:(.2+Math.random())*1.5,
             gradientOffset:-100+Math.random()*200,
-            topColor:new Color().setHSL(hue, .6+Math.random()*.2,.25+(Math.random()*.1)),
-            bottomColor:new Color().setHSL(hue2, .6+Math.random()*.2,.25+(Math.random()*.1)),
+            topColor:new Color(0xffffff),//.setHSL(hue, .6+Math.random()*.2,.25+(Math.random()*.1)),
+            bottomColor:new Color(0xffffff),//.setHSL(hue2, .6+Math.random()*.2,.25+(Math.random()*.1)),
             deformSpeed:(-1+Math.random()*2)*2,
             colorSpeed:(-1+Math.random()*2)*5,
             shouldLoopGradient:1,
         }
-        
         this.mat = this.mats.getCustomMaterial(material, params)
-
+        //this.mat.emissive = new Color().setHSL(.4+Math.random()*.2, 2.0, .6);
+        
         if(OBJ.points.length>1){
             const spline = new CatmullRomCurve3(OBJ.points);
-            this.geometry = new TubeGeometry( spline, 70, .005, 10, false );
+            this.geometry = new TubeGeometry( spline, 70, (.05+Math.random()*.05)*.125, 10, false );
         }else{
             this.geometry = new BoxGeometry(0,0,0,1,1,1);
         }
         //new MeshStandardMaterial({color:0xffffff*Math.random()})
-        this.mesh = new Mesh( this.geometry,this.mat );
+        this.mesh = new Mesh( this.geometry, this.mat );
         this.fftIndex = Math.floor(Math.random()*1024);
-        this.mult = Math.random()*(.8);
+        
+        this.mult = Math.random()*(.3);
+        if(Math.random()>.75)this.mult = Math.random()*(.9);
         
         OBJ.scene.attach( this.mesh );
-        
+        //this.mesh.visible = false;
+        //this.timeout;
         setTimeout(function(){
-            
-            //self.geomtry.dispose();
-            // self.mat.dispose();
+            self.mesh.geometry.dispose();
+            self.mesh.material.dispose();
             OBJ.scene.remove(self.mesh);
             OBJ.arr.splice(OBJ.index);
 
         },300+Math.random()*300)
     }
+
+    // trig(){
+
+    //     const self = this;
+        
+    //     if(this.timeout == null){
+    //         clearTimeout(this.timeout);
+    //     }  
+
+    //     this.mesh.visible = true;
+        
+    //     this.timeout = setTimeout(function(){
+    //         self.mesh.visible = false;
+    //     }, 200+Math.random()*300);
+    // }
 
     clamp(input, min, max) {
         return input < min ? min : input > max ? max : input;
@@ -524,7 +563,7 @@ class Squigle{
             if(this.mesh.material.userData.shader!=null){
 
                 const val = this.map(window.fft.getValue()[ this.fftIndex ], -160, -20, 0, 1);// (50 + (window.fft.getValue()[ this.meshArray[i].index ]))*.1;
-                this.mesh.material.userData.shader.uniforms.noiseAmt.value = val * this.mult ;
+                this.mesh.material.userData.shader.uniforms.noiseAmt.value = val * (this.mult) ;
             
             }
       
@@ -923,6 +962,65 @@ class VisualTest7{
 
         this.faceLines = [];
 
+        // for(let i = 0; i<faceSplineArr.length; i++){
+        //     //const spln = i;//Math.floor(Math.random()*faceSplineArr.length);
+        //     this.faceLines.push(new Squigle({scene:this.movefacecap, points:faceSplineArr[i], arr:this.faceLines, index:this.faceLines.length-1}))
+        // }
+
+        this.face = window.getLoadedObjectByName("face-effect").model;
+        const col = Math.random();
+        this.globalHue = col;
+        // this.meshArray = [];
+        // this.face.traverse(function(obj){
+
+        //     if(obj.isMesh){
+
+        //         obj.castShadow = true;
+        //         obj.side = DoubleSide;
+        //         //obj.material.visible = false;
+        //         obj.material.color = new Color(0x0345fc).setHSL(col, 1, .3);
+        //         //obj.material.visible = false;
+        //         obj.material.visible = false;
+        //         self.meshArray.push( {mesh:obj, index: Math.floor(Math.random()*1024), mult : Math.random()*.02, react:1 });
+
+        //         const hue = Math.random();
+        //         const hue2 = (hue+(.2+Math.random()*.2))%1.0
+        //         const rnbAmt = Math.random()*1;
+        //         const params = {
+        //             twistAmt:(-1+Math.random()*2)*0,
+        //             noiseSize:(-1+Math.random()*2)*20.05,
+        //             twistSize:10+(Math.random()*1000),
+        //             noiseAmt:0,//(-1+Math.random()*2)*.2,
+        //             rainbowAmt: 0,
+        //             //gradientSize: ( 1 + Math.random() * 4.0 ),
+        //             gradientSize: ( 1 + Math.random() * 4.0 )*.2,
+        //             gradientAngle: Math.random()*Math.PI*2,
+        //             gradientAdd:1,
+        //             rainbowGradientSize:(.2+Math.random())*4,
+        //             gradientOffset:-100+Math.random()*200,
+        //             // topColor:new Color().setHSL(hue, .6+Math.random()*.2,.25+(Math.random()*.1)),
+        //             // bottomColor:new Color().setHSL(hue2, .6+Math.random()*.2,.25+(Math.random()*.1)),
+        //             topColor:new Color().setHSL(hue, 0,0),
+        //             bottomColor:new Color().setHSL(hue2, 0, .3) ,
+        //             deformSpeed:(-1+Math.random()*2)*5,
+        //             colorSpeed:(-1+Math.random()*2)*5,
+        //             shouldLoopGradient:1,
+        //         }
+                
+                
+        //         const mat = self.mats.getCustomMaterial(obj.material, params)
+        //         obj.material = mat;
+
+
+        //          //obj.material.transparent = true;
+        //          //obj.material.opacity = .8;
+        //         // obj.material.blendMode = AdditiveBlending;
+                
+        //     }
+        // })
+        // this.face.scale.set(.75,.75,.75);
+        // this.movefacecap.attach(this.face);
+
         //self.initCam();
         self.getMediaPipe();
         
@@ -1006,28 +1104,28 @@ class VisualTest7{
 
                 //console.log(object)
 
-                for ( const blendshape of faceBlendshapes ) {
+                // for ( const blendshape of faceBlendshapes ) {
 
-                    const name = this.blendshapesMap[ blendshape.categoryName ];
-                    const index = this.blndObject.morphTargetDictionary[ name ];
+                //     const name = this.blendshapesMap[ blendshape.categoryName ];
+                //     const index = this.blndObject.morphTargetDictionary[ name ];
 
-                    if ( index !== undefined ) {
+                //     if ( index !== undefined ) {
 
-                        this.blndObject.morphTargetInfluences[ index ] = blendshape.score;
+                //         this.blndObject.morphTargetInfluences[ index ] = blendshape.score;
 
-                    }
+                //     }
 
-                    const nme = this.blendshapesMap[blendshape.categoryName];
-                    if(nme !== undefined){
+                //     const nme = this.blendshapesMap[blendshape.categoryName];
+                //     if(nme !== undefined){
                         
-                        const index = this.blndObject.morphTargetDictionary[ nme ];
-                        if ( index !== undefined ) {
-                            this.blndObject.morphTargetInfluences[ index ] = blendshape.score;
-                        }
+                //         const index = this.blndObject.morphTargetDictionary[ nme ];
+                //         if ( index !== undefined ) {
+                //             this.blndObject.morphTargetInfluences[ index ] = blendshape.score;
+                //         }
 
-                    }
+                //     }
 
-                }
+                // }
 
             }
 
@@ -1129,16 +1227,16 @@ class VisualTest7{
         const self= this;
         if(OBJ.note!=null){
             if(Math.random()>.4){
-                this.rippleSize=Math.random()*2;
-                this.rippleContrast=.8+Math.random()*2;
-                this.rippleSpeed=.01+Math.random()*.08;
+                this.rippleSize=.5+Math.random()*1.5;
+                this.rippleContrast=.5+Math.random()*1.5;
+                this.rippleSpeed=.04+Math.random()*.04;
                 
-                this.motionTrailOpacity = .001+Math.random()*.1;
+                this.motionTrailOpacity = .01;//+Math.random()*.1;
 
 
             }
 
-            if(Math.random()>.7){
+            if(Math.random()>.75){
                 
                 const geometry = this.blndObject.geometry;
                 // console.log(this.blndObject);
@@ -1150,7 +1248,7 @@ class VisualTest7{
                     
                     const points = [];
     
-                    const amt = 2+Math.floor(Math.random()*16);
+                    const amt = 2+Math.floor(Math.random()*10);
                     const start = Math.floor(Math.random()*positionAttribute.count - (amt));
                     
                     for(let i = 0; i<amt; i++){
@@ -1169,7 +1267,61 @@ class VisualTest7{
                     }
 
                     this.faceLines.push(new Squigle({scene:this.movefacecap, points:points, arr:this.faceLines, index:this.faceLines.length-1}))
+                    
                 }
+                // for(let i = 0; i<20; i++){
+                //     //const points = [];
+                //     const spln = Math.floor(Math.random()*faceSplineArr.length);
+                //     //for(let i = 0;i<faceSplineArr[spln].length; i++){
+                //         //const vert = faceSplineArr[spln][i];
+                //         //points.push(vert);
+                //         //const emitter = new ParticleEmitter({max:10, particleClass:ParticleSnair});
+                //         //const track = new TrackAni({scene:this.scene, name:"norotate", emitter:emitter,  spline:handSplineArr[i]})
+                //         //track.emitter.obj.hue = (col);
+                //         //this.splineAnis.push({emitter:emitter, track:track, name:"snair"})
+                //     //}
+                   
+                //     this.faceLines.push(new Squigle({scene:this.movefacecap, points:faceSplineArr[spln], arr:this.faceLines, index:this.faceLines.length-1}))
+                // }
+                
+                // for(let i = 0; i<10+Math.floor(Math.random()*20); i++){
+                //     const spln = this.faceLines[Math.floor(Math.random()*this.faceLines.length)];
+                //     //console.log(spln);
+                //     spln.trig();
+                // }   
+        
+             
+                // for(let i = 0; i < 100+Math.floor(Math.random()*300) ; i++ ){
+                            
+                //     const obj = this.meshArray[Math.floor(Math.random()*this.meshArray.length)];
+                //     const mesh = obj.mesh;
+                    
+                //     if( obj.hideTimeout != null )
+                //         clearTimeout(obj.hideTimeout)
+
+                //     // if(Math.random()<.5)
+                //     //     mesh.material.visible = false;
+                //     // else
+                //     mesh.material.visible = true;    
+                //     //mesh.material.wireframe = true;
+
+                //     //mesh.material.wireframe = true;
+                //     // mesh.material.opacity = 0;
+                //     // mesh.material.transparent = true;
+                    
+                //     obj.hideTimeout = setTimeout(function(){
+                //         mesh.material.visible = false;
+                //         //mesh.material.wireframe = false;
+                //         //mesh.material.wireframe = false;
+                //         // mesh.material.opacity = 1;
+                //         // mesh.material.transparent = false;
+
+                //         obj.hideTimeout = null;
+                //     }, 20+Math.random()*300)
+                // }
+
+                
+        
             }
 
             switch( OBJ.command ){
@@ -1177,8 +1329,8 @@ class VisualTest7{
                     if(OBJ.velocity > 0){
                         if(this.transform!=null){
 
-                            const x =   ((this.graphicsCanvas.width/2)) + (this.transform.position.x * (11))+(-50+Math.random()*100);
-                            const y =  ((this.graphicsCanvas.height/2)) + (-this.transform.position.y * (8))+(-50+Math.random()*100);
+                            const x =   ((this.graphicsCanvas.width/2)) + (this.transform.position.x * (11))+(-10+Math.random()*20);
+                            const y =  ((this.graphicsCanvas.height/2)) + (-this.transform.position.y * (8))+(-20+Math.random()*40);
 
                             this.canvasDraws[0].trig({x:x, y:y})
                             //}
@@ -1203,8 +1355,7 @@ class VisualTest7{
                 case 145://track 2 on
                     if(OBJ.velocity > 0){
 
-
-                        this.canvasDraws[1] .trig()
+                        this.canvasDraws[1].trig();
 
                         //  for(let i = 0; i<50; i++){
                         //     setTimeout(function(){
@@ -1246,7 +1397,7 @@ class VisualTest7{
                     break;
                 case 146: // track 3 on
                     if(OBJ.velocity > 0){
-                        this.canvasDraws[2].trig()
+                        this.canvasDraws[2].trig();
 
                         // const arr = [];
                             

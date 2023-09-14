@@ -9,11 +9,11 @@ import { RoomEnvironment } from './scripts/jsm/environments/RoomEnvironment.js';
 //import { CinematicCamera } from './scripts/jsm/cameras/CinematicCamera.js';
 //import { GUI } from './scripts/jsm/libs/lil-gui.module.min.js';
 //import Stats from './scripts/jsm/libs/stats.module.js';
-
 //import { Recorder } from './Recorder.js';
 // import { Effects } from './Effects.js';
 // import {TrackAni} from './SplineAnimation.js';
 // import {ParticleEmitter} from './ParticleEmitter.js';
+
 import {Master} from './ChannelHelper.js';
 
 
@@ -24,8 +24,8 @@ import {Master} from './ChannelHelper.js';
 // import { ParticlePerc } from './Particle.js';
 // import { ParticleMetal } from './Particle.js';
 // import { ParticleFire } from './Particle.js';
+// import { Visuals } from './Visuals.js';
 
-//import { Visuals } from './Visuals.js';
 import { VisualTest1 } from './VisualTest1.js';
 import { VisualTest2 } from './VisualTest2.js';
 import { VisualTest3 } from './VisualTest3.js';
@@ -33,6 +33,8 @@ import { VisualTest4 } from './VisualTest4.js';
 import { VisualTest5 } from './VisualTest5.js';
 import { VisualTest6 } from './VisualTest6.js';
 import { VisualTest7 } from './VisualTest7.js';
+import { VisualTest8 } from './VisualTest8.js';
+import { VisualTest9 } from './VisualTest9.js';
 
 import { GenerativeSplines } from './GenerativeSplines.js';
 
@@ -120,7 +122,8 @@ window.loadObjs = [
     {loaded:false, group:null, url:"hand.glb", name:"hand", model:null, vis:5},
 
     {loaded:false, group:null, url:"face/mask.glb", name:"mask-2", model:null, vis:6},
-    {loaded:false, group:null, url:"facecap-og/facecap-2.glb", name:"facecap-2", model:null, vis:6},
+    {loaded:false, group:null, url:"facecap-og/facecap-3.glb", name:"facecap-2", model:null, vis:6},
+    {loaded:false, group:null, url:"facecap-og/face.glb", name:"face-effect", model:null, vis:6},
 
     
 ]
@@ -142,6 +145,8 @@ const visuals = [
     VisualTest5,
     VisualTest6,
     VisualTest7,
+    VisualTest8,
+    VisualTest9,
     
 ]
 
@@ -727,7 +732,6 @@ function init() {
     window.scene.environment = pmremGenerator.fromScene( new RoomEnvironment(), .1 ).texture;
 
     window.addEventListener( 'resize', onWindowResize );
-
     
     urlQuery = getQuery();
 
